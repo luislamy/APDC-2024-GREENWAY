@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+version="3.1">
+	<display-name>My Individual APDC 2024 Project</display-name>
+	
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+
+	<servlet>
+		<servlet-name>MainServices</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>jersey.config.server.provider.packages</param-name>
+			<param-value>pt.unl.fct.di.apdc.projeto.resources</param-value>
+		</init-param>
+		<init-param>
+			<param-name>jersey.config.server.provider.scanning.recursive</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		<init-param>
+			<param-name>jersey.config.servlet.filter.contextPath</param-name>
+			<param-value>/rest/*</param-value>
+		</init-param>
+		<init-param>
+			<param-name>jersey.config.server.tracing.type</param-name>
+			<param-value>ALL</param-value> <!-- This is a debug utility that should be disabled when code goes to production -->
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>MainServices</servlet-name>
+		<url-pattern>/rest/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>AdminUserInitializer</servlet-name>
+		<servlet-class>pt.unl.fct.di.apdc.projeto.resources.AdminUserInitializer</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>AdminUserInitializer</servlet-name>
+		<url-pattern>/adminUserInitializer</url-pattern>
+	</servlet-mapping>
+
+</web-app>

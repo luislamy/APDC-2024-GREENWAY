@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>User Registration</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <button id="indexBtn"  class="btn" onclick="location.href='index.html';"    >Welcome Page</button>
+        <div class="container">
+            <h1>User Registration</h1>
+            <form id="registrationForm">
+                <div class="form-group">
+                    <label for="username">*Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">*Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div>
+                    <small class="text-muted">Password must have ate least 10 characters, at least 4 numbers, and both upper and lower case letters.</small>                    
+                </div>
+                <div class="form-group">
+                    <label for="confirmation">*Confirm Password:</label>
+                    <input type="password" id="confirmation" name="confirmation" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">*Email:</label>
+                    <input type="text" id="email" name="email" required>
+                </div>
+                <div>
+                    <small class="text-muted">Email may have more than 2 domains, requires format string1@domain1.domain2</small>
+                </div>
+                <div class="form-group">
+                    <label for="name">*Name:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div>
+                    <small class="text-muted">At least first and last names required.</small>                    
+                </div>
+                <div class="form-group">
+                    <label for="phone">*Phone Number:</label>
+                    <input type="text" id="phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="profile">Profile Visibility:</label>
+                    <select id="profile" name="profile">
+                        <option value=""></option>
+                        <option value="PRIVATE">Private</option>
+                        <option value="PUBLIC">Public</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="work">Occupation:</label>
+                    <input type="text" id="work" name="work">
+                </div>
+                <div class="form-group">
+                    <label for="workplace">Workplace:</label>
+                    <input type="text" id="workplace" name="workplace">
+                </div>
+                <div class="form-group">
+                    <label for="address">Address:</label>
+                    <input type="text" id="address" name="address">
+                </div>
+                <div class="form-group">
+                    <label for="postalcode">Postal Code:</label>
+                    <input type="text" id="postalcode" name="postalcode">
+                </div>
+                <div>
+                    <small class="text-muted">Must have following format: nnnn_nnn.</small>                    
+                </div>
+                <div class="form-group">
+                    <label for="fiscal">NIF:</label>
+                    <input type="text" id="fiscal" name="fiscal">
+                </div>
+                <div>
+                    <small class="text-muted">Must have 9 numbers exactly.</small>                    
+                </div>
+                <div class="form-group">
+                    <label for="photo">Profile Photo:</label>
+                    <input type="file" id="photo" name="photo" accept=".jpg">
+                </div>
+                <div>
+                    <small class="text-muted">Only .jpeg files allowed. Maximum size: 1MB</small>
+                </div>
+                <div>
+                    <img src="" height="200" alt="preview"/>
+                </div>
+                <div>
+                    <small class="text-muted">Fields marked with an asterisc* are mandatory for registration.</small>
+                </div>
+                <div class="form-group">
+                    <button class="btn"type="submit">Register</button>
+                </div>
+            </form>
+        </div>
+        <script src="../scripts/register.js"></script>
+    </body>
+</html>
