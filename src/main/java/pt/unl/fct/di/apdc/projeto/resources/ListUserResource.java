@@ -28,6 +28,7 @@ import pt.unl.fct.di.apdc.projeto.util.AuthToken;
 import pt.unl.fct.di.apdc.projeto.util.User;
 import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 import pt.unl.fct.di.apdc.projeto.util.UserQuery;
+import pt.unl.fct.di.apdc.projeto.util.Validations;
 
 @Path("/list")
 public class ListUserResource {
@@ -58,15 +59,13 @@ public class ListUserResource {
             Key userKey = serverConstants.getUserKey(token.username);
             Key tokenKey = serverConstants.getTokenKey(token.username);
             Entity user = datastore.get(userKey);
-            if ( user == null ) {
-				LOG.warning("List users: " + token.username + " not registered as user.");
-                return Response.status(Status.NOT_FOUND).entity("No such user exists.").build();
-            }
             Entity authToken = datastore.get(tokenKey);
-            String userRole = user.getString("role");
-            int validation = token.isStillValid(authToken, user.getString("role"));
-            if ( validation == 1 ) {
-                Query<Entity> query;
+            var validation = Validations.checkValidation(Validations.LIST_USERS, user, authToken, token);
+            if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+				return validation;
+			} else {
+                String userRole = user.getString("role");
+				Query<Entity> query;
                 if ( userRole.equals(ServerConstants.USER) ) {
                     Query<ProjectionEntity> projectionQuery = Query.newProjectionEntityQueryBuilder()
 				            .setKind("User")
@@ -116,19 +115,7 @@ public class ListUserResource {
                 }
                 LOG.info("List users: " + token.username + " received list of all users.");
                 return Response.ok(g.toJson(userList)).build();
-            } else if ( validation == 0 ) { // Token time has run out
-                LOG.fine("List users: " + token.username + "'s' authentication token expired.");
-                return Response.status(Status.UNAUTHORIZED).entity("Token time limit exceeded, make new login.").build();
-            } else if ( validation == -1 ) { // Role is different
-                LOG.warning("List users: " + token.username + "'s' authentication token has different role.");
-                return Response.status(Status.UNAUTHORIZED).entity("User role has changed, make new login.").build();
-            } else if ( validation == -2 ) { // token is false
-                LOG.severe("List users: " + token.username + "'s' authentication token is different, possible attempted breach.");
-                return Response.status(Status.UNAUTHORIZED).entity("Token is incorrect, make new login").build();
-            } else {
-                LOG.severe("List users: " + token.username + "'s' authentication token validity error.");
-                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-            }
+			}
         } catch ( Exception e ) {
 			LOG.severe("List users: " + e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();

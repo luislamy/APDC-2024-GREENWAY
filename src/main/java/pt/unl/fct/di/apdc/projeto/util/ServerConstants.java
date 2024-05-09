@@ -29,9 +29,8 @@ public class ServerConstants {
     }
 
     public static ServerConstants getServerConstants() {
-        if ( singleton == null ) {
+        if ( singleton == null )
             singleton = new ServerConstants();
-        }
         return singleton;
     }
 
