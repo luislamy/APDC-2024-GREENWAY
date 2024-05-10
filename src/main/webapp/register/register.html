@@ -19,7 +19,8 @@
                     <small class="text-muted">Email may have more than 2 domains, requires format string1@domain1.domain2</small>
                 </div>
                 -->
-                <input type="text" id="name" name="name" placeholder="First and Last Name" required>
+                <input type="text" id="firstName" name="firstName" placeholder="First Name" required>
+                <input type="text" id="lastName" name="lastName" placeholder="Last Name" required>
                 <!--
                 <div>
                     <small class="text-muted">At least first and last names required.</small>                    
@@ -121,6 +122,10 @@
                             const preview = document.querySelector("img");
                             jsonData[key] = preview.src;
                         }
+                    } else if ( key === "firstName" ) {
+                        jsonData['name'] = value;
+                    } else if ( key === "lastName" ) {
+                        jsonData['name'] = jsonData['name'] + " " + value;
                     } else {
                         jsonData[key] = value;
                     }
