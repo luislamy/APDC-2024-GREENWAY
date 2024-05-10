@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(async response => {
             if ( response.ok ) {
                 console.log('User registered.')
-                window.location.href = 'index.html';
+                window.location.href = '../index.html';
             } else {
                 const errorMessage = await response.text();
                 alert('Fetch error: ' + errorMessage);

@@ -290,12 +290,20 @@ public class UserResource {
                 txn.rollback();
 				return validation;
 			} else {
-                // TODO: Remove all messages of the user, both sent and received
                 Query<Entity> query = Query.newEntityQueryBuilder()
                     .setKind("Message")
                     .setFilter(PropertyFilter.hasAncestor(userKey))
                     .build();
                 QueryResults<Entity> results = txn.run(query);
+                while ( results.hasNext() ) {
+                    Entity next = results.next();
+                    txn.delete(next.getKey());
+                }
+                query = Query.newEntityQueryBuilder()
+                    .setKind("Message")
+                    .setFilter(PropertyFilter.eq("sender", data.username))
+                    .build();
+                results = txn.run(query);
                 while ( results.hasNext() ) {
                     Entity next = results.next();
                     txn.delete(next.getKey());

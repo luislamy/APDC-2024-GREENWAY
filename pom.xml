@@ -122,6 +122,10 @@
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>appengine-maven-plugin</artifactId>
 				<version>${appengine.maven.plugin.version}</version>
+				<configuration>
+					<deploy.projectId>apdc-grupo-7</deploy.projectId>
+					<deploy.version>1</deploy.version>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

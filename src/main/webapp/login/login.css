@@ -1,3 +1,18 @@
+input, select {
+    padding: 0.7rem;
+    border-radius: 10px;
+    min-width: fit-content;
+    width: 200px;
+    border: 0px;
+}
+
+input[type="submit"] {
+    background: black;
+    color: white;
+    cursor: pointer;
+    width: 200px
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
