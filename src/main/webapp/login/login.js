@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const token = await response.json();
                 localStorage.setItem('authToken', JSON.stringify(token));
                 console.log('User logged in.')
-                window.location.href = '../index.html';
+                window.location.href = '../dashboard/dashboard.html';
             } else {
                 const errorMessage = await response.text();
                 alert('Fetch error: ' + errorMessage);

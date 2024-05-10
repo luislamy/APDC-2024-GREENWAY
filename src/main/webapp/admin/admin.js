@@ -33,7 +33,7 @@ function checkLoginStatus() {
             if (response.ok) {
             } else {
                 localStorage.removeItem('authToken');
-                window.location.href = 'index.html';
+                window.location.href = 'dashboard.html';
             }
         })
         .catch(error => {

@@ -7,10 +7,26 @@
         <link rel="stylesheet" href="styles.css">
     </head>
     <body>
-        <button id="userCenterBtn"  class="btn" onclick="location.href='user.html';"    >User Center</button>
+        <button id="adminCenterBtn" class="btn" onclick="location.href='admin.html';"   >Admin Center</button>
         <div class="container">
             <h1>Change User Data</h1>
             <form id="userDataForm">
+                <div class="form-group">
+                    <label for="username">*Username of the user to change:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="text" id="email" name="email">
+                </div>
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name">
+                </div>
                 <div class="form-group">
                     <label for="phone">Phone Number:</label>
                     <input type="text" id="phone" name="phone">
@@ -44,6 +60,24 @@
                     <input type="text" id="fiscal" name="fiscal">
                 </div>
                 <div class="form-group">
+                    <label for="role">Role:</label>
+                    <select id="role" name="role">
+                        <option value="">Unchanged</option>
+                        <option value="USER">User</option>
+                        <option value="GBO">GBO</option>
+                        <option value="GA">GA</option>
+                        <option value="SU">SU</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="state">State:</label>
+                    <select id="state" name="state">
+                        <option value="">Unchanged</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="INACTIVE">Inactive</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="photo">Profile Photo:</label>
                     <input type="file" id="photo" name="photo" accept=".jpg">
                 </div>
@@ -53,11 +87,14 @@
                 <div>
                     <img src="" height="200" alt="preview"/>
                 </div>
+                <div>
+                    <small class="text-muted">Fields marked with an asterisc* are mandatory for changing user data.</small>
+                </div>
                 <div class="form-group">
                     <button class="btn"type="submit">Submit Changes</button>
                 </div>
             </form>
         </div>
-        <script src="../scripts/profile.js"></script>
+        <script src="./adminProfile.js"></script>
     </body>
 </html>
