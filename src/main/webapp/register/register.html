@@ -19,8 +19,7 @@
                     <small class="text-muted">Email may have more than 2 domains, requires format string1@domain1.domain2</small>
                 </div>
                 -->
-                <input type="text" id="name" name="name" placeholder="First Name" required>
-                <input type="text" id="name" name="name" placeholder="Last Name" required>
+                <input type="text" id="name" name="name" placeholder="First and Last Name" required>
                 <!--
                 <div>
                     <small class="text-muted">At least first and last names required.</small>                    
@@ -33,9 +32,9 @@
                     <option value="PUBLIC">Public</option>
                 </select>
                 <input type="text" id="work" name="work" placeholder="Occupation">
-                <input type="text" id="company" name="company" placeholder="Company">
+                <input type="text" id="workplace" name="workplace" placeholder="Company">
                 <input type="text" id="address" name="address" placeholder="Address">
-                <input id="postalCode" type="tel" pattern="[0-9]{4}-[0-9]{3}" placeholder="Postal Code (XXXX-XXX)"></input>
+                <input id="postalCode" name="postalCode" type="tel" pattern="[0-9]{4}-[0-9]{3}" placeholder="Postal Code (XXXX-XXX)"></input>
                 <!--
                 <div>
                     <small class="text-muted">Must have following format: nnnn-nnn.</small>                    
@@ -68,6 +67,9 @@
                 <div class="form-group" style="width: 100%; grid-column-start: span 2;">
                     <label for="photo">Profile Photo:</label>
                     <input type="file" id="photo" name="photo" accept=".jpg">
+                </div>
+                <div>
+                    <img src="" height="200" alt="preview"/>
                 </div>
                 <input style="width: 100%; grid-column-start: span 2;" class="submit" type="submit" value="Enter"></input>
             </form>
