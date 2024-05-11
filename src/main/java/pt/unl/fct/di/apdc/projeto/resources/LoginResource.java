@@ -93,9 +93,8 @@ public class LoginResource {
 	public Response getToken(AuthToken token) {
 		LOG.fine("Token: token check attempt by " + token.username + ".");
 		Key userKey = serverConstants.getUserKey(token.username);
-		Key tokenKey = serverConstants.getTokenKey(token.username);
 		Entity user = datastore.get(userKey);
-		Entity authToken = datastore.get(tokenKey);
+		Entity authToken = serverConstants.getToken(token);
 		var validation = Validations.checkValidation(Validations.GET_TOKEN, user, authToken, token);
 		if ( validation.getStatus() != Status.OK.getStatusCode() ) {
 			return validation;

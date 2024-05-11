@@ -57,9 +57,8 @@ public class ListUserResource {
         LOG.fine("List users: " + token.username + " attempted to list users.");
         try {
             Key userKey = serverConstants.getUserKey(token.username);
-            Key tokenKey = serverConstants.getTokenKey(token.username);
             Entity user = datastore.get(userKey);
-            Entity authToken = datastore.get(tokenKey);
+            Entity authToken = serverConstants.getToken(token);
             var validation = Validations.checkValidation(Validations.LIST_USERS, user, authToken, token);
             if ( validation.getStatus() != Status.OK.getStatusCode() ) {
 				return validation;

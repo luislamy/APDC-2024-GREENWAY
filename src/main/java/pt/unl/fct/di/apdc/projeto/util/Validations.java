@@ -354,7 +354,7 @@ public class Validations {
         if ( validateUser(operation, sender, message.sender).getStatus() != Status.OK.getStatusCode() ) {
             return Response.status(Status.NOT_FOUND).entity(message.sender + " is not a registered user.").build();
         }
-        if ( validateUser(operation, sender, message.receiver).getStatus() != Status.OK.getStatusCode() ) {
+        if ( validateUser(operation, receiver, message.receiver).getStatus() != Status.OK.getStatusCode() ) {
             return Response.status(Status.NOT_FOUND).entity(message.receiver + " is not a registered user.").build();
         }
         if ( receiver.getString("state").equals(ServerConstants.INACTIVE) ) {
@@ -404,7 +404,7 @@ public class Validations {
         if ( validateUser(operation, sender, data.sender).getStatus() != Status.OK.getStatusCode() ) {
             return Response.status(Status.NOT_FOUND).entity(data.sender + " is not a registered user.").build();
         }
-        if ( validateUser(operation, sender, data.receiver).getStatus() != Status.OK.getStatusCode() ) {
+        if ( validateUser(operation, receiver, data.receiver).getStatus() != Status.OK.getStatusCode() ) {
             return Response.status(Status.NOT_FOUND).entity(data.receiver + " is not a registered user.").build();
         }
         return validateToken(operation, sender, authToken, token);
