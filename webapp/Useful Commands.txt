@@ -1,0 +1,9 @@
+mvn package appengine:run
+
+mvn package -e -X appengine:deploy -Dapp.deploy.projectId=apdc-grupo-7 -Dapp.deploy.version=1
+
+gcloud datastore indexes create src/main/webapp/web-inf/index.yaml
+
+gcloud beta emulators datastore start
+
+gcloud config set project apdc-grupo-7
