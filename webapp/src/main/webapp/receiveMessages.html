@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Messages Received</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <button id="sendMessageBtn" class="btn" onclick="location.href='sendMessage.html';" style="display: block;" >Send Message</button>
+        <button id="conversationBtn"class="btn" onclick="location.href='conversation.html';"style="display: block;" >Conversation</button>
+        <button id="userCenterBtn"  class="btn" onclick="location.href='user.html';"        style="display: none;"  >User Center</button>
+        <button id="adminCenterBtn" class="btn" onclick="location.href='admin.html';"       style="display: none;"  >Admin Center</button>
+        <h1>Messages Received</h1>
+        <div id="messageList"></div>
+        <script src="../scripts/receiveMessages.js"></script>
+    </body>
+</html>

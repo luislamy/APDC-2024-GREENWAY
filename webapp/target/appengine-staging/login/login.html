@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>User Login</title>
+        <link rel="stylesheet" href="login.css">
+    </head>
+    <body style="display: grid; place-items: center; gap: 1rem;">
+        <div class="container" style="display: flex; flex-direction: column; align-items: center;">
+            <div style="border-radius: 10px; padding: 0.7rem 2rem; color:white; align-self:center; text-align: center; background: black;" onclick="location.href='../index.html';">Back</div>
+            <h1 style="align-self: center">Log in</h1>
+            <form id="loginForm" style="display: flex; flex-direction: column; gap: 1rem;">
+                <input type="text" id="username" placeholder="Username" name="username" required>
+                <input type="password" id="password" placeholder="Password" name="password" required>
+                <input style="align-self: center; width: 100%" id="submit" type="submit" value="Enter"></input>
+            </form>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+            var loginForm = document.getElementById('loginForm');
+
+            loginForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                var formData = new FormData(loginForm);
+                var jsonData = {};
+
+                formData.forEach(function(value, key) {
+                    jsonData[key] = value;
+                });
+                loginUser(JSON.stringify(jsonData));
+            });
+
+            function loginUser(jsonData) {
+                fetch('/rest/login/user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: jsonData
+                })
+                .then(async response => {
+                    if (response.ok) {
+                        const token = await response.json();
+                        localStorage.setItem('authToken', JSON.stringify(token));
+                        console.log('User logged in.')
+                        window.location.href = '../dashboard/dashboard.html';
+                    } else {
+                        const errorMessage = await response.text();
+                        alert('Fetch error: ' + errorMessage);
+                    }
+                });
+            }
+        });
+        </script>
+    </body>
+</html>
