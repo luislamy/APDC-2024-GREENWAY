@@ -1,19 +1,20 @@
 package pt.unl.fct.di.apdc.projeto.resources;
 
 import java.util.logging.Logger;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.apache.commons.codec.digest.DigestUtils;
 
-import com.google.cloud.datastore.Datastore;
+import pt.unl.fct.di.apdc.projeto.util.*;
+
+import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Transaction;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
 import com.google.gson.Gson;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
@@ -51,7 +52,6 @@ public class LoginResource {
 	public Response login(LoginData data) {
 		LOG.fine("Login: login attempt by: " + data.username + ".");
 		Key userKey = serverConstants.getUserKey(data.username);
-		Key tokenKey = serverConstants.getTokenKey(data.username);
 		Transaction txn = datastore.newTransaction();
 		try {
 			Entity user = txn.get(userKey);
@@ -61,10 +61,11 @@ public class LoginResource {
 				return validation;
 			} else {
 				AuthToken authToken = new AuthToken(data.username, user.getString("role"));
+				Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", data.username)).setKind("Token").newKey(authToken.tokenID);
 				Entity token = Entity.newBuilder(tokenKey)
 						.set("username", authToken.username)
-						.set("role", authToken.role)
 						.set("tokenID", authToken.tokenID)
+						.set("role", authToken.role)
 						.set("creationDate", authToken.creationDate)
 						.set("expirationDate", authToken.expirationDate)
 						.build();
