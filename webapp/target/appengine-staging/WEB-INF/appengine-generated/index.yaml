@@ -1,0 +1,52 @@
+indexes:
+- kind: "User"
+  properties:
+  - name: "username"
+    direction: desc
+  - name: "password"
+    direction: desc
+  - name: "email"
+    direction: desc
+  - name: "name"
+    direction: desc
+  - name: "phone"
+    direction: desc
+  - name: "profile"
+    direction: desc
+  - name: "work"
+    direction: desc
+  - name: "workplace"
+    direction: desc
+  - name: "address"
+    direction: desc
+  - name: "postalcode"
+    direction: desc
+  - name: "fiscal"
+    direction: desc
+  - name: "role"
+    direction: desc
+  - name: "state"
+    direction: desc
+  - name: "userCreationTime"
+    direction: desc
+- kind: "User"
+  properties:
+  - name: "profile"
+  - name: "role"
+    direction: desc
+  - name: "state"
+  - name: "email"
+  - name: "name"
+  - name: "username"
+- kind: "User"
+  properties:
+  - name: "role"
+  - name: "role"
+    direction: desc
+- kind: "Message"
+  ancestor: yes
+  properties:
+  - name: "receiver"
+  - name: "sender"
+  - name: "message"
+  - name: "timestamp"

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>User Registration</title>
+        <link rel="stylesheet" href="register.css">
+    </head>
+    <body style="display: grid; place-items: center;">
+        <div class="container" style="display: flex; flex-direction: column; align-items: center;">
+            <div style="border-radius: 10px; padding: 0.7rem 2rem; color:white; align-self:center; text-align: center; background: black;" onclick="location.href='../index.html';">Back</div>
+            <h1 style="align-self: center">Register</h1>
+            <form id="registrationForm" style="display: grid; grid-template-columns: auto auto; gap: 1rem 1rem;">
+                    
+                <input type="text" id="username" name="username" placeholder="Username" required>
+                <input type="text" id="email" name="email" placeholder="Email" required>
+                <!--
+                <div>
+                    <small class="text-muted">Email may have more than 2 domains, requires format string1@domain1.domain2</small>
+                </div>
+                -->
+                <input type="text" id="firstName" name="firstName" placeholder="First Name" required>
+                <input type="text" id="lastName" name="lastName" placeholder="Last Name" required>
+                <!--
+                <div>
+                    <small class="text-muted">At least first and last names required.</small>                    
+                </div>
+                -->
+                <input id="phone" type="tel" required placeholder="Phone Number (XXX XXX XXX)" pattern="[0-9]{3} [0-9]{3} [0-9]{3}"></input>
+                <select id="profile" name="profile" style="width: 100%">
+                    <option value="">Profile Visibility</option>
+                    <option value="PRIVATE">Private</option>
+                    <option value="PUBLIC">Public</option>
+                </select>
+                <input type="text" id="work" name="work" placeholder="Occupation">
+                <input type="text" id="workplace" name="workplace" placeholder="Company">
+                <input type="text" id="address" name="address" placeholder="Address">
+                <input id="postalCode" name="postalCode" type="tel" pattern="[0-9]{4}-[0-9]{3}" placeholder="Postal Code (XXXX-XXX)"></input>
+                <!--
+                <div>
+                    <small class="text-muted">Must have following format: nnnn-nnn.</small>                    
+                </div>
+                -->
+                <input type="tel" pattern="[0-9]{3} [0-9]{3} [0-9]{3}" id="fiscal" name="fiscal" placeholder="NIF (XXX XXX XXX)">
+                <!--
+                <div>
+                    <small class="text-muted">Must have 9 numbers exactly.</small>                    
+                </div>
+                -->
+                <div></div>
+                <!--
+                <div>
+                    <small class="text-muted">Only .jpeg files allowed. Maximum size: 1MB</small>
+                </div>
+                -->
+                <!--
+                <div>
+                    <small class="text-muted">Fields marked with an asterisc* are mandatory for registration.</small>
+                </div>
+                -->
+                <input type="password" id="password" name="password" placeholder="Password" required>
+                <!--
+                <div>
+                    <small class="text-muted">Password must have ate least 10 characters, at least 4 numbers, and both upper and lower case letters.</small>                    
+                </div>
+                -->
+                <input type="password" id="confirmation" name="confirmation" placeholder="Confirm Password" required>
+                <div class="form-group" style="width: 100%; grid-column-start: span 2;">
+                    <label for="photo">Profile Photo:</label>
+                    <input type="file" id="photo" name="photo" accept=".jpg">
+                </div>
+                <div>
+                    <img src="" height="200" alt="preview"/>
+                </div>
+                <input style="width: 100%; grid-column-start: span 2;" class="submit" type="submit" value="Enter"></input>
+            </form>
+        </div>
+        <script src="./register.js"/>
+           
+    </body>
+</html>
