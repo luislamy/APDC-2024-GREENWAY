@@ -14,7 +14,7 @@ import com.google.cloud.datastore.Transaction;
 
 public class ServerConstants {
 
-    public static final String USER = "USER", GBO = "GBO", GA = "GA", SU = "SU";
+    public static final String USER = "USER", GBO = "GBO", GA = "GA", EP = "EP", GS = "GS", SU = "SU";
 
 	public static final String ACTIVE = "ACTIVE", INACTIVE = "INACTIVE";
 

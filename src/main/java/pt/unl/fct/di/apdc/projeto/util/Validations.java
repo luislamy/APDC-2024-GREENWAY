@@ -228,7 +228,7 @@ public class Validations {
         if ( validateUser(operation, user, data.username).getStatus() != Status.OK.getStatusCode() ) {
             return Response.status(Status.NOT_FOUND).entity(data.username + " is not a registered user.").build();
         }
-        Response validateTokenResponse = validateToken(operation, user, authToken, token);
+        Response validateTokenResponse = validateToken(operation, admin, authToken, token);
         if ( validateTokenResponse.getStatus() != Status.OK.getStatusCode() ) {
             return validateTokenResponse;
         } else {
@@ -273,7 +273,7 @@ public class Validations {
         if ( validateUser(operation, user, data.username).getStatus() != Status.OK.getStatusCode() ) {
             return Response.status(Status.NOT_FOUND).entity(data.username + " is not a registered user.").build();
         }
-        Response validateTokenResponse = validateToken(operation, user, authToken, token);
+        Response validateTokenResponse = validateToken(operation, admin, authToken, token);
         if ( validateTokenResponse.getStatus() != Status.OK.getStatusCode() ) {
             return validateTokenResponse;
         } else {
@@ -309,7 +309,7 @@ public class Validations {
         if ( validateUser(operation, user, data.username).getStatus() != Status.OK.getStatusCode() ) {
             return Response.status(Status.NOT_FOUND).entity(data.username + " is not a registered user.").build();
         }
-        Response validateTokenResponse = validateToken(operation, user, authToken, token);
+        Response validateTokenResponse = validateToken(operation, admin, authToken, token);
         if ( validateTokenResponse.getStatus() != Status.OK.getStatusCode() ) {
             return validateTokenResponse;
         } else {

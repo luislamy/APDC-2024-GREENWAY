@@ -23,10 +23,10 @@
                 <input type="text" id="lastName" name="lastName" placeholder="Last Name" required>
                 <!--
                 <div>
-                    <small class="text-muted">At least first and last names required.</small>                    
+                    <small class="text-muted">At least first and last names required.</small>
                 </div>
                 -->
-                <input id="phone" type="tel" required placeholder="Phone Number (XXX XXX XXX)" pattern="[0-9]{3} [0-9]{3} [0-9]{3}"></input>
+                <input id="phone" name="phone" type="tel" required placeholder="Phone Number (XXX XXX XXX)" pattern="[0-9]{3} [0-9]{3} [0-9]{3}"></input>
                 <select id="profile" name="profile" style="width: 100%">
                     <option value="">Profile Visibility</option>
                     <option value="PRIVATE">Private</option>
@@ -35,16 +35,16 @@
                 <input type="text" id="work" name="work" placeholder="Occupation">
                 <input type="text" id="workplace" name="workplace" placeholder="Company">
                 <input type="text" id="address" name="address" placeholder="Address">
-                <input id="postalCode" name="postalCode" type="tel" pattern="[0-9]{4}-[0-9]{3}" placeholder="Postal Code (XXXX-XXX)"></input>
+                <input id="postalcode" name="postalcode" type="tel" pattern="[0-9]{4}-[0-9]{3}" placeholder="Postal Code (XXXX-XXX)"></input>
                 <!--
                 <div>
-                    <small class="text-muted">Must have following format: nnnn-nnn.</small>                    
+                    <small class="text-muted">Must have following format: nnnn-nnn.</small>
                 </div>
                 -->
                 <input type="tel" pattern="[0-9]{3} [0-9]{3} [0-9]{3}" id="fiscal" name="fiscal" placeholder="NIF (XXX XXX XXX)">
                 <!--
                 <div>
-                    <small class="text-muted">Must have 9 numbers exactly.</small>                    
+                    <small class="text-muted">Must have 9 numbers exactly.</small>
                 </div>
                 -->
                 <div></div>
@@ -61,7 +61,7 @@
                 <input type="password" id="password" name="password" placeholder="Password" required>
                 <!--
                 <div>
-                    <small class="text-muted">Password must have ate least 10 characters, at least 4 numbers, and both upper and lower case letters.</small>                    
+                    <small class="text-muted">Password must have ate least 10 characters, at least 4 numbers, and both upper and lower case letters.</small>
                 </div>
                 -->
                 <input type="password" id="confirmation" name="confirmation" placeholder="Confirm Password" required>
