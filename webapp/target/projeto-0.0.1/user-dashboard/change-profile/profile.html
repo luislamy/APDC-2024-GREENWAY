@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Change User Data</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <button id="userCenterBtn"  class="btn" onclick="location.href='user.html';"    >User Center</button>
+        <div class="container">
+            <h1>Change User Data</h1>
+            <form id="userDataForm">
+                <div class="form-group">
+                    <label for="phone">Phone Number:</label>
+                    <input type="text" id="phone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label for="profile">Profile Visibility:</label>
+                    <select id="profile" name="profile">
+                        <option value="">Unchanged</option>
+                        <option value="PRIVATE">Private</option>
+                        <option value="PUBLIC">Public</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="work">Occupation:</label>
+                    <input type="text" id="work" name="work">
+                </div>
+                <div class="form-group">
+                    <label for="workplace">Workplace:</label>
+                    <input type="text" id="workplace" name="workplace">
+                </div>
+                <div class="form-group">
+                    <label for="address">Address:</label>
+                    <input type="text" id="address" name="address">
+                </div>
+                <div class="form-group">
+                    <label for="postalcode">Postal Code:</label>
+                    <input type="text" id="postalcode" name="postalcode">
+                </div>
+                <div class="form-group">
+                    <label for="fiscal">NIF:</label>
+                    <input type="text" id="fiscal" name="fiscal">
+                </div>
+                <div class="form-group">
+                    <label for="photo">Profile Photo:</label>
+                    <input type="file" id="photo" name="photo" accept=".jpg">
+                </div>
+                <div>
+                    <small class="text-muted">Only .jpeg files allowed. Maximum size: 1MB</small>
+                </div>
+                <div>
+                    <img src="" height="200" alt="preview"/>
+                </div>
+                <div class="form-group">
+                    <button class="btn"type="submit">Submit Changes</button>
+                </div>
+            </form>
+        </div>
+        <script src="./profile.js"></script>
+    </body>
+</html>

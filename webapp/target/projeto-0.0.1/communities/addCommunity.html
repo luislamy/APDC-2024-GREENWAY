@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="communities.css">
+    <title>Create Community</title>
+</head>
+<body>
+    <nav id="navbar" style="position: fixed; top: 0; background: white; width: 100vw; height: 60px; display: flex; flex-direction: row; justify-content: end; gap: 1rem; text-align: center;">
+        <div id="login" onclick="location.href='./login/login.html';" style="border-radius: 10px; padding: 0.7rem 2rem; color:white; align-self:center; text-align: center; background: black;">Log in</div>
+        <div id="register" onclick="location.href='./register/register.html';" style="margin-right: 2rem; border-radius: 10px; padding: 0.7rem 2rem; color:white; align-self:center; text-align: center; background: black;">Register</div>
+    </nav>
+    <h1 style="margin-top: 90px;">Create Community</h1>
+    <form id="addCommunity">
+        <input type="text" id="communityName" placeholder="Community Name" name="Community Name" required>
+        <input type="text" id="description" placeholder="Description" name="Description">
+        <input id="submit" type="submit" value="Enter"></input>
+    </form>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('#addCommunity').onsubmit = () => {
+                const data = JSON.parse(localStorage.getItem("authToken")); 
+                const name = document.getElementById("communityName")
+                const description = document.getElementById("description")
+                const bodyData = {
+                        "name": name,
+                        "description": description
+                    }
+                fetch('https://apdc-grupo-7.oa.r.appspot.com/rest/community/create', {
+                    method: "POST",
+                    headers: {
+                        "Content-type": "application/json",
+                        "username": data["username"],
+                        "tokenID": data["tokenID"],
+                        "expirationTime": data["expirationData"]
+                    },
+                    body: JSON.stringify(bodyData)
+                })
+                .then(async response => {
+                    if (response.ok) {
+                        // success
+                    } else {
+                        // erros
+                    }
+                })
+                .catch(err => console.log(err));
+                }
+            }
+        )
+</script>
+</html>

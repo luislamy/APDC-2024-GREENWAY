@@ -27,8 +27,8 @@ public class ServerConstants {
     private static ServerConstants singleton = null;
 
     private ServerConstants() {
-        //this.datastore = DatastoreOptions.newBuilder().setProjectId("apdc-grupo-7").setHost("localhost:8081").build().getService();
-        this.datastore = DatastoreOptions.getDefaultInstance().getService();
+       //this.datastore = DatastoreOptions.newBuilder().setProjectId("apdc-grupo-7").setHost("localhost:8081").build().getService();
+ this.datastore = DatastoreOptions.getDefaultInstance().getService();
         this.userKeyFactory = datastore.newKeyFactory().setKind("User");
     }
 
