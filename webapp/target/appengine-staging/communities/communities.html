@@ -12,15 +12,59 @@
         <div id="register" onclick="location.href='./register/register.html';" style="margin-right: 2rem; border-radius: 10px; padding: 0.7rem 2rem; color:white; align-self:center; text-align: center; background: black;">Register</div>
     </nav>
     <h1 style="margin-top: 90px; display: inline-block;">Communities
-        <button onclick="location.href='addCommunity.html';">Create Community</button>
+        <button onclick="location.href='./addCommunity.html';">Create Community</button>
     </h1>
     <div id="container" style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 1rem; padding: 2rem; background: #F2f2f2; width: 80%; height:fit-content; margin: auto; align-self: center;">
-        <div style="background: blue; content: none; width: 100%; height: fit-content;">
-            <h2>Community Name</h2>
-            <h3>Community description: Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum</h3>
-            <h5>128 Members</h5>
-            <button>Join Community</button>
-        </div>
+        
     </div>
 </body>
+<script>
+    function getData() {
+            const data = JSON.parse(localStorage.getItem("authToken"));
+            fetch('https://apdc-grupo-7.oa.r.appspot.com/rest/communities', {
+                method: "GET",
+                headers: {
+                    "Content-type": "application/json",
+                    "username": data["username"],
+                    "tokenID": data["tokenID"],
+                    "expirationTime": data["expirationDate"]
+                }
+            })
+            .then(async response => {
+                if (response.ok) {
+                    const jsonData = await response.json();
+                    const communitiesDiv = document.getElementById("container");
+                    if (response.status == 202) {
+                        for (const obj of jsonData) {
+                        const data = JSON.parse(obj)
+                        const communityDiv =  document.createElement("div");
+                    
+                        const div1 = document.createElement("div");
+                        div1.innerHTML = "Name: " + data["name"];
+                        communityDiv.appendChild(div1);
+
+                        const div2 = document.createElement("div");
+                        div2.innerHTML = "Description: " + data["description"];
+                        communityDiv.appendChild(div2);
+
+                        const div3 = document.createElement("div");
+                        div3.innerHTML = "Members: " + data["num_members"];
+                        communityDiv.appendChild(div3);
+                        communitiesDiv.append(communityDiv);
+                        }
+                    }
+                    else {
+                        console.log("what")
+                    }
+                } else {
+                    const message = await response.text();
+                    console.error("Failed to fetch data:", message);
+                }
+            })
+            .catch(err => console.error("Error fetching data:", err));
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            getData();
+        });
+</script>
 </html>
