@@ -32,7 +32,7 @@ public class AuthToken {
 	 * @return 1 if the token is still valid, 0 if the time has run out, -1 if the given role is different and -2 if the token is different to the one in the database.
 	 */
 	public int isStillValid(Entity token, String role) {
-		if ( token == null )
+		if ( token == null || role == null )
 			return -2;
 		String entityUsername = token.getString("username");
 		String entityTokenID = token.getString("tokenID");
