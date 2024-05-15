@@ -71,9 +71,13 @@ public class MessageResource {
 		try {
 			Entity sender = txn.get(senderKey);
             Entity receiver = txn.get(receiverKey);
-            Entity authToken = serverConstants.getToken(txn, token);
+            Entity authToken = serverConstants.getToken(txn, token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.SEND_MESSAGE, sender, receiver, authToken, token, message);
-            if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(txn, token.username, token.tokenID);
+                txn.commit();
+                return validation;
+            } else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
                 txn.rollback();
 				return validation;
 			} else {
@@ -111,11 +115,14 @@ public class MessageResource {
 		Key userKey = serverConstants.getUserKey(token.username);
 		try {
 			Entity user = datastore.get(userKey);
-            Entity authToken = serverConstants.getToken(token);
+            Entity authToken = serverConstants.getToken(token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.RECEIVE_MESSAGES, user, authToken, token);
-            if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(token.username, token.tokenID);
+                return validation;
+			} else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
 				return validation;
-			} else {
+            } else {
                 Query<Entity> query = Query.newEntityQueryBuilder()
                     .setKind("Message")
                     .setFilter(PropertyFilter.hasAncestor(userKey))
@@ -150,11 +157,14 @@ public class MessageResource {
 		try {
 			Entity sender = datastore.get(senderKey);
             Entity receiver = datastore.get(receiverKey);
-            Entity authToken = serverConstants.getToken(token);
+            Entity authToken = serverConstants.getToken(token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.LOAD_CONVERSATION, sender, receiver, authToken, token, conversation);
-            if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(token.username, token.tokenID);
+                return validation;
+			} else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
 				return validation;
-			} else {
+            } else {
                 Query<Entity> senderQuery = Query.newEntityQueryBuilder()
                     .setKind("Message")
                     .setFilter(CompositeFilter.and(PropertyFilter.hasAncestor(senderKey), PropertyFilter.eq("sender", conversation.receiver)))

@@ -79,12 +79,12 @@ public class Validations {
         }
         if ( user.getString("state").equals(ServerConstants.INACTIVE) ) {
             LOG.warning(operation + data.username + " not an active user.");
-            return Response.status(Status.UNAUTHORIZED).entity("User's account is inactive.").build();
+            return Response.status(Status.FORBIDDEN).entity("User's account is inactive.").build();
         }
         String hashedPassword = (String) user.getString("password");
         if ( !hashedPassword.equals(DigestUtils.sha3_512Hex(data.password)) ) {
             LOG.warning(operation + data.username + " provided wrong password.");
-            return Response.status(Status.UNAUTHORIZED).entity("Wrong password.").build();
+            return Response.status(Status.FORBIDDEN).entity("Wrong password.").build();
         } else {
             return Response.ok().build();
         }
@@ -118,7 +118,7 @@ public class Validations {
         String operation = "Data change: ";
         if ( token.role.equals(ServerConstants.USER) && !data.username.equals(token.username) ) {
             LOG.warning(operation + token.username + " cannot change other user's data.");
-            return Response.status(Status.UNAUTHORIZED).entity("User role cannot change other users data.").build();
+            return Response.status(Status.FORBIDDEN).entity("User role cannot change other users data.").build();
         }
         int validData = data.validData();
 		if ( validData != 0 ) {
@@ -146,24 +146,24 @@ public class Validations {
             } else if ( adminRole.equals(ServerConstants.GBO) ) {
                 if ( !user.getString("role").equals(ServerConstants.USER) ) {
                     LOG.warning(operation + token.username + " cannot change non USER users data.");
-                    return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot change data of non USER users.").build();
+                    return Response.status(Status.FORBIDDEN).entity("GBO users cannot change data of non USER users.").build();
                 }
                 if ( data.role != null && !data.role.trim().isEmpty() ) {
                     LOG.warning(operation + token.username + " cannot change users' role.");
-                    return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot change users' role.").build();
+                    return Response.status(Status.FORBIDDEN).entity("GBO users cannot change users' role.").build();
                 }
             } else if ( adminRole.equals(ServerConstants.GA) ) {
                 if ( !user.getString("role").equals(ServerConstants.USER) && !user.getString("role").equals(ServerConstants.GBO) ) {
                     LOG.warning(operation + token.username + " cannot change GA or SU users data.");
-                    return Response.status(Status.UNAUTHORIZED).entity("GA users cannot change data of GA or SU users.").build();
+                    return Response.status(Status.FORBIDDEN).entity("GA users cannot change data of GA or SU users.").build();
                 } else if ( data.role.equals(ServerConstants.GA) || data.role.equals(ServerConstants.SU) ) {
                     LOG.warning(operation + token.username + " cannot change users' role to GA or SU roles.");
-                    return Response.status(Status.UNAUTHORIZED).entity("GA users cannot change users' role to GA or SU roles.").build();
+                    return Response.status(Status.FORBIDDEN).entity("GA users cannot change users' role to GA or SU roles.").build();
                 }
             } else if ( adminRole.equals(ServerConstants.SU) ) {
                 if ( !user.getString("role").equals(ServerConstants.USER) && !user.getString("role").equals(ServerConstants.GBO) && !user.getString("role").equals(ServerConstants.GA) ) {
                     LOG.warning(operation + token.username + " cannot change SU users data.");
-                    return Response.status(Status.UNAUTHORIZED).entity("SU users cannot change data of SU users.").build();
+                    return Response.status(Status.FORBIDDEN).entity("SU users cannot change data of SU users.").build();
                 }
             } else {
                 LOG.severe(operation +  "Unrecognized role.");
@@ -189,7 +189,7 @@ public class Validations {
             String hashedPassword = (String) user.getString("password");
             if ( !hashedPassword.equals(DigestUtils.sha3_512Hex(data.oldPassword)) ) {
                 LOG.warning(operation + token.username + " provided wrong password.");
-                return Response.status(Status.UNAUTHORIZED).entity("Wrong password.").build();
+                return Response.status(Status.FORBIDDEN).entity("Wrong password.").build();
             } else {
                 return Response.ok().build();
             }
@@ -201,7 +201,7 @@ public class Validations {
         if ( token.role.equals(ServerConstants.USER) || token.role.equals(ServerConstants.GBO) || 
             ( token.role.equals(ServerConstants.GA) && (data.role.equals(ServerConstants.GA) || data.role.equals(ServerConstants.SU) ) ) ) {
             LOG.warning(operation + "unauthorized attempt to change the role of a user.");
-            return Response.status(Status.UNAUTHORIZED).entity("User is not authorized to change user accounts role.").build();
+            return Response.status(Status.FORBIDDEN).entity("User is not authorized to change user accounts role.").build();
         }
         if ( validateUser(operation, admin, token.username).getStatus() != Status.OK.getStatusCode() ) {
             return Response.status(Status.NOT_FOUND).entity(token.username + " is not a registered user.").build();
@@ -220,7 +220,7 @@ public class Validations {
         String operation = "State change: ";
         if ( token.role.equals(ServerConstants.USER) ) {
             LOG.warning(operation + "unauthorized attempt to change the state of a user.");
-            return Response.status(Status.UNAUTHORIZED).entity("USER roles cannot change any user states.").build();
+            return Response.status(Status.FORBIDDEN).entity("USER roles cannot change any user states.").build();
         }
         if ( validateUser(operation, admin, token.username).getStatus() != Status.OK.getStatusCode() ) {
             return Response.status(Status.NOT_FOUND).entity(token.username + " is not a registered user.").build();
@@ -238,18 +238,18 @@ public class Validations {
                 if ( !userRole.equals(ServerConstants.USER) ) {
                     // GBO users can only change USER states
                     LOG.warning(operation + token.username + " attmepted to change the state of a non USER role.");
-                    return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot change non USER roles' states.").build();
+                    return Response.status(Status.FORBIDDEN).entity("GBO users cannot change non USER roles' states.").build();
                 }
             } else if ( adminRole.equals(ServerConstants.GA) ) {
                 if ( !userRole.equals(ServerConstants.USER) && !userRole.equals(ServerConstants.GBO) ) {
                     // GA users can change USER and GBO states
                     LOG.warning(operation + token.username + " attmepted to change the state of a non USER or GBO role.");
-                    return Response.status(Status.UNAUTHORIZED).entity("GA users cannot change non USER and GBO roles' states.").build();
+                    return Response.status(Status.FORBIDDEN).entity("GA users cannot change non USER and GBO roles' states.").build();
                 }
             } else if ( adminRole.equals(ServerConstants.SU) ) {
             } else if ( adminRole.equals(ServerConstants.USER) ) {
                 LOG.warning(operation + token.username + " attmepted to change the state of a user as a USER role.");
-                return Response.status(Status.UNAUTHORIZED).entity("USER users cannot change states.").build();
+                return Response.status(Status.FORBIDDEN).entity("USER users cannot change states.").build();
             } else {
                 LOG.severe(operation + "Unrecognized role.");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -262,10 +262,10 @@ public class Validations {
         String operation = "Remove user: ";
         if ( token.role.equals(ServerConstants.GBO) ) {
             LOG.warning(operation + "GBO users cannot remove any accounts.");
-            return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot remove any accounts.").build();
+            return Response.status(Status.FORBIDDEN).entity("GBO users cannot remove any accounts.").build();
         } else if ( token.role.equals(ServerConstants.USER) && !token.username.equals(data.username) ) {
             LOG.warning(operation + "USER users cannot remove any accounts other than their own.");
-            return Response.status(Status.UNAUTHORIZED).entity("USER users cannot remove any accounts other than their own.").build();
+            return Response.status(Status.FORBIDDEN).entity("USER users cannot remove any accounts other than their own.").build();
         }
         if ( validateUser(operation, admin, token.username).getStatus() != Status.OK.getStatusCode() ) {
             return Response.status(Status.NOT_FOUND).entity(token.username + " is not a registered user.").build();
@@ -282,17 +282,17 @@ public class Validations {
             if ( adminRole.equals(ServerConstants.USER) ) {
                 if ( !role.equals(ServerConstants.USER) || !user.equals(admin) ) {
                     LOG.warning(operation + token.username + " (USER role) attempted to delete other user.");
-                    return Response.status(Status.UNAUTHORIZED).entity("USER roles cannot remove other users from the database.").build();
+                    return Response.status(Status.FORBIDDEN).entity("USER roles cannot remove other users from the database.").build();
                 }
             } else if ( adminRole.equals(ServerConstants.GA) ) {
                 if ( !role.equals(ServerConstants.GBO) && !role.equals(ServerConstants.USER) ) {
                     LOG.warning(operation + token.username + " (GA role) attempted to delete SU or GA user.");
-                    return Response.status(Status.UNAUTHORIZED).entity("GA roles cannot remove GA or SU users from the database.").build();
+                    return Response.status(Status.FORBIDDEN).entity("GA roles cannot remove GA or SU users from the database.").build();
                 }
             } else if ( adminRole.equals(ServerConstants.SU) ) {
             } else if ( adminRole.equals(ServerConstants.GBO) ) {
                 LOG.warning(operation + token.username + " (GBO role) attempted to delete user.");
-                return Response.status(Status.UNAUTHORIZED).entity("GBO roles cannot remove users from the database.").build();
+                return Response.status(Status.FORBIDDEN).entity("GBO roles cannot remove users from the database.").build();
             } else {
                 LOG.severe(operation + "Unrecognized role.");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -320,17 +320,17 @@ public class Validations {
             if ( adminRole.equals(ServerConstants.USER) ) {
                 if ( !role.equals(ServerConstants.USER) || !state.equals(ServerConstants.ACTIVE) || !profile.equals(ServerConstants.PUBLIC) ) {
                     LOG.warning(operation + token.username + " (USER role) attempted to search non USER, inactive or private users' information.");
-                    return Response.status(Status.UNAUTHORIZED).entity("USER roles cannot search for other non USER, inactive or private users' from the database.").build();
+                    return Response.status(Status.FORBIDDEN).entity("USER roles cannot search for other non USER, inactive or private users' from the database.").build();
                 }
             } else if ( adminRole.equals(ServerConstants.GBO) ) {
                 if ( !role.equals(ServerConstants.GBO) && !role.equals(ServerConstants.USER) ) {
                     LOG.warning(operation + token.username + " (GBO role) attempted to search higher user.");
-                    return Response.status(Status.UNAUTHORIZED).entity("GBO roles cannot search for higher users from the database.").build();
+                    return Response.status(Status.FORBIDDEN).entity("GBO roles cannot search for higher users from the database.").build();
                 }
             } else if ( adminRole.equals(ServerConstants.GA) ) {
                 if ( role.equals(ServerConstants.SU) ) {
                     LOG.warning(operation + token.username + " (GA role) attempted to search higher user.");
-                    return Response.status(Status.UNAUTHORIZED).entity("GA roles cannot search for higher users from the database.").build();
+                    return Response.status(Status.FORBIDDEN).entity("GA roles cannot search for higher users from the database.").build();
                 }
             } else if ( adminRole.equals(ServerConstants.SU) ) {
             } else {
@@ -359,7 +359,7 @@ public class Validations {
         }
         if ( receiver.getString("state").equals(ServerConstants.INACTIVE) ) {
             LOG.warning(operation + message.receiver + " is not an active user.");
-            return Response.status(Status.UNAUTHORIZED).entity("Receiver's account is inactive.").build();
+            return Response.status(Status.FORBIDDEN).entity("Receiver's account is inactive.").build();
         }
         Response validateTokenResponse = validateToken(operation, sender, authToken, token);
         if ( validateTokenResponse.getStatus() != Status.OK.getStatusCode() ) {
@@ -370,17 +370,17 @@ public class Validations {
             if ( senderRole.equals(ServerConstants.USER) ) {
                 if ( !receiverRole.equals(ServerConstants.USER) || !receiver.getString("profile").equals(ServerConstants.PUBLIC) ) {
                     LOG.fine(operation + "USER roles cannot send messages to non USER roles.");
-                    return Response.status(Status.UNAUTHORIZED).entity("USER roles cannot send messages to non USER roles or users with private profiles.").build();
+                    return Response.status(Status.FORBIDDEN).entity("USER roles cannot send messages to non USER roles or users with private profiles.").build();
                 }
             } else if ( senderRole.equals(ServerConstants.GBO) ) {
                 if ( !receiverRole.equals(ServerConstants.USER) && !receiverRole.equals(ServerConstants.GBO) ) {
                     LOG.fine(operation + "GBO roles cannot send messages to higher roles.");
-                    return Response.status(Status.UNAUTHORIZED).entity("GBO roles cannot send messages to higher roles.").build();
+                    return Response.status(Status.FORBIDDEN).entity("GBO roles cannot send messages to higher roles.").build();
                 }
             } else if ( senderRole.equals(ServerConstants.GA) ) {
                 if ( !receiverRole.equals(ServerConstants.USER) && !receiverRole.equals(ServerConstants.GBO) && !receiverRole.equals(ServerConstants.GA) ) {
                     LOG.fine(operation + "GA roles cannot send messages to higher roles.");
-                    return Response.status(Status.UNAUTHORIZED).entity("GA roles cannot send messages to higher roles.").build();
+                    return Response.status(Status.FORBIDDEN).entity("GA roles cannot send messages to higher roles.").build();
                 }
             } else if ( senderRole.equals(ServerConstants.SU) ) {
             } else {
