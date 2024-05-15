@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.projeto.util.CommunityData;
 import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 
-@Path("communities/community")
+@Path("/communities/community")
 public class CommunityResource {
 
     /**
@@ -62,7 +62,7 @@ public class CommunityResource {
 		try {
             String key = UUID.randomUUID().toString();
             Key communityKey = datastore.newKeyFactory().setKind("Community").newKey(key);
-            if ( txn.get(communityKey) == null ) {
+            if ( serverConstants.getCommunity(txn, key) == null ) {
                 Entity community = Entity.newBuilder(communityKey)
 						.set("id", key)
                         .set("name", data.name)
@@ -70,7 +70,6 @@ public class CommunityResource {
                         .set("num_members", 1)
                         .set("username", username)
                         .build();
-
                 txn.add(community);
 				txn.commit();
 				LOG.fine("Create community: " + data.name + " was registered in the database.");
