@@ -61,7 +61,6 @@ public class MessageResource {
         LOG.fine("Send Message: send message attempt by: " + message.sender + " to " + message.receiver + ".");
         AuthToken token = message.token;
 		Key senderKey = serverConstants.getUserKey(message.sender);
-		Key senderTokenKey = serverConstants.getTokenKey(message.sender);
         Key receiverKey = serverConstants.getUserKey(message.receiver);
         Key messageKey = datastore.allocateId(
             datastore.newKeyFactory()
@@ -72,9 +71,13 @@ public class MessageResource {
 		try {
 			Entity sender = txn.get(senderKey);
             Entity receiver = txn.get(receiverKey);
-            Entity authToken = datastore.get(senderTokenKey);
+            Entity authToken = serverConstants.getToken(txn, token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.SEND_MESSAGE, sender, receiver, authToken, token, message);
-            if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(txn, token.username, token.tokenID);
+                txn.commit();
+                return validation;
+            } else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
                 txn.rollback();
 				return validation;
 			} else {
@@ -110,14 +113,16 @@ public class MessageResource {
     public Response receiveMessages(AuthToken token) {
         LOG.fine("Receive Messages: receive messages attempt by: " + token.username + ".");
 		Key userKey = serverConstants.getUserKey(token.username);
-        Key tokenKey = serverConstants.getTokenKey(token.username);
 		try {
 			Entity user = datastore.get(userKey);
-            Entity authToken = datastore.get(tokenKey);
+            Entity authToken = serverConstants.getToken(token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.RECEIVE_MESSAGES, user, authToken, token);
-            if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(token.username, token.tokenID);
+                return validation;
+			} else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
 				return validation;
-			} else {
+            } else {
                 Query<Entity> query = Query.newEntityQueryBuilder()
                     .setKind("Message")
                     .setFilter(PropertyFilter.hasAncestor(userKey))
@@ -149,15 +154,17 @@ public class MessageResource {
         LOG.fine("Receive Message: receive messages attempt by: " + token.username + ".");
 		Key senderKey = serverConstants.getUserKey(conversation.sender);
         Key receiverKey = serverConstants.getUserKey(conversation.receiver);
-        Key tokenKey = serverConstants.getTokenKey(token.username);
 		try {
 			Entity sender = datastore.get(senderKey);
             Entity receiver = datastore.get(receiverKey);
-            Entity authToken = datastore.get(tokenKey);
+            Entity authToken = serverConstants.getToken(token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.LOAD_CONVERSATION, sender, receiver, authToken, token, conversation);
-            if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(token.username, token.tokenID);
+                return validation;
+			} else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
 				return validation;
-			} else {
+            } else {
                 Query<Entity> senderQuery = Query.newEntityQueryBuilder()
                     .setKind("Message")
                     .setFilter(CompositeFilter.and(PropertyFilter.hasAncestor(senderKey), PropertyFilter.eq("sender", conversation.receiver)))

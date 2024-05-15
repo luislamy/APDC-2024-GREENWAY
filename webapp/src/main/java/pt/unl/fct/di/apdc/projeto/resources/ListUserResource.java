@@ -57,13 +57,15 @@ public class ListUserResource {
         LOG.fine("List users: " + token.username + " attempted to list users.");
         try {
             Key userKey = serverConstants.getUserKey(token.username);
-            Key tokenKey = serverConstants.getTokenKey(token.username);
             Entity user = datastore.get(userKey);
-            Entity authToken = datastore.get(tokenKey);
+            Entity authToken = serverConstants.getToken(token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.LIST_USERS, user, authToken, token);
-            if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(token.username, token.tokenID);
+                return validation;
+			} else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
 				return validation;
-			} else {
+            } else {
                 String userRole = user.getString("role");
 				Query<Entity> query;
                 if ( userRole.equals(ServerConstants.USER) ) {

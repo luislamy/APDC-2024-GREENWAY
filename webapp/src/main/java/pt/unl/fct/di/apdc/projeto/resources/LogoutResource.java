@@ -44,15 +44,14 @@ public class LogoutResource {
         Transaction txn = datastore.newTransaction();
         try {
             Key userKey = serverConstants.getUserKey(token.username);
-            Key tokenKey = serverConstants.getTokenKey(token.username);
             Entity user = txn.get(userKey);
-            Entity authToken = txn.get(tokenKey);
+            Entity authToken = serverConstants.getToken(txn, token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.LOGOUT, user, authToken, token);
             if ( validation.getStatus() != Status.OK.getStatusCode() ) {
 				txn.rollback();
 				return validation;
 			} else {
-				txn.delete(tokenKey);
+				txn.delete(authToken.getKey());
                 txn.commit();
                 LOG.fine("Logout: " + token.username + " logged out.");
                 return Response.ok().entity("User logged out.").build();

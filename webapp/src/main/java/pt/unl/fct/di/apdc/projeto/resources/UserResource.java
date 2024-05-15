@@ -61,12 +61,15 @@ public class UserResource {
         try {
             Key userKey = serverConstants.getUserKey(data.username);
             Key adminKey = serverConstants.getUserKey(token.username);
-            Key tokenKey = serverConstants.getTokenKey(token.username);
             Entity user = txn.get(userKey);
             Entity admin = txn.get(adminKey);
-            Entity authToken = txn.get(tokenKey);
+            Entity authToken = serverConstants.getToken(txn, token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.CHANGE_USER_DATA, admin, user, authToken, token, data);
-            if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(txn, token.username, token.tokenID);
+                txn.commit();
+                return validation;
+            } else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
                 txn.rollback();
 				return validation;
 			} else {
@@ -115,11 +118,14 @@ public class UserResource {
         Transaction txn = datastore.newTransaction();
         try {
             Key userKey = serverConstants.getUserKey(token.username);
-            Key tokenKey = serverConstants.getTokenKey(token.username);
             Entity user = txn.get(userKey);
-            Entity authToken = txn.get(tokenKey);
+            Entity authToken = serverConstants.getToken(txn, token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.CHANGE_PASSWORD, user, authToken, token, data);
-            if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(txn, token.username, token.tokenID);
+                txn.commit();
+                return validation;
+            } else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
                 txn.rollback();
 				return validation;
 			} else {
@@ -169,12 +175,15 @@ public class UserResource {
         try {
             Key userKey = serverConstants.getUserKey(data.username);
             Key adminKey = serverConstants.getUserKey(token.username);
-            Key tokenKey = serverConstants.getTokenKey(token.username);
             Entity user = txn.get(userKey);
             Entity admin = txn.get(adminKey);
-            Entity authToken = txn.get(tokenKey);
+            Entity authToken = serverConstants.getToken(txn, token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.CHANGE_USER_ROLE, admin, user, authToken, token, data);
-            if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(txn, token.username, token.tokenID);
+                txn.commit();
+                return validation;
+            } else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
                 txn.rollback();
 				return validation;
 			} else {
@@ -225,12 +234,15 @@ public class UserResource {
         try {
             Key userKey = serverConstants.getUserKey(data.username);
             Key adminKey = serverConstants.getUserKey(token.username);
-            Key tokenKey = serverConstants.getTokenKey(token.username);
             Entity user = txn.get(userKey);
             Entity admin = txn.get(adminKey);
-            Entity authToken = txn.get(tokenKey);
+            Entity authToken = serverConstants.getToken(txn, token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.CHANGE_USER_STATE, admin, user, authToken, token, data);
-            if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(txn, token.username, token.tokenID);
+                txn.commit();
+                return validation;
+            } else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
                 txn.rollback();
 				return validation;
 			} else {
@@ -279,14 +291,16 @@ public class UserResource {
         Transaction txn = datastore.newTransaction();
         try {
             Key userKey = serverConstants.getUserKey(data.username);
-            Key userTokenKey = serverConstants.getTokenKey(data.username);
             Key adminKey = serverConstants.getUserKey(token.username);
-            Key adminTokenKey = serverConstants.getTokenKey(token.username);
             Entity user = txn.get(userKey);
             Entity admin = txn.get(adminKey);
-            Entity authToken = txn.get(adminTokenKey);
+            Entity authToken = serverConstants.getToken(txn, token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.REMOVE_USER, admin, user, authToken, token, data);
-            if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(txn, token.username, token.tokenID);
+                txn.commit();
+                return validation;
+            } else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
                 txn.rollback();
 				return validation;
 			} else {
@@ -308,7 +322,15 @@ public class UserResource {
                     Entity next = results.next();
                     txn.delete(next.getKey());
                 }
-                txn.delete(userKey, userTokenKey);
+                Query<Key> tokensQuery = Query.newKeyQueryBuilder()
+                    .setKind("Token")
+                    .setFilter(PropertyFilter.hasAncestor(userKey))
+                    .build();
+                QueryResults<Key> tokenKeys = txn.run(tokensQuery);
+                while ( tokenKeys.hasNext() ) {
+                    txn.delete(tokenKeys.next());
+                }
+                txn.delete(userKey);
                 txn.commit();
                 LOG.fine("Remove User: " + data.username + " removed from the database.");
                 return Response.ok().entity("User removed from database.").build();
@@ -336,14 +358,16 @@ public class UserResource {
         try {
             Key userKey = serverConstants.getUserKey(data.username);
             Key adminKey = serverConstants.getUserKey(token.username);
-            Key adminTokenKey = serverConstants.getTokenKey(token.username);
             Entity user = datastore.get(userKey);
             Entity admin = datastore.get(adminKey);
-            Entity authToken = datastore.get(adminTokenKey);
+            Entity authToken = serverConstants.getToken(token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.SEARCH_USER, admin, user, authToken, token, data);
-            if ( validation.getStatus() != Status.OK.getStatusCode() )
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(token.username, token.tokenID);
+                return validation;
+			} else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
 				return validation;
-			else {
+            } else {
                 User searchUser = new User(user.getString("username"), user.getString("password"), user.getString("email"), 
                                             user.getString("name"), user.getString("phone"), user.getString("profile"), 
                                             user.getString("work"), user.getString("workplace"), user.getString("address"), 
@@ -366,13 +390,15 @@ public class UserResource {
         LOG.fine("Get User: get user attempt by " + token.username + ".");
         try {
             Key userKey = serverConstants.getUserKey(token.username);
-            Key userTokenKey = serverConstants.getTokenKey(token.username);
             Entity user = datastore.get(userKey);
-            Entity authToken = datastore.get(userTokenKey);
+            Entity authToken = serverConstants.getToken(token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.USER_PROFILE, user, authToken, token);
-            if ( validation.getStatus() != Status.OK.getStatusCode() )
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(token.username, token.tokenID);
+                return validation;
+			} else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
 				return validation;
-			else {
+            } else {
                 User searchUser = new User(user.getString("username"), user.getString("email"), user.getString("name"), 
                                             user.getString("phone"), user.getString("profile"), user.getString("work"), 
                                             user.getString("workplace"), user.getString("address"), user.getString("postalcode"), 
