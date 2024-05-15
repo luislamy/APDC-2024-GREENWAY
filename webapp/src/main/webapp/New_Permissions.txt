@@ -1,0 +1,45 @@
+--------------------------------------
+USER/EP/GBO/ - general
+create community
+join community
+view community
+view communities
+--------------------------------------
+USER/EP - member of community
+post in community
+edit own post
+remove own post
+comment on post in community
+edit own comment
+remove own comment
+leave community
+list community members
+community member related (message, look at profile, etc)
+post related (not admin)
+comment related (not admin)
+--------------------------------------
+USER/EP - community manager
+edit community
+edit post
+edit comment
+remove post
+remove comment
+lock post
+pin post
+remove user from community
+ban user
+kick user
+warn user
+respond to user appeal
+request remove community
+--------------------------------------
+GBO
+approve/deny remove community request
+remove community
+lock community
+warn community managers
+kick manager from community
+ban manager from community
+--------------------------------------
+GA/GS/SU
+All of the above
