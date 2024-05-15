@@ -1,0 +1,44 @@
+Communities:
+1. create community (done, review) -> /communities/community/create
+2. view communities (done, review) -> /communities
+3. view community (todo, review) -> /communities/community
+4. join community (todo, review) -> /communities/community/join
+5. leave community (todo, review) -> /communities/community/leave
+6. list community members (todo, review) -> /communities/community/list/users
+7. edit community (todo, review) -> /communities/community/edit
+8. request remove community (todo, review) -> /communities/community/remove/request
+9. remove community (todo, review) -> /communities/community/remove
+10. lock community (todo, review) -> /communities/community/lock
+
+Community Post:
+1. post to community (todo, review) -> /
+2. edit post (todo, review) -> /
+3. remove post (todo, review) -> /
+4. lock post (todo, review) -> /
+5. pin post (todo, review) -> /
+6. like/dislike post (todo, review) -> /
+7. share post (todo, review) -> /
+
+Post Comment:
+1. comment on post (todo, review) -> /
+2. edit comment (todo, review) -> /
+3. remove comment (todo, review) -> /
+4. like/dislike comment (todo, review) -> /
+5. respond to comment (todo, review) -> /
+6. pin comment (todo, review) -> /
+
+Community member actions:
+1. message community member (todo, review) -> /
+2. go to user profile (todo, review) -> /
+
+Community manager actions (general community managers and above roles have permission for these):
+1. ban user from community (todo, review) -> /
+2. kick user for some time (todo, review) -> /
+3. warn user (todo, review) -> /
+4. check user appeals (todo, review) -> /
+5. respond to user appeal (todo, review) -> /
+
+Community manager actions (GC and above roles have permission to do these):
+1. warn community manager (todo, review) -> /
+2. ban manager from community (todo, review) -> /
+3. change community manager (todo, review) -> /

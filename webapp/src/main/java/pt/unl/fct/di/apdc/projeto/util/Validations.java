@@ -21,10 +21,11 @@ public class Validations {
     CHANGE_USER_DATA = 4, CHANGE_PASSWORD = 5, CHANGE_USER_ROLE = 6, 
     CHANGE_USER_STATE = 7, REMOVE_USER = 8, SEARCH_USER = 9, 
     USER_PROFILE = 10, SEND_MESSAGE = 11, RECEIVE_MESSAGES = 12, 
-    LOAD_CONVERSATION = 13;
+    LOAD_CONVERSATION = 13, CREATE_COMMUNITY = 14, GET_COMMUNITIES = 15, 
+    GET_COMMUNITY = 16, JOIN_COMMUNITY = 17;
 
 
-    public static Response checkValidation(int operation, Entity user, LoginData data) {
+    public static <T> Response checkValidation(int operation, Entity user, T data) {
         return checkValidation(operation, user, null, null, null, data);
     }
 

@@ -33,12 +33,11 @@ warn user
 respond to user appeal
 request remove community
 --------------------------------------
-GBO
+GBO / GC
 approve/deny remove community request
 remove community
 lock community
 warn community managers
-kick manager from community
 ban manager from community
 --------------------------------------
 GA/GS/SU
