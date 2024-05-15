@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response.Status;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
