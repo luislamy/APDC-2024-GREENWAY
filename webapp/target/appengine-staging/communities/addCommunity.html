@@ -14,6 +14,7 @@
     <h1 style="margin-top: 90px;">Create Community</h1>
     <form id="addCommunity">
         <input type="text" id="communityName" placeholder="Community Name" required>
+        <input type="text" id="nickname" placeholder="Community Nickname" required>
         <input type="text" id="description" placeholder="Description">
         <input id="submit" type="submit" value="Enter"></input>
     </form>
@@ -21,20 +22,19 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('#addCommunity').onsubmit = () => {
-                const data = JSON.parse(localStorage.getItem("authToken")); 
                 const name = document.getElementById("communityName").value;
+                const nickname = document.getElementById("nickname").value;
                 const description = document.getElementById("description").value;
                 const bodyData = {
                     "name": name,
+                    "nickname": nickname,
                     "description": description
                 }
                 fetch('https://apdc-grupo-7.oa.r.appspot.com/rest/communities/community/create', {
                     method: "POST",
                     headers: {
                         "Content-type": "application/json",
-                        "username": data["username"],
-                        "tokenID": data["tokenID"],
-                        "expirationTime": data["expirationDate"]
+                        "authToken": localStorage.getItem("authToken"),
                     },
                     body: JSON.stringify(bodyData)
                 })

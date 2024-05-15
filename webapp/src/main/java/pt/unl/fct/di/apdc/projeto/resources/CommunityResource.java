@@ -49,9 +49,12 @@ public class CommunityResource {
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    public Response createCommunity(@HeaderParam("username") String username, @HeaderParam("tokenID") String tokenID, @HeaderParam("expirationTime") long expirationTime, CommunityData data) {
+    public Response createCommunity(@HeaderParam("authToken") String jsonToken, CommunityData data) {
+        AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
+        String username = authToken.username;
+        String tokenID = authToken.tokenID;
+        long expirationTime = authToken.expirationDate;
         LOG.fine("Attempt to create community by: " + username + ".");
-
         Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", username)).setKind("Token").newKey(tokenID);
         Entity token = datastore.get(tokenKey);
         if (token == null)
@@ -64,7 +67,7 @@ public class CommunityResource {
         Key userKey = serverConstants.getUserKey(username);
         Transaction txn = datastore.newTransaction();
 		try {
-            String key = UUID.randomUUID().toString();
+            String key = data.nickname;
             Key communityKey = datastore.newKeyFactory().setKind("Community").newKey(key);
             if ( serverConstants.getCommunity(txn, key) == null ) {
                 Entity community = Entity.newBuilder(communityKey)
