@@ -7,7 +7,7 @@ import com.google.cloud.datastore.KeyFactory;
 
 public class ServerConstants {
 
-    public static final String USER = "USER", GBO = "GBO", GA = "GA", SU = "SU";
+    public static final String USER = "USER", GBO = "GBO", GA = "GA", SU = "SU", EP = "EP", GS ="GS";
 
 	public static final String ACTIVE = "ACTIVE", INACTIVE = "INACTIVE";
 
