@@ -20,14 +20,11 @@
 </body>
 <script>
     function getData() {
-            const data = JSON.parse(localStorage.getItem("authToken"));
             fetch('https://apdc-grupo-7.oa.r.appspot.com/rest/communities', {
                 method: "GET",
                 headers: {
                     "Content-type": "application/json",
-                    "username": data["username"],
-                    "tokenID": data["tokenID"],
-                    "expirationTime": data["expirationDate"]
+                    "authToken": localStorage.getItem("authToken")
                 }
             })
             .then(async response => {

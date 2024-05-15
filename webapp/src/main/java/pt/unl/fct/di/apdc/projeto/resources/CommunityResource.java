@@ -1,29 +1,28 @@
 package pt.unl.fct.di.apdc.projeto.resources;
 
-import java.util.logging.Logger;
 import java.util.UUID;
+import java.util.logging.Logger;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
-import javax.ws.rs.core.Response.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
-import com.google.cloud.datastore.PathElement;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Transaction;
-import com.google.cloud.datastore.Key;
-import com.google.api.client.json.Json;
 import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.QueryResults;
-import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
-import com.google.cloud.datastore.StructuredQuery.Filter;
-import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.PathElement;
+import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
-import pt.unl.fct.di.apdc.projeto.util.*;
+import pt.unl.fct.di.apdc.projeto.util.CommunityData;
+import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 
-@Path("communities/community")
+@Path("/communities/community")
 public class CommunityResource {
 
     /**
@@ -63,15 +62,14 @@ public class CommunityResource {
 		try {
             String key = UUID.randomUUID().toString();
             Key communityKey = datastore.newKeyFactory().setKind("Community").newKey(key);
-            if ( txn.get(communityKey) == null ) {
+            if ( serverConstants.getCommunity(txn, key) == null ) {
                 Entity community = Entity.newBuilder(communityKey)
-						.set("id", key) 
+						.set("id", key)
                         .set("name", data.name)
                         .set("description", data.description)
                         .set("num_members", 1)
                         .set("username", username)
                         .build();
-
                 txn.add(community);
 				txn.commit();
 				LOG.fine("Create community: " + data.name + " was registered in the database.");
