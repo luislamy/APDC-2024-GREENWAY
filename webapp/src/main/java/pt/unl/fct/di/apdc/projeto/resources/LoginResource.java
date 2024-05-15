@@ -51,7 +51,6 @@ public class LoginResource {
 	public Response login(LoginData data) {
 		LOG.fine("Login: login attempt by: " + data.username + ".");
 		Key userKey = serverConstants.getUserKey(data.username);
-		Key tokenKey = serverConstants.getTokenKey(data.username);
 		Transaction txn = datastore.newTransaction();
 		try {
 			Entity user = txn.get(userKey);
@@ -61,6 +60,7 @@ public class LoginResource {
 				return validation;
 			} else {
 				AuthToken authToken = new AuthToken(data.username, user.getString("role"));
+				Key tokenKey = serverConstants.getTokenKey(data.username, authToken.tokenID);
 				Entity token = Entity.newBuilder(tokenKey)
 						.set("username", authToken.username)
 						.set("role", authToken.role)
@@ -94,9 +94,12 @@ public class LoginResource {
 		LOG.fine("Token: token check attempt by " + token.username + ".");
 		Key userKey = serverConstants.getUserKey(token.username);
 		Entity user = datastore.get(userKey);
-		Entity authToken = serverConstants.getToken(token);
+		Entity authToken = serverConstants.getToken(token.username, token.tokenID);
 		var validation = Validations.checkValidation(Validations.GET_TOKEN, user, authToken, token);
-		if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+		if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+			serverConstants.removeToken(token.username, token.tokenID);
+			return validation;
+		} else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
 			return validation;
 		} else {
 			LOG.fine("Token: " + token.username + " is still logged in.");

@@ -1,6 +1,7 @@
 pt\unl\fct\di\apdc\projeto\util\ChangeData.class
 pt\unl\fct\di\apdc\projeto\util\ServerConstants.class
 pt\unl\fct\di\apdc\projeto\util\PasswordData.class
+pt\unl\fct\di\apdc\projeto\resources\GetCommunitiesResource.class
 pt\unl\fct\di\apdc\projeto\resources\ListUserResource.class
 pt\unl\fct\di\apdc\projeto\resources\CommunityResource.class
 pt\unl\fct\di\apdc\projeto\util\Validations.class

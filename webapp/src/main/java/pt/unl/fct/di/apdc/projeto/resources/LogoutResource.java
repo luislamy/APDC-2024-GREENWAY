@@ -45,7 +45,7 @@ public class LogoutResource {
         try {
             Key userKey = serverConstants.getUserKey(token.username);
             Entity user = txn.get(userKey);
-            Entity authToken = serverConstants.getToken(txn, token);
+            Entity authToken = serverConstants.getToken(txn, token.username, token.tokenID);
             var validation = Validations.checkValidation(Validations.LOGOUT, user, authToken, token);
             if ( validation.getStatus() != Status.OK.getStatusCode() ) {
 				txn.rollback();

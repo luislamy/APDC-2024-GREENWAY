@@ -21,7 +21,7 @@ import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.projeto.util.CommunityData;
 import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 
-@Path("/community")
+@Path("communities/community")
 public class CommunityResource {
 
     /**
@@ -38,8 +38,7 @@ public class CommunityResource {
     /** The converter to JSON */
     private final Gson g = new Gson();
 
-    public CommunityResource() {
-    }
+    public CommunityResource() {}
 
     @POST
     @Path("/create")
@@ -48,7 +47,7 @@ public class CommunityResource {
     public Response createCommunity(@HeaderParam("username") String username, @HeaderParam("tokenID") String tokenID, @HeaderParam("expirationTime") long expirationTime, CommunityData data) {
         LOG.fine("Attempt to create community by: " + username + ".");
 
-        Key tokenKey = datastore.newKeyFactory().setKind("Token").newKey(username);
+        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", username)).setKind("Token").newKey(tokenID);
         Entity token = datastore.get(tokenKey);
         if (token == null)
             return Response.status(Status.BAD_REQUEST).entity("User is not logged in.").build();

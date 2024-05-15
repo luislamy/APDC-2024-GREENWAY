@@ -13,8 +13,8 @@
     </nav>
     <h1 style="margin-top: 90px;">Create Community</h1>
     <form id="addCommunity">
-        <input type="text" id="communityName" placeholder="Community Name" name="Community Name" required>
-        <input type="text" id="description" placeholder="Description" name="Description">
+        <input type="text" id="communityName" placeholder="Community Name" required>
+        <input type="text" id="description" placeholder="Description">
         <input id="submit" type="submit" value="Enter"></input>
     </form>
 </body>
@@ -22,27 +22,27 @@
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('#addCommunity').onsubmit = () => {
                 const data = JSON.parse(localStorage.getItem("authToken")); 
-                const name = document.getElementById("communityName")
-                const description = document.getElementById("description")
+                const name = document.getElementById("communityName").value;
+                const description = document.getElementById("description").value;
                 const bodyData = {
-                        "name": name,
-                        "description": description
-                    }
-                fetch('https://apdc-grupo-7.oa.r.appspot.com/rest/community/create', {
+                    "name": name,
+                    "description": description
+                }
+                fetch('https://apdc-grupo-7.oa.r.appspot.com/rest/communities/community/create', {
                     method: "POST",
                     headers: {
                         "Content-type": "application/json",
                         "username": data["username"],
                         "tokenID": data["tokenID"],
-                        "expirationTime": data["expirationData"]
+                        "expirationTime": data["expirationDate"]
                     },
                     body: JSON.stringify(bodyData)
                 })
                 .then(async response => {
                     if (response.ok) {
-                        // success
+                        window.location.href = "../communities/communities.html";
                     } else {
-                        // erros
+                        window.location.href = "../communities/communities.html";
                     }
                 })
                 .catch(err => console.log(err));

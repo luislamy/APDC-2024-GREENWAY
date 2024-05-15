@@ -6,10 +6,6 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.PathElement;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.QueryResults;
-import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
-import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Transaction;
 
 public class ServerConstants {
@@ -28,7 +24,7 @@ public class ServerConstants {
 
     private ServerConstants() {
        //this.datastore = DatastoreOptions.newBuilder().setProjectId("apdc-grupo-7").setHost("localhost:8081").build().getService();
- this.datastore = DatastoreOptions.getDefaultInstance().getService();
+        this.datastore = DatastoreOptions.getDefaultInstance().getService();
         this.userKeyFactory = datastore.newKeyFactory().setKind("User");
     }
 
@@ -55,21 +51,35 @@ public class ServerConstants {
         return tokenKey;
     }
 
-    public Entity getToken(AuthToken authToken) {
-        return getToken(null, authToken);
+    public Key getTokenKey(String username, String tokenID) {
+        Key tokenKey = datastore.allocateId(
+				datastore.newKeyFactory()
+				.addAncestor(PathElement.of("User", username))
+				.setKind("Token")
+				.newKey(tokenID));
+        return tokenKey;
     }
 
-    public Entity getToken(Transaction txn, AuthToken authToken) {
-        Query<Entity> query = Query.newEntityQueryBuilder()
-            .setKind("Token")
-            .setFilter(CompositeFilter.and(
-                PropertyFilter.hasAncestor(this.getUserKey(authToken.username)), 
-                PropertyFilter.eq("tokenID", authToken.tokenID)))
-            .build();
-        QueryResults<Entity> results = txn != null ? txn.run(query) : datastore.run(query);
-        Entity token = null;
-        if ( results.hasNext() )
-            token = results.next();
+    public Entity getToken(String username, String tokenID) {
+        return getToken(null, username, tokenID);
+    }
+
+    public Entity getToken(Transaction txn, String username, String tokenID) {
+        Key tokenKey = getTokenKey(username, tokenID);
+        Entity token = txn == null ? datastore.get(tokenKey) : txn.get(tokenKey);
         return token;
+    }
+
+    public void removeToken(String username, String tokenID) {
+        this.removeToken(null, username, tokenID);
+    }
+
+    public void removeToken(Transaction txn, String username, String tokenID) {
+        Key tokenKey = this.getTokenKey(username, tokenID);
+        if ( txn == null ) {
+            this.datastore.delete(tokenKey);
+        } else {
+            txn.delete(tokenKey);
+        }
     }
 }

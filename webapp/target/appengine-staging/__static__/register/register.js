@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var password = document.getElementById('password').value;
         var confirmation = document.getElementById('confirmation').value;
 
-        if (password != confirmation) {
+        if (password !== confirmation) {
             alert('Password and Confirmation password do not match. Please try again.');
             return;
         }
@@ -44,6 +44,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     const preview = document.querySelector("img");
                     jsonData[key] = preview.src;
                 }
+            } else if ( key === 'firstName' ) {
+                jsonData['name'] = value;
+            } else if ( key === 'lastName' ) {
+                jsonData['name'] = jsonData['name'] + " " + value;
             } else {
                 jsonData[key] = value;
             }
