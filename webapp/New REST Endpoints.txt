@@ -1,18 +1,18 @@
 Communities:
-1. create community (done, review) -> /communities/community/create
+1. create community (done, review) -> /communities/create
 2. view communities (done, review) -> /communities
-3. view community (todo, review) -> /communities/community
-4. join community (todo, review) -> /communities/community/join
+3. view community (todo, review) -> /communities/$communityID
+4. join community (todo, review) -> /communities/join
 5. leave community (todo, review) -> /communities/community/leave
 6. list community members (todo, review) -> /communities/community/list/users
-7. edit community (todo, review) -> /communities/community/edit
+7. edit community (todo, review) -> /communities/edit
 8. request remove community (todo, review) -> /communities/community/remove/request
 9. remove community (todo, review) -> /communities/community/remove
 10. lock community (todo, review) -> /communities/community/lock
 
 Community Post:
-1. post to community (todo, review) -> /
-2. edit post (todo, review) -> /
+1. post to community (done, review) -> /communities/{communityID}/post
+2. edit post (todo, review) -> /communities/{communityID}/post/edit
 3. remove post (todo, review) -> /
 4. lock post (todo, review) -> /
 5. pin post (todo, review) -> /

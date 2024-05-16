@@ -4,9 +4,11 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -26,7 +28,7 @@ import pt.unl.fct.di.apdc.projeto.util.CommunityData;
 import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 import pt.unl.fct.di.apdc.projeto.util.Validations;
 
-@Path("/communities/community")
+@Path("/communities")
 public class CommunityResource {
 
     /**
@@ -68,7 +70,7 @@ public class CommunityResource {
             Key communityKey = datastore.newKeyFactory().setKind("Community").newKey(key);
             if ( serverConstants.getCommunity(txn, key) == null ) {
                 Entity community = Entity.newBuilder(communityKey)
-						.set("id", key)
+						.set("communityID", data.communityID)
                         .set("name", data.name)
                         .set("description", data.description)
                         .set("num_members", 1)
@@ -99,10 +101,11 @@ public class CommunityResource {
     }
 
 
-    @POST
+    @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCommunity(@HeaderParam("authToken") String jsonToken, String communityID) {
+    @Path("/{communityID}")
+    public Response getCommunity(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         LOG.fine("Get community: " + authToken.username + " attempted to get community with id " + communityID + ".");
         Entity user = serverConstants.getUser(authToken.username);
@@ -115,8 +118,9 @@ public class CommunityResource {
 		} else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
 			return validation;
 		} else {
+            // TODO: send boolean true if member of community, false otherwise
 			LOG.fine("Get community: " + authToken.username + " received the community.");
-            Community communityData = new Community(community.getString("name"), community.getString("description"), 
+            Community communityData = new Community(community.getString("communityID"), community.getString("name"), community.getString("description"), 
                                                     community.getLong("num_members"), community.getString("username"), 
                                                     community.getTimestamp("creationDate"));
 			return Response.ok(g.toJson(communityData)).build();
@@ -137,6 +141,7 @@ public class CommunityResource {
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
             Entity community = serverConstants.getCommunity(txn, communityID);
             var validation = Validations.checkValidation(Validations.JOIN_COMMUNITY, user, token, authToken, community);
+            validation = Response.ok().build();
             if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();

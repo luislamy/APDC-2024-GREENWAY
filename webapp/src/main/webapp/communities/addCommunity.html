@@ -21,7 +21,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('#addCommunity').onsubmit = () => {
-                const data = JSON.parse(localStorage.getItem("authToken")); 
+                const data = JSON.parse(localStorage.getItem("authToken"));
                 const name = document.getElementById("communityName").value;
                 const description = document.getElementById("description").value;
                 const bodyData = {

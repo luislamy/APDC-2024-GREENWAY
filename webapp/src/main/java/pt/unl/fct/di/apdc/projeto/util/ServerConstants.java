@@ -6,6 +6,9 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.PathElement;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Transaction;
 
 public class ServerConstants {
@@ -90,5 +93,33 @@ public class ServerConstants {
 
     public Entity getCommunity(Transaction txn, String key) {
         return txn == null ? datastore.get(getCommunityKey(key)) : txn.get(getCommunityKey(key));
+    }
+
+    public Key getPostKey(String communityID, String postID) {
+        return datastore.newKeyFactory()
+            .addAncestor(PathElement.of("Community", communityID))
+            .setKind("Post")
+            .newKey(postID);
+    }
+
+    public Entity getPost(String communityID, String postID) {
+        return getPost(null, communityID, postID);
+    }
+
+    public Entity getPost(Transaction txn, String communityID, String postID) {
+        return txn == null ? datastore.get(getPostKey(communityID, postID)) : txn.get(getPostKey(communityID, postID));
+    }
+
+    public QueryResults<Entity> getPostsFromCommunity(String communityID) {
+        return getPostsFromCommunity(null, communityID);
+    }
+    
+    public QueryResults<Entity> getPostsFromCommunity(Transaction txn, String communityID) {
+        Query<Entity> query = Query.newEntityQueryBuilder()
+            .setKind("Post")
+            .setFilter(PropertyFilter.hasAncestor(getCommunityKey(communityID)))
+            .build();
+        QueryResults<Entity> results = txn == null ? datastore.run(query) : txn.run(query);
+        return results;
     }
 }

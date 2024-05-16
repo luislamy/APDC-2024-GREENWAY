@@ -4,7 +4,7 @@ import com.google.cloud.Timestamp;
 
 public class Community {
     
-    public String name, description, creator;
+    public String name, description, creator, communityID;
 
     public long members;
 
@@ -12,7 +12,8 @@ public class Community {
 
     public Community() {}
 
-    public Community(String name, String description, long members, String creator, Timestamp creationDate) {
+    public Community(String communityID, String name, String description, long members, String creator, Timestamp creationDate) {
+        this.communityID = communityID;
         this.name = name;
         this.description = description;
         this.members = members;
