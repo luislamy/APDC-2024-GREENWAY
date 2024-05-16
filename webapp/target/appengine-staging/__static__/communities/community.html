@@ -12,5 +12,48 @@
         <div id="register" onclick="location.href='./register/register.html';" style="margin-right: 2rem; border-radius: 10px; padding: 0.7rem 2rem; color:white; align-self:center; text-align: center; background: black;">Register</div>
     </nav>
     <h1 style="margin-top: 90px;">Community Name</h1>
+    <div id="info"></div>
 </body>
+<script>
+    function getData() {
+            fetch(`https://apdc-grupo-7.oa.r.appspot.com/rest/communities/${localStorage.getItem("communityID")}`, {
+                method: "GET",
+                headers: {
+                    "Content-type": "application/json",
+                    "authToken": localStorage.getItem("authToken")
+                }
+            })
+            .then(async response => {
+                if (await response.ok) {
+                    const data = await response.json();
+                    const communitiesDiv = document.getElementById("info");
+                    
+                    const communityDiv =  document.createElement("div");
+                
+                    const div1 = document.createElement("div");
+                    div1.innerHTML = "Name: " + data["name"];
+                    communityDiv.appendChild(div1);
+
+                    const div2 = document.createElement("div");
+                    div2.innerHTML = "Description: " + data["description"];
+                    communityDiv.appendChild(div2);
+
+                    const div3 = document.createElement("div");
+                    div3.innerHTML = "Members: " + data["members"];
+                    communityDiv.appendChild(div3);
+
+                    communitiesDiv.append(communityDiv);
+                }
+                else {
+                    const message = await response.text();
+                    console.error("Failed to fetch data:", message);
+                }
+                localStorage.removeItem("communityID")
+            })
+            .catch(err => console.error("Error fetching data:", err));
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            getData();
+        });
+</script>
 </html>

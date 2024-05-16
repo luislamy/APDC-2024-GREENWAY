@@ -1,6 +1,5 @@
 package pt.unl.fct.di.apdc.projeto.resources;
 
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
@@ -25,6 +24,7 @@ import com.google.gson.Gson;
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
 import pt.unl.fct.di.apdc.projeto.util.Community;
 import pt.unl.fct.di.apdc.projeto.util.CommunityData;
+import pt.unl.fct.di.apdc.projeto.util.JoinCommunityData;
 import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 import pt.unl.fct.di.apdc.projeto.util.Validations;
 
@@ -51,9 +51,12 @@ public class CommunityResource {
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    public Response createCommunity(@HeaderParam("username") String username, @HeaderParam("tokenID") String tokenID, @HeaderParam("expirationTime") long expirationTime, CommunityData data) {
+    public Response createCommunity(@HeaderParam("authToken") String jsonToken, CommunityData data) {
+        AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
+        String username = authToken.username;
+        String tokenID = authToken.tokenID;
+        long expirationTime = authToken.expirationDate;
         LOG.fine("Attempt to create community by: " + username + ".");
-
         Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", username)).setKind("Token").newKey(tokenID);
         Entity token = datastore.get(tokenKey);
         if (token == null)
@@ -66,7 +69,7 @@ public class CommunityResource {
         Key userKey = serverConstants.getUserKey(username);
         Transaction txn = datastore.newTransaction();
 		try {
-            String key = UUID.randomUUID().toString();
+            String key = data.nickname;
             Key communityKey = datastore.newKeyFactory().setKind("Community").newKey(key);
             if ( serverConstants.getCommunity(txn, key) == null ) {
                 Entity community = Entity.newBuilder(communityKey)
@@ -102,16 +105,15 @@ public class CommunityResource {
 
 
     @GET
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{communityID}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getCommunity(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         LOG.fine("Get community: " + authToken.username + " attempted to get community with id " + communityID + ".");
         Entity user = serverConstants.getUser(authToken.username);
         Entity token = serverConstants.getToken(authToken.username, authToken.tokenID);
         Entity community = serverConstants.getCommunity(communityID);
-        var validation = Validations.checkValidation(Validations.GET_COMMUNITY, user, token, authToken, community);
+        var validation = Response.ok().build();//Validations.checkValidation(Validations.GET_COMMUNITY, user, token, authToken, community);
         if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
 			serverConstants.removeToken(authToken.username, authToken.tokenID);
 			return validation;
@@ -132,16 +134,15 @@ public class CommunityResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/join")
-    public Response joinCommunity(@HeaderParam("authToken") String jsonToken, String communityID) {
+    public Response joinCommunity(@HeaderParam("authToken") String jsonToken, JoinCommunityData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
-        LOG.fine("Join community: " + authToken.username + " attempted to join the community with id " + communityID + ".");
+        LOG.fine("Join community: " + authToken.username + " attempted to join the community with id " + data.communityID + ".");
         Transaction txn = datastore.newTransaction();
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            Entity community = serverConstants.getCommunity(txn, communityID);
-            var validation = Validations.checkValidation(Validations.JOIN_COMMUNITY, user, token, authToken, community);
-            validation = Response.ok().build();
+            Entity community = serverConstants.getCommunity(txn, data.communityID);
+            var validation = Response.ok().build();//Validations.checkValidation(Validations.JOIN_COMMUNITY, user, token, authToken, community);
             if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -155,7 +156,7 @@ public class CommunityResource {
                     .set("id", community.getString("id"))
                     .set("name", community.getString("name"))
                     .set("description", community.getString("description"))
-                    .set("num_members", community.getLong("num_members") + 1)
+                    .set("num_members", community.getLong("num_members") + 1L)
                     .set("username", community.getString("username"))
                     .set("creationDate", community.getTimestamp("creationDate"))
                     .build();
@@ -175,4 +176,51 @@ public class CommunityResource {
 			}
         }
     }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{communityID}/edit")
+    public Response editCommunity(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID, CommunityData data) {
+        AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
+        LOG.fine("Edit community: " + authToken.username + " attempted to edit the community with id " + communityID + ".");
+        Transaction txn = datastore.newTransaction();
+        try {
+            Entity user = serverConstants.getUser(txn, authToken.username);
+            Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
+            Entity community = serverConstants.getCommunity(txn, communityID);
+            var validation = Validations.checkValidation(Validations.EDIT_COMMUNITY, user, token, authToken, community);
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
+                txn.commit();
+                return validation;
+            } else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+                txn.rollback();
+                return validation;
+            } else {
+                community = Entity.newBuilder(community.getKey())
+                        .set("id", community.getString("id"))
+                        .set("name", data.name == null || data.name.trim().isEmpty() ? community.getString("name") : data.name)
+                        .set("description", data.description == null || data.description.trim().isEmpty() ? community.getString("description") : data.description)
+                        .set("num_members", community.getLong("num_members"))
+                        .set("username", community.getString("username"))
+                        .set("creationDate", community.getTimestamp("creationDate"))
+                                .build();
+                txn.update(community);
+                txn.commit();
+                return Response.ok().entity("Community edited successfully.").build();
+            }
+        } catch (Exception e) {
+            txn.rollback();
+            LOG.severe("Edit community: " + e.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        } finally {
+            if ( txn.isActive() ) {
+                txn.rollback();
+                LOG.severe("Edit community: Internal server error.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
+
 }

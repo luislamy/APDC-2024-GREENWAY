@@ -40,6 +40,10 @@
                         div1.innerHTML = "Name: " + data["name"];
                         communityDiv.appendChild(div1);
 
+                        const nickname = document.createElement("div");
+                        nickname.innerHTML = data["nickname"];
+                        communityDiv.appendChild(nickname);
+
                         const div2 = document.createElement("div");
                         div2.innerHTML = "Description: " + data["description"];
                         communityDiv.appendChild(div2);
@@ -47,6 +51,34 @@
                         const div3 = document.createElement("div");
                         div3.innerHTML = "Members: " + data["num_members"];
                         communityDiv.appendChild(div3);
+
+                        const button = document.createElement("button");
+                        button.innerHTML = "Join";
+                        communityDiv.appendChild(button);
+                        button.addEventListener('click', function () {
+                            fetch('https://apdc-grupo-7.oa.r.appspot.com/rest/communities/join', {
+                                method: "POST",
+                                headers: {
+                                    "Content-type": "application/json",
+                                    "authToken": localStorage.getItem("authToken")
+                                },
+                                body: JSON.stringify({
+                                    "communityID": data["nickname"]
+                                }) 
+                            })
+                            .then(
+                                async response => {
+                                    if (await response.ok) {
+                                        localStorage.setItem("communityID", data["nickname"]); // community nickname
+                                        window.location.href = "community.html"
+                                    } else {
+                                        const message = await response.text();
+                                        alert("Failed to fetch data:", message);
+                                    }
+                                }
+                            )   
+                            .catch(err => console.error("Error fetching data:", err))
+                        })
                         communitiesDiv.append(communityDiv);
                         }
                     }

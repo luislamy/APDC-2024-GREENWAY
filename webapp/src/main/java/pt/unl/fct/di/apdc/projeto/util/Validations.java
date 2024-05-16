@@ -22,7 +22,7 @@ public class Validations {
     CHANGE_USER_STATE = 7, REMOVE_USER = 8, SEARCH_USER = 9, 
     USER_PROFILE = 10, SEND_MESSAGE = 11, RECEIVE_MESSAGES = 12, 
     LOAD_CONVERSATION = 13, CREATE_COMMUNITY = 14, GET_COMMUNITIES = 15, 
-    GET_COMMUNITY = 16, JOIN_COMMUNITY = 17, ADD_POST = 18;
+    GET_COMMUNITY = 16, JOIN_COMMUNITY = 17, EDIT_COMMUNITY = 18, ADD_POST = 19;
 
 
     public static <T> Response checkValidation(int operation, Entity user, T data) {
