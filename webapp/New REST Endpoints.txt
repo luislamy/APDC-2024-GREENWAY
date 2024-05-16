@@ -1,44 +1,45 @@
 Communities:
-1. create community (done, review) -> /communities/create
-2. view communities (done, review) -> /communities
-3. view community (todo, review) -> /communities/$communityID
-4. join community (todo, review) -> /communities/join
-5. leave community (todo, review) -> /communities/community/leave
-6. list community members (todo, review) -> /communities/community/list/users
-7. edit community (todo, review) -> /communities/edit
-8. request remove community (todo, review) -> /communities/community/remove/request
-9. remove community (todo, review) -> /communities/community/remove
-10. lock community (todo, review) -> /communities/community/lock
+1. create community (done, valToDo, review) -> /communities/create
+2. view communities (done, valToDo, review) -> /communities
+3. view community (done, valToDo, review) -> /communities/$communityID
+4. join community (todo, valToDo, review) -> /communities/join
+5. leave community (todo, valToDo, review) -> /communities/community/leave
+6. list community members (todo, valToDo, review) -> /communities/community/list/users
+7. edit community (done, valToDo, review) -> /communities/edit
+8. request remove community (todo, valToDo, review) -> /communities/community/remove/request
+9. remove community (todo, valToDo, review) -> /communities/community/remove
+10. lock community (todo, valToDo, review) -> /communities/community/lock
 
 Community Post:
-1. post to community (done, review) -> /communities/{communityID}/post
-2. edit post (todo, review) -> /communities/{communityID}/post/edit
-3. remove post (todo, review) -> /
-4. lock post (todo, review) -> /
-5. pin post (todo, review) -> /
-6. like/dislike post (todo, review) -> /
-7. share post (todo, review) -> /
+1. post to community (done, valToDo, review) -> /communities/{communityID}/post
+2. edit post (done, valToDo, review) -> /communities/{communityID}/post/edit
+3. remove post (done, valToDo, review) -> /communities/{communityID}/post/remove
+4. lock post (done, valToDo, review) -> /communities/{communityID}/post/lock
+5. pin post (done, valToDo, review) -> /communities/{communityID}/post/pin
+6. like post (done, valToDo, review) -> /communities/{communityID}/post/like
+7. dislike post (done, valToDo, review) -> /communities/{communityID}/post/dislike
+8. ??share post (todo, valToDo, review) -> /
 
 Post Comment:
-1. comment on post (todo, review) -> /
-2. edit comment (todo, review) -> /
-3. remove comment (todo, review) -> /
-4. like/dislike comment (todo, review) -> /
-5. respond to comment (todo, review) -> /
-6. pin comment (todo, review) -> /
+1. comment on post (done, valToDo, review) -> /communities/{communityID}/{postID}/comment
+2. edit comment (done, valToDo, review) -> /communities/{communityID}/{postID}/comment/edit
+3. remove comment (done, valToDo, review) -> /communities/{communityID}/{postID}/comment/remove
+4. like comment (done, valToDo, review) -> /communities/{communityID}/{postID}/comment/like
+5. dislike comment (done, valToDo, review) -> /communities/{communityID}/{postID}/comment/dislike
+6. pin comment (done, valToDo, review) -> /communities/{communityID}/{postID}/comment/pin
 
 Community member actions:
-1. message community member (todo, review) -> /
-2. go to user profile (todo, review) -> /
+1. message community member (todo, valToDo, review) -> /
+2. go to user profile (todo, valToDo, review) -> /
 
 Community manager actions (general community managers and above roles have permission for these):
-1. ban user from community (todo, review) -> /
-2. kick user for some time (todo, review) -> /
-3. warn user (todo, review) -> /
-4. check user appeals (todo, review) -> /
-5. respond to user appeal (todo, review) -> /
+1. ban user from community (todo, valToDo, review) -> /
+2. kick user for some time (todo, valToDo, review) -> /
+3. warn user (todo, valToDo, review) -> /
+4. check user appeals (todo, valToDo, review) -> /
+5. respond to user appeal (todo, valToDo, review) -> /
 
 Community manager actions (GC and above roles have permission to do these):
-1. warn community manager (todo, review) -> /
-2. ban manager from community (todo, review) -> /
-3. change community manager (todo, review) -> /
+1. warn community manager (todo, valToDo, review) -> /
+2. ban manager from community (todo, valToDo, review) -> /
+3. change community manager (todo, valToDo, review) -> /

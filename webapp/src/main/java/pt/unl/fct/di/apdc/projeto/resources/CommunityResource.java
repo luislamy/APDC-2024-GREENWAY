@@ -69,7 +69,7 @@ public class CommunityResource {
         Key userKey = serverConstants.getUserKey(username);
         Transaction txn = datastore.newTransaction();
 		try {
-            String key = data.nickname;
+            String key = data.communityID;
             Key communityKey = datastore.newKeyFactory().setKind("Community").newKey(key);
             if ( serverConstants.getCommunity(txn, key) == null ) {
                 Entity community = Entity.newBuilder(communityKey)
@@ -113,7 +113,8 @@ public class CommunityResource {
         Entity user = serverConstants.getUser(authToken.username);
         Entity token = serverConstants.getToken(authToken.username, authToken.tokenID);
         Entity community = serverConstants.getCommunity(communityID);
-        var validation = Response.ok().build();//Validations.checkValidation(Validations.GET_COMMUNITY, user, token, authToken, community);
+        var validation = Validations.checkValidation(Validations.GET_COMMUNITY, user, token, authToken, community);
+        validation = Response.ok().build();
         if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
 			serverConstants.removeToken(authToken.username, authToken.tokenID);
 			return validation;
@@ -142,7 +143,11 @@ public class CommunityResource {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
             Entity community = serverConstants.getCommunity(txn, data.communityID);
-            var validation = Response.ok().build();//Validations.checkValidation(Validations.JOIN_COMMUNITY, user, token, authToken, community);
+            Key memberKey = serverConstants.getCommunityMemberKey(data.communityID, authToken.username);
+            Entity member = serverConstants.getCommunityMember(txn, data.communityID, authToken.username);
+            var validation = Validations.checkValidation(Validations.JOIN_COMMUNITY, user, token, authToken, community);
+            //TODO: make validations
+            validation = Response.ok().build();
             if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -151,16 +156,21 @@ public class CommunityResource {
                 txn.rollback();
 				return validation;
 			} else {
-                // TODO: create relation between user and community
+                member = Entity.newBuilder(memberKey)
+                    .set("communityID", data.communityID)
+                    .set("username", authToken.username)
+                    .set("joinDate", Timestamp.now())
+                    .set("isManager", false)
+                    .build();
                 community = Entity.newBuilder(community.getKey())
-                    .set("id", community.getString("id"))
+                    .set("communityID", community.getString("communityID"))
                     .set("name", community.getString("name"))
                     .set("description", community.getString("description"))
                     .set("num_members", community.getLong("num_members") + 1L)
                     .set("username", community.getString("username"))
                     .set("creationDate", community.getTimestamp("creationDate"))
                     .build();
-                txn.put(community);
+                txn.put(community, member);
                 txn.commit();
                 return Response.ok().entity("Community joined successfully.").build();
             }
@@ -199,7 +209,7 @@ public class CommunityResource {
                 return validation;
             } else {
                 community = Entity.newBuilder(community.getKey())
-                        .set("id", community.getString("id"))
+                        .set("communityID", community.getString("communityID"))
                         .set("name", data.name == null || data.name.trim().isEmpty() ? community.getString("name") : data.name)
                         .set("description", data.description == null || data.description.trim().isEmpty() ? community.getString("description") : data.description)
                         .set("num_members", community.getLong("num_members"))

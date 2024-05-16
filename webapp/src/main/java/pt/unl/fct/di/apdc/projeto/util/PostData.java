@@ -22,9 +22,19 @@ public class PostData {
 
     public long comments;
 
+    public boolean isLocked;
+
+    public boolean isPinned;
+
+    public Timestamp pinDate;
+
+    public boolean isLiked;
+
+    public boolean isDisliked;
+
     public PostData() {}
 
-    public PostData(String postID, String title, String postBody, String username, Timestamp postDate, Timestamp lastEdit, long likes, long dislikes, long comments) {
+    public PostData(String postID, String title, String postBody, String username, Timestamp postDate, Timestamp lastEdit, long likes, long dislikes, long comments, boolean isLocked, boolean isPinned, Timestamp pinDate, boolean isLiked, boolean isDisliked) {
         this.postID = postID;
         this.title = title;
         this.postBody = postBody;
@@ -34,5 +44,10 @@ public class PostData {
         this.likes = likes;
         this.dislikes = dislikes;
         this.comments = comments;
+        this.isLocked = isLocked;
+        this.isPinned = isPinned;
+        this.pinDate = pinDate;
+        this.isLiked = isLiked;
+        this.isDisliked = isDisliked;
     }
 }

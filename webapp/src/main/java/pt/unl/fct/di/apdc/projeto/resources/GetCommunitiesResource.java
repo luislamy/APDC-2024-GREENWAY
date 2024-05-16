@@ -70,10 +70,10 @@ public class GetCommunitiesResource {
         tokens.forEachRemaining(communityLog -> {
             Map<String, Object> m = new HashMap<>();
             String name = communityLog.getString("name");
-            String nickname = communityLog.getString("id");
+            String communityID = communityLog.getString("communityID");
             String description = communityLog.getString("description");
             Long members = communityLog.getLong("num_members");
-            m.put("name", name); m.put("nickname", nickname); m.put("description", description); m.put("num_members", members);
+            m.put("name", name); m.put("communityID", communityID); m.put("description", description); m.put("num_members", members);
             list.add(g.toJson(m));
 		});
         return Response.ok(g.toJson(list)).status(Status.ACCEPTED).build();

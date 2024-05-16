@@ -22,7 +22,13 @@ public class Validations {
     CHANGE_USER_STATE = 7, REMOVE_USER = 8, SEARCH_USER = 9, 
     USER_PROFILE = 10, SEND_MESSAGE = 11, RECEIVE_MESSAGES = 12, 
     LOAD_CONVERSATION = 13, CREATE_COMMUNITY = 14, GET_COMMUNITIES = 15, 
-    GET_COMMUNITY = 16, JOIN_COMMUNITY = 17, EDIT_COMMUNITY = 18, ADD_POST = 19;
+    GET_COMMUNITY = 16, JOIN_COMMUNITY = 17, EDIT_COMMUNITY = 18;
+
+    public static int ADD_POST = 301, GET_POST = 302, EDIT_POST = 303, REMOVE_POST = 304, 
+    LOCK_POST = 305, PIN_POST = 306, LIKE_POST = 307;
+
+    public static int ADD_COMMENT = 311, EDIT_COMMENT = 312, REMOVE_COMMENT = 313,
+    LIKE_COMMENT = 314, DISLIKE_COMMENT = 315, PIN_COMMENT = 316;
 
 
     public static <T> Response checkValidation(int operation, Entity user, T data) {
@@ -39,12 +45,7 @@ public class Validations {
         return checkValidation(operation, user, null, token, authToken, data);
     }
 
-    public static <T> Response checkValidation(int operation, Entity user, Entity token, Entity community, AuthToken authToken, T data) {
-        return checkValidation(operation, user, null, community, token, authToken, data);
-    }
-
-
-    public static <T> Response checkValidation(int operation, Entity admin, Entity user, Entity community, Entity token, AuthToken authToken, T data) {
+    public static <T> Response checkValidation(int operation, Entity admin, Entity user, Entity token, AuthToken authToken, T data) {
         if ( operation == LOGIN )
             return checkLoginValidation(admin, (LoginData) data);
         else if ( operation == GET_TOKEN )
@@ -450,6 +451,104 @@ public class Validations {
         }
         return validateToken(operation, sender, token, authToken);
     }
+
+
+    public static Response checkAddPostValidation(Entity user, Entity community, Entity member, Entity token,
+            AuthToken authToken, PostData data) {
+        // TODO: make validation
+        return Response.ok().build();
+    }
+
+    public static Response checkGetPostValidation(Entity user, Entity community, Entity member, Entity post, Entity token, AuthToken authToken) {
+        // TODO: make validation
+        return Response.ok().build();
+    }
+
+
+    public static Response checkEditPostValidation(Entity user, Entity community, Entity post, Entity member, Entity token,
+            AuthToken authToken, PostData data) {
+        // TODO: make validation
+        return Response.ok().build();
+    }
+
+
+    public static Response checkRemovePostValidation(Entity user, Entity community, Entity post, Entity member,
+            Entity token, AuthToken authToken) {
+        // TODO: make validation
+        return Response.ok().build();
+    }
+
+
+    public static Response checkLockPostValidation(Entity user, Entity community, Entity post, Entity member,
+            Entity token, AuthToken authToken, PostData data) {
+        // TODO: make validation
+        return Response.ok().build();
+    }
+
+    public static Response checkPinPostValidation(Entity user, Entity community, Entity post, Entity member,
+            Entity token, AuthToken authToken, PostData data) {
+        // TODO: make validation
+        return Response.ok().build();
+    }
+
+
+    public static Response checkLikePostValidation(Entity user, Entity community, Entity post, Entity member,
+            Entity likeRelation, Entity token, AuthToken authToken, PostData data) {
+        // TODO: make validation
+        return Response.ok().build();
+    }
+
+
+    public static Response checkDislikePostValidation(Entity user, Entity community, Entity post, Entity member,
+            Entity dislikeRelation, Entity token, AuthToken authToken, PostData data) {
+        // TODO: make validation
+        return Response.ok().build();
+    }
+
+
+    public static Response checkAddCommentValidation(Entity user, Entity community, Entity post, Entity parentComment,
+            Entity member, Entity token, AuthToken authToken, CommentData data) {
+        // TODO: make validation
+        return Response.ok().build();
+    }
+
+
+    public static Response checkEditCommentValidation(Entity user, Entity community, Entity post, Entity comment,
+            Entity member, Entity token, AuthToken authToken, CommentData data) {
+        // TODO: make validation
+        return Response.ok().build();
+    }
+
+
+    public static Response checkRemoveCommentValidation(Entity user, Entity community, Entity post, Entity comment,
+            Entity member, Entity token, AuthToken authToken, CommentData data) {
+        // TODO: make validation
+        return Response.ok().build();
+    }
+
+
+    public static Response checkLikeCommentValidation(Entity user, Entity community, Entity post, Entity comment,
+            Entity member, Entity likeRelation, Entity token, AuthToken authToken, CommentData data) {
+        // TODO: make validation
+        return Response.ok().build();
+    }
+
+
+    public static Response checkDislikeCommentValidation(Entity user, Entity community, Entity post, Entity comment,
+            Entity member, Entity dislikeRelation, Entity token, AuthToken authToken, CommentData data) {
+        // TODO: make validation
+        return Response.ok().build();
+    }
+
+
+    public static Response checkPinCommentValidation(Entity user, Entity community, Entity post, Entity comment,
+            Entity member, Entity token, AuthToken authToken, CommentData data) {
+        // TODO: make validation
+        return Response.ok().build();
+    }
+
+    /*******************************Private methods**********************************************************************/
+
 
     private static Response validateUser(String operation, Entity user, String username) {
         if ( user == null ) {
