@@ -69,7 +69,7 @@ public class CommunityResource {
         Key userKey = serverConstants.getUserKey(username);
         Transaction txn = datastore.newTransaction();
 		try {
-            String key = data.nickname;
+            String key = data.communityID;
             Key communityKey = datastore.newKeyFactory().setKind("Community").newKey(key);
             if ( serverConstants.getCommunity(txn, key) == null ) {
                 Entity community = Entity.newBuilder(communityKey)
