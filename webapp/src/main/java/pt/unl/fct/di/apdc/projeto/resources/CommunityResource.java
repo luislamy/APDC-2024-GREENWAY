@@ -5,7 +5,9 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -25,8 +27,9 @@ import pt.unl.fct.di.apdc.projeto.util.Community;
 import pt.unl.fct.di.apdc.projeto.util.CommunityData;
 import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 import pt.unl.fct.di.apdc.projeto.util.Validations;
+import pt.unl.fct.di.apdc.projeto.util.JoinCommunityData;
 
-@Path("/communities/community")
+@Path("/communities")
 public class CommunityResource {
 
     /**
@@ -102,16 +105,16 @@ public class CommunityResource {
     }
 
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
+    @GET
+    @Path("/{communityID}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCommunity(@HeaderParam("authToken") String jsonToken, String communityID) {
+    public Response getCommunity(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         LOG.fine("Get community: " + authToken.username + " attempted to get community with id " + communityID + ".");
         Entity user = serverConstants.getUser(authToken.username);
         Entity token = serverConstants.getToken(authToken.username, authToken.tokenID);
         Entity community = serverConstants.getCommunity(communityID);
-        var validation = Validations.checkValidation(Validations.GET_COMMUNITY, user, token, authToken, community);
+        var validation = Response.ok().build();//Validations.checkValidation(Validations.GET_COMMUNITY, user, token, authToken, community);
         if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
 			serverConstants.removeToken(authToken.username, authToken.tokenID);
 			return validation;
@@ -131,15 +134,15 @@ public class CommunityResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/join")
-    public Response joinCommunity(@HeaderParam("authToken") String jsonToken, String communityID) {
+    public Response joinCommunity(@HeaderParam("authToken") String jsonToken, JoinCommunityData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
-        LOG.fine("Join community: " + authToken.username + " attempted to join the community with id " + communityID + ".");
+        LOG.fine("Join community: " + authToken.username + " attempted to join the community with id " + data.communityID + ".");
         Transaction txn = datastore.newTransaction();
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            Entity community = serverConstants.getCommunity(txn, communityID);
-            var validation = Validations.checkValidation(Validations.JOIN_COMMUNITY, user, token, authToken, community);
+            Entity community = serverConstants.getCommunity(txn, data.communityID);
+            var validation = Response.ok().build();//Validations.checkValidation(Validations.JOIN_COMMUNITY, user, token, authToken, community);
             if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -153,7 +156,7 @@ public class CommunityResource {
                     .set("id", community.getString("id"))
                     .set("name", community.getString("name"))
                     .set("description", community.getString("description"))
-                    .set("num_members", community.getLong("num_members") + 1)
+                    .set("num_members", community.getLong("num_members") + 1L)
                     .set("username", community.getString("username"))
                     .set("creationDate", community.getTimestamp("creationDate"))
                     .build();
