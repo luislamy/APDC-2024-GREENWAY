@@ -19,5 +19,6 @@ pt\unl\fct\di\apdc\projeto\util\MessageClass.class
 pt\unl\fct\di\apdc\projeto\util\RegisterData.class
 pt\unl\fct\di\apdc\projeto\resources\LogoutResource.class
 pt\unl\fct\di\apdc\projeto\util\AuthToken.class
+pt\unl\fct\di\apdc\projeto\util\Community.class
 pt\unl\fct\di\apdc\projeto\util\UserQuery.class
 pt\unl\fct\di\apdc\projeto\resources\AdminUserInitializer.class
