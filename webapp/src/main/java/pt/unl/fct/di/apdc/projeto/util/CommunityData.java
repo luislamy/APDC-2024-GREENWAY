@@ -11,5 +11,4 @@ public class CommunityData {
         this.name = name;
         this.description = description;
     }
-
 }

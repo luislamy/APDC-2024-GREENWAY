@@ -17,7 +17,6 @@ import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
@@ -45,7 +44,8 @@ public class CommunityResource {
     /** The converter to JSON */
     private final Gson g = new Gson();
 
-    public CommunityResource() {}
+    public CommunityResource() {
+    }
 
     @POST
     @Path("/create")
@@ -53,83 +53,85 @@ public class CommunityResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response createCommunity(@HeaderParam("authToken") String jsonToken, CommunityData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
-        String username = authToken.username;
-        String tokenID = authToken.tokenID;
-        long expirationTime = authToken.expirationDate;
-        LOG.fine("Attempt to create community by: " + username + ".");
-        Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", username)).setKind("Token").newKey(tokenID);
-        Entity token = datastore.get(tokenKey);
-        if (token == null)
-            return Response.status(Status.BAD_REQUEST).entity("User is not logged in.").build();
-        else if (expirationTime < System.currentTimeMillis()) {
-            datastore.delete(tokenKey);
-            return Response.status(Status.BAD_REQUEST).entity("User is not logged in because the token expired.").build();
-        }
-    
-        Key userKey = serverConstants.getUserKey(username);
+        LOG.fine("Attempt to create community by: " + authToken.username + ".");
         Transaction txn = datastore.newTransaction();
-		try {
-            String key = data.communityID;
-            Key communityKey = datastore.newKeyFactory().setKind("Community").newKey(key);
-            if ( serverConstants.getCommunity(txn, key) == null ) {
-                Entity community = Entity.newBuilder(communityKey)
-						.set("communityID", data.communityID)
-                        .set("name", data.name)
-                        .set("description", data.description)
-                        .set("num_members", 1)
-                        .set("username", username)
-                        .set("creationDate", Timestamp.now())
-                        .build();
-                txn.add(community);
-				txn.commit();
-				LOG.fine("Create community: " + data.name + " was registered in the database.");
-				return Response.ok().build();
+        try {
+            Entity user = serverConstants.getUser(txn, authToken.username);
+            Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
+            var validation = Validations.checkCreateCommunityValidation(user, token, authToken);
+            if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
+                serverConstants.removeToken(authToken.username, authToken.tokenID);
+                return validation;
+            } else if (validation.getStatus() != Status.OK.getStatusCode()) {
+                return validation;
             } else {
+                String communityID = data.communityID;
+                if (serverConstants.getCommunity(txn, communityID) == null) {
+                    Entity community = Entity.newBuilder(serverConstants.getCommunityKey(communityID))
+                            .set("communityID", data.communityID)
+                            .set("name", data.name)
+                            .set("description", data.description)
+                            .set("num_members", 1)
+                            .set("username", authToken.username)
+                            .set("creationDate", Timestamp.now())
+                            .build();
+                    Entity member = Entity
+                            .newBuilder(serverConstants.getCommunityMemberKey(communityID, authToken.username))
+                            .set("communityID", data.communityID)
+                            .set("username", authToken.username)
+                            .set("joinDate", Timestamp.now())
+                            .set("isManager", true)
+                            .build();
+                    txn.add(community, member);
+                    txn.commit();
+                    LOG.fine("Create community: " + data.name + " was registered in the database.");
+                    return Response.ok().build();
+                } else {
+                    txn.rollback();
+                    LOG.fine("Create community: duplicate username.");
+                    return Response.status(Status.CONFLICT).entity("Community already exists.").build();
+                }
+            }
+        } catch (Exception e) {
+            txn.rollback();
+            LOG.severe("Create community: " + e.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        } finally {
+            if (txn.isActive()) {
                 txn.rollback();
-				LOG.fine("Create community: duplicate username.");
-				return Response.status(Status.CONFLICT).entity("Community already exists.").build();
-			}
-        } catch  ( Exception e ) {
-			txn.rollback();
-			LOG.severe("Create community: " + e.getMessage());
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		} finally {
-			if (txn.isActive()) {
-				txn.rollback();
                 LOG.severe("Create community: Internal server error.");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-			}
-		}
+            }
+        }
 
     }
-
 
     @GET
     @Path("/{communityID}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCommunity(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID) {
+    public Response getCommunity(@HeaderParam("authToken") String jsonToken,
+            @PathParam("communityID") String communityID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         LOG.fine("Get community: " + authToken.username + " attempted to get community with id " + communityID + ".");
         Entity user = serverConstants.getUser(authToken.username);
-        Entity token = serverConstants.getToken(authToken.username, authToken.tokenID);
         Entity community = serverConstants.getCommunity(communityID);
-        var validation = Validations.checkValidation(Validations.GET_COMMUNITY, user, token, authToken, community);
-        validation = Response.ok().build();
-        if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
-			serverConstants.removeToken(authToken.username, authToken.tokenID);
-			return validation;
-		} else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
-			return validation;
-		} else {
+        Entity token = serverConstants.getToken(authToken.username, authToken.tokenID);
+        var validation = Validations.checkGetCommunityValidation(user, community, token, authToken, communityID);
+        if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
+            serverConstants.removeToken(authToken.username, authToken.tokenID);
+            return validation;
+        } else if (validation.getStatus() != Status.OK.getStatusCode()) {
+            return validation;
+        } else {
             // TODO: send boolean true if member of community, false otherwise
-			LOG.fine("Get community: " + authToken.username + " received the community.");
-            Community communityData = new Community(community.getString("communityID"), community.getString("name"), community.getString("description"), 
-                                                    community.getLong("num_members"), community.getString("username"), 
-                                                    community.getTimestamp("creationDate"));
-			return Response.ok(g.toJson(communityData)).build();
-		}
+            LOG.fine("Get community: " + authToken.username + " received the community.");
+            Community communityData = new Community(community.getString("communityID"), community.getString("name"),
+                    community.getString("description"),
+                    community.getLong("num_members"), community.getString("username"),
+                    community.getTimestamp("creationDate"));
+            return Response.ok(g.toJson(communityData)).build();
+        }
     }
-
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -137,53 +139,52 @@ public class CommunityResource {
     @Path("/join")
     public Response joinCommunity(@HeaderParam("authToken") String jsonToken, JoinCommunityData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
-        LOG.fine("Join community: " + authToken.username + " attempted to join the community with id " + data.communityID + ".");
+        LOG.fine("Join community: " + authToken.username + " attempted to join the community with id "
+                + data.communityID + ".");
         Transaction txn = datastore.newTransaction();
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
-            Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
             Entity community = serverConstants.getCommunity(txn, data.communityID);
-            Key memberKey = serverConstants.getCommunityMemberKey(data.communityID, authToken.username);
             Entity member = serverConstants.getCommunityMember(txn, data.communityID, authToken.username);
-            var validation = Validations.checkValidation(Validations.JOIN_COMMUNITY, user, token, authToken, community);
-            //TODO: make validations
-            validation = Response.ok().build();
-            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+            Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
+            var validation = Validations.checkJoinCommunityValidation(user, community, member, token, authToken, data.communityID);
+            if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
                 return validation;
-            } else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+            } else if (validation.getStatus() != Status.OK.getStatusCode()) {
                 txn.rollback();
-				return validation;
-			} else {
+                return validation;
+            } else {
+                Key memberKey = serverConstants.getCommunityMemberKey(data.communityID, authToken.username);
                 member = Entity.newBuilder(memberKey)
-                    .set("communityID", data.communityID)
-                    .set("username", authToken.username)
-                    .set("joinDate", Timestamp.now())
-                    .set("isManager", false)
-                    .build();
+                        .set("communityID", data.communityID)
+                        .set("username", authToken.username)
+                        .set("joinDate", Timestamp.now())
+                        .set("isManager", false)
+                        .build();
                 community = Entity.newBuilder(community.getKey())
-                    .set("communityID", community.getString("communityID"))
-                    .set("name", community.getString("name"))
-                    .set("description", community.getString("description"))
-                    .set("num_members", community.getLong("num_members") + 1L)
-                    .set("username", community.getString("username"))
-                    .set("creationDate", community.getTimestamp("creationDate"))
-                    .build();
+                        .set("communityID", community.getString("communityID"))
+                        .set("name", community.getString("name"))
+                        .set("description", community.getString("description"))
+                        .set("num_members", community.getLong("num_members") + 1L)
+                        .set("username", community.getString("username"))
+                        .set("creationDate", community.getTimestamp("creationDate"))
+                        .build();
                 txn.put(community, member);
                 txn.commit();
                 return Response.ok().entity("Community joined successfully.").build();
             }
         } catch (Exception e) {
-			txn.rollback();
-			LOG.severe("Login: " + e.getMessage());
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+            txn.rollback();
+            LOG.severe("Login: " + e.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         } finally {
-			if ( txn.isActive() ) {
-				txn.rollback();
+            if (txn.isActive()) {
+                txn.rollback();
                 LOG.severe("Login: Internal server error.");
-				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-			}
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
         }
     }
 
@@ -191,31 +192,39 @@ public class CommunityResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{communityID}/edit")
-    public Response editCommunity(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID, CommunityData data) {
+    public Response editCommunity(@HeaderParam("authToken") String jsonToken,
+            @PathParam("communityID") String communityID, CommunityData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
-        LOG.fine("Edit community: " + authToken.username + " attempted to edit the community with id " + communityID + ".");
+        LOG.fine("Edit community: " + authToken.username + " attempted to edit the community with id " + communityID
+                + ".");
         Transaction txn = datastore.newTransaction();
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
-            Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
             Entity community = serverConstants.getCommunity(txn, communityID);
-            var validation = Validations.checkValidation(Validations.EDIT_COMMUNITY, user, token, authToken, community);
-            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+            Entity member = serverConstants.getCommunityMember(txn, data.communityID, authToken.username);
+            Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
+            var validation = Validations.checkEditCommunityValidation(user, community, member, token, authToken, data);
+            if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
                 return validation;
-            } else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+            } else if (validation.getStatus() != Status.OK.getStatusCode()) {
                 txn.rollback();
                 return validation;
             } else {
                 community = Entity.newBuilder(community.getKey())
                         .set("communityID", community.getString("communityID"))
-                        .set("name", data.name == null || data.name.trim().isEmpty() ? community.getString("name") : data.name)
-                        .set("description", data.description == null || data.description.trim().isEmpty() ? community.getString("description") : data.description)
+                        .set("name",
+                                data.name == null || data.name.trim().isEmpty() ? community.getString("name")
+                                        : data.name)
+                        .set("description",
+                                data.description == null || data.description.trim().isEmpty()
+                                        ? community.getString("description")
+                                        : data.description)
                         .set("num_members", community.getLong("num_members"))
                         .set("username", community.getString("username"))
                         .set("creationDate", community.getTimestamp("creationDate"))
-                                .build();
+                        .build();
                 txn.update(community);
                 txn.commit();
                 return Response.ok().entity("Community edited successfully.").build();
@@ -225,7 +234,7 @@ public class CommunityResource {
             LOG.severe("Edit community: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         } finally {
-            if ( txn.isActive() ) {
+            if (txn.isActive()) {
                 txn.rollback();
                 LOG.severe("Edit community: Internal server error.");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();

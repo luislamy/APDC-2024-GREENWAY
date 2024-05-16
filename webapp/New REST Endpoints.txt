@@ -1,11 +1,11 @@
 Communities:
-1. create community (done, valToDo, review) -> /communities/create
-2. view communities (done, valToDo, review) -> /communities
-3. view community (done, valToDo, review) -> /communities/$communityID
-4. join community (todo, valToDo, review) -> /communities/join
+1. create community (done, done, review) -> /communities/create
+2. view communities (done, done, review) -> /communities
+3. view community (done, done, review) -> /communities/$communityID
+4. join community (done, done, review) -> /communities/join
 5. leave community (todo, valToDo, review) -> /communities/community/leave
 6. list community members (todo, valToDo, review) -> /communities/community/list/users
-7. edit community (done, valToDo, review) -> /communities/edit
+7. edit community (done, done, review) -> /communities/edit
 8. request remove community (todo, valToDo, review) -> /communities/community/remove/request
 9. remove community (todo, valToDo, review) -> /communities/community/remove
 10. lock community (todo, valToDo, review) -> /communities/community/lock

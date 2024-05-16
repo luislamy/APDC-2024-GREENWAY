@@ -4,12 +4,9 @@ public class JoinCommunityData {
 
     public String communityID;
 
-    public JoinCommunityData() {
-
-    }
+    public JoinCommunityData() {}
 
     public JoinCommunityData(String communityID) {
         this.communityID = communityID;
-    }
-    
+    }   
 }
