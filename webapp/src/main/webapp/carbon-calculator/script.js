@@ -1,7 +1,7 @@
 const questionnaireData = [
     {
         section: "food",
-        logo: "../assets/fast-food.png", // Add section logo URL
+        logo: "../assets/fast-food.png", 
         title: "Food",
         questions: [
             {

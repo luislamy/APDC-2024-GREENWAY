@@ -18,3 +18,13 @@ body {
 h1 {
     text-align: center;
 }
+
+nav {
+	width: 50%;
+	margin: auto;
+}
+
+.btn {
+	text-align: center
+	
+}
