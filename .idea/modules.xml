@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/APDC-2024-GREENWAY.iml" filepath="$PROJECT_DIR$/.idea/APDC-2024-GREENWAY.iml" />
+      <module fileurl="file://$PROJECT_DIR$/webapp/projeto.iml" filepath="$PROJECT_DIR$/webapp/projeto.iml" />
+    </modules>
+  </component>
+</project>

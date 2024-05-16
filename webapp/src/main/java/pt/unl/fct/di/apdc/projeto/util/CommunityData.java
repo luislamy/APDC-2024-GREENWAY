@@ -2,7 +2,7 @@ package pt.unl.fct.di.apdc.projeto.util;
 
 public class CommunityData {
 
-    public String name, nickname, description;
+    public String name, nickname, description; //nickname é o ID
 
     public CommunityData() {}
 

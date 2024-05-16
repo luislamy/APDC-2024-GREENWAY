@@ -3,6 +3,7 @@ package pt.unl.fct.di.apdc.projeto.resources;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
@@ -176,4 +177,51 @@ public class CommunityResource {
 			}
         }
     }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{communityID}/edit")
+    public Response editCommunity(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID, CommunityData data) {
+        AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
+        LOG.fine("Edit community: " + authToken.username + " attempted to edit the community with id " + communityID + ".");
+        Transaction txn = datastore.newTransaction();
+        try {
+            Entity user = serverConstants.getUser(txn, authToken.username);
+            Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
+            Entity community = serverConstants.getCommunity(txn, communityID);
+            var validation = Validations.checkValidation(Validations.EDIT_COMMUNITY, user, token, authToken, community);
+            if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
+                serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
+                txn.commit();
+                return validation;
+            } else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
+                txn.rollback();
+                return validation;
+            } else {
+                community = Entity.newBuilder(community.getKey())
+                        .set("id", community.getString("id"))
+                        .set("name", data.name == null || data.name.trim().isEmpty() ? community.getString("name") : data.name)
+                        .set("description", data.description == null || data.description.trim().isEmpty() ? community.getString("description") : data.description)
+                        .set("num_members", community.getLong("num_members"))
+                        .set("username", community.getString("username"))
+                        .set("creationDate", community.getTimestamp("creationDate"))
+                                .build();
+                txn.update(community);
+                txn.commit();
+                return Response.ok().entity("Community edited successfully.").build();
+            }
+        } catch (Exception e) {
+            txn.rollback();
+            LOG.severe("Edit community: " + e.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        } finally {
+            if ( txn.isActive() ) {
+                txn.rollback();
+                LOG.severe("Edit community: Internal server error.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
+
 }
