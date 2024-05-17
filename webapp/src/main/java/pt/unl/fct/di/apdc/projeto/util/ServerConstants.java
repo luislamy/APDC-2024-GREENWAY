@@ -1,16 +1,8 @@
 package pt.unl.fct.di.apdc.projeto.util;
 
-import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.PathElement;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
-import com.google.cloud.datastore.Transaction;
 
 public class ServerConstants {
 
@@ -132,6 +124,19 @@ public class ServerConstants {
             .setKind("Comment")
             .setFilter(PropertyFilter.hasAncestor(postKey))
             .build();
+        return txn == null ? datastore.run(query) : txn.run(query);
+    }
+
+    public QueryResults<Entity> getMembersFromCommunity(String communityID) {
+        return getMembersFromCommunity(null, communityID);
+    }
+
+    public QueryResults<Entity> getMembersFromCommunity(Transaction txn, String communityID) {
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind("Member")
+                .setFilter(PropertyFilter.hasAncestor(getCommunityKey(communityID)))
+                .setOrderBy(StructuredQuery.OrderBy.desc("isManager"))
+                .build();
         return txn == null ? datastore.run(query) : txn.run(query);
     }
 
