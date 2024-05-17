@@ -51,7 +51,7 @@ public class GetCommunitiesResource {
         LOG.fine("Get Communities: attempt to get the communities by user " + authToken.username + ".");
         Entity user = serverConstants.getUser(authToken.username);
         Entity token = serverConstants.getToken(authToken.username, authToken.tokenID);
-        var validation = Validations.checkGetCommunitiesValidation(user, token, authToken);
+        var validation = Validations.checkCommunitiesValidations(Validations.GET_COMMUNITIES, user, token, authToken);
         if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
 			serverConstants.removeToken(authToken.username, authToken.tokenID);
 			return validation;

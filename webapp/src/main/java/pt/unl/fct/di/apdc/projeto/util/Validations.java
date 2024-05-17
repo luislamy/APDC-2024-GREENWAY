@@ -549,6 +549,37 @@ public class Validations {
 
     /*********************** Communities Validations ***********************/
 
+    public static Response checkCommunitiesValidations(int operation, Entity user, Entity token, AuthToken authToken) {
+        return checkCommunitiesValidations(operation, user, null, token, authToken);
+    }
+
+    public static Response checkCommunitiesValidations(int operation, Entity user, Entity token, AuthToken authToken, CommunityData data) {
+        return checkCommunitiesValidations(operation, user, null, null, token, authToken, data);
+    }
+
+    public static Response checkCommunitiesValidations(int operation, Entity user, Entity community, Entity token, AuthToken authToken) {
+        return checkCommunitiesValidations(operation, user, community, null, token, authToken, null);
+    }
+
+    public static Response checkCommunitiesValidations(int operation, Entity user, Entity community, Entity member, Entity token, AuthToken authToken) {
+        return checkCommunitiesValidations(operation, user, community, member, token, authToken, null);
+    }
+
+    public static Response checkCommunitiesValidations(int operation, Entity user, Entity community, Entity member, Entity token, AuthToken authToken, CommunityData data) {
+        return checkCommunitiesValidations(operation, user, community, member, null, token, authToken, data);
+    }
+
+    public static <T> Response checkCommunitiesValidations(int operation, Entity user, Entity community, Entity member, Entity adminMember, Entity token, AuthToken authToken, T data) {
+        switch(operation) {
+            case GET_COMMUNITIES: return checkGetCommunitiesValidation(user, token, authToken);
+            case CREATE_COMMUNITY: return checkCreateCommunityValidation(user, token, authToken, (CommunityData) data);
+            case GET_COMMUNITY: return checkGetCommunityValidation(user, community, token, authToken);
+            case JOIN_COMMUNITY: return checkJoinCommunityValidation(user, community, member, token, authToken);
+            case EDIT_COMMUNITY: return checkEditCommunityValidation(user, community, adminMember, token, authToken, (CommunityData) data);
+            default: return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Internal server error during communities validations.").build();
+        }
+    }
+
     public static Response checkGetCommunitiesValidation(Entity user, Entity token, AuthToken authToken) {
         String operation = "Get communities: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
@@ -557,7 +588,7 @@ public class Validations {
         return validateToken(operation, user, token, authToken);
     }
 
-    public static Response checkCreateCommunityValidation(Entity user, Entity token, AuthToken authToken) {
+    public static Response checkCreateCommunityValidation(Entity user, Entity token, AuthToken authToken, CommunityData data) {
         String operation = "Create community: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -569,6 +600,11 @@ public class Validations {
             var userRole = user.getString("role");
             if (userRole.equals(ServerConstants.USER) || userRole.equals(ServerConstants.EP)
                     || userRole.equals(ServerConstants.GC)) {
+                var code = data.isValid();
+                if ( code < 1 ) {
+                    LOG.fine(operation + data.getInvalidReason(code) + "provided.");
+                    return Response.status(Status.BAD_REQUEST).entity(operation + data.getInvalidReason(code) + "provided.").build();
+                }
                 return Response.ok().build();
             } else {
                 return Response.status(Status.FORBIDDEN).entity("User is not allowed to create communities").build();
@@ -576,8 +612,8 @@ public class Validations {
         }
     }
 
-    public static Response checkGetCommunityValidation(Entity user, Entity community, Entity token, AuthToken authToken,
-            String communityID) {
+    public static Response checkGetCommunityValidation(Entity user, Entity community, Entity token,
+            AuthToken authToken) {
         String operation = "Get community: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -586,8 +622,8 @@ public class Validations {
         if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
             return tokenValidation;
         } else {
-            if (validateCommunity(operation, community, communityID).getStatus() != Status.OK.getStatusCode()) {
-                return Response.status(Status.NOT_FOUND).entity(communityID + " is not a registered community.")
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
             return Response.ok().build();
@@ -595,22 +631,23 @@ public class Validations {
     }
 
     public static Response checkJoinCommunityValidation(Entity user, Entity community, Entity member, Entity token,
-            AuthToken authToken, String communityID) {
+            AuthToken authToken) {
         String operation = "Join community: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
-        }
-        if (validateCommunity(operation, community, communityID).getStatus() != Status.OK.getStatusCode()) {
-            return Response.status(Status.NOT_FOUND).entity(communityID + " is not a registered community.").build();
-        }
-        if (member != null) {
-            LOG.info(operation + "user is already a member of the community.");
-            return Response.status(Status.CONFLICT).entity("User is already a member of the community.").build();
         }
         var tokenValidation = validateToken(operation, user, token, authToken);
         if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
             return tokenValidation;
         } else {
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
+                        .build();
+            }
+            if (member != null) {
+                LOG.info(operation + "user is already a member of the community.");
+                return Response.status(Status.CONFLICT).entity("User is already a member of the community.").build();
+            }
             var userRole = user.getString("role");
             if (userRole.equals(ServerConstants.USER) || userRole.equals(ServerConstants.EP)
                     || userRole.equals(ServerConstants.GC)) {
@@ -631,8 +668,8 @@ public class Validations {
         if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
             return tokenValidation;
         } else {
-            if (validateCommunity(operation, community, data.communityID).getStatus() != Status.OK.getStatusCode()) {
-                return Response.status(Status.NOT_FOUND).entity(data.communityID + " is not a registered community.")
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
             if (member == null) {
@@ -662,53 +699,52 @@ public class Validations {
     /************************ Posts Validations ********************/
 
     public static Response checkPostsValidations(int operation, Entity user, Entity community, Entity member,
-            Entity token, AuthToken authToken, PostData data, String communityID) {
-        return checkPostsValidations(operation, user, community, null, member, token, authToken, data, communityID);
+            Entity token, AuthToken authToken, PostData data) {
+        return checkPostsValidations(operation, user, community, null, member, token, authToken, data);
     }
 
     public static Response checkPostsValidations(int operation, Entity user, Entity community, Entity post,
-            Entity member, Entity token, AuthToken authToken, String communityID) {
-        return checkPostsValidations(operation, user, community, post, member, token, authToken, null, communityID);
+            Entity member, Entity token, AuthToken authToken) {
+        return checkPostsValidations(operation, user, community, post, member, token, authToken, null);
     }
 
     public static Response checkPostsValidations(int operation, Entity user, Entity community, Entity post,
-            Entity member, Entity token, AuthToken authToken, PostData data, String communityID) {
-        return checkPostsValidations(operation, user, community, post, member, null, token, authToken, data,
-                communityID);
+            Entity member, Entity token, AuthToken authToken, PostData data) {
+        return checkPostsValidations(operation, user, community, post, member, null, token, authToken, data);
     }
 
     public static Response checkPostsValidations(int operation, Entity user, Entity community, Entity post,
             Entity member, Entity relation, Entity token, AuthToken authToken,
-            PostData data, String communityID) {
+            PostData data) {
         switch (operation) {
             case ADD_POST:
-                return checkAddPostValidation(user, community, member, token, authToken, data, communityID);
+                return checkAddPostValidation(user, community, member, token, authToken, data);
             case GET_POST:
-                return checkGetPostValidation(user, community, post, member, token, authToken, communityID);
+                return checkGetPostValidation(user, community, post, member, token, authToken);
             case EDIT_POST:
-                return checkEditPostValidation(user, community, post, member, token, authToken, data, communityID);
+                return checkEditPostValidation(user, community, post, member, token, authToken, data);
             case REMOVE_POST:
-                return checkRemovePostValidation(user, community, post, member, token, authToken, communityID);
+                return checkRemovePostValidation(user, community, post, member, token, authToken);
             case LOCK_POST:
-                return checkLockPostValidation(user, community, post, member, token, authToken, data, communityID);
+                return checkLockPostValidation(user, community, post, member, token, authToken, data);
             case PIN_POST:
-                return checkPinPostValidation(user, community, post, member, token, authToken, data, communityID);
+                return checkPinPostValidation(user, community, post, member, token, authToken, data);
             case LIKE_POST:
                 return checkLikePostValidation(user, community, post, member, relation, token,
-                        authToken, data,
-                        communityID);
+                        authToken, data);
             case DISLIKE_POST:
                 return checkDislikePostValidation(user, community, post, member, relation, token,
-                        authToken, data,
-                        communityID);
+                        authToken, data);
             default:
                 return Response.status(Status.INTERNAL_SERVER_ERROR)
                         .entity("Internal server error during posts validations.").build();
         }
     }
 
+    //TODO: make these operations not work for locked communities
+
     private static Response checkAddPostValidation(Entity user, Entity community, Entity member, Entity token,
-            AuthToken authToken, PostData data, String communityID) {
+            AuthToken authToken, PostData data) {
         String operation = "Add post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -717,8 +753,8 @@ public class Validations {
         if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
             return tokenValidation;
         } else {
-            if (validateCommunity(operation, community, communityID).getStatus() != Status.OK.getStatusCode()) {
-                return Response.status(Status.NOT_FOUND).entity(communityID + " is not a registered community.")
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
             if (member == null && !authToken.role.equals(ServerConstants.GC)) {
@@ -730,9 +766,11 @@ public class Validations {
                 LOG.info(operation + "user may not post to communities.");
                 return Response.status(Status.FORBIDDEN).entity("User may not post to communities.").build();
             }
-            if (!data.isValidToPost()) {
-                LOG.fine(operation + "title or postBody are blank.");
-                return Response.status(Status.BAD_REQUEST).entity("Please give the post a title and body.").build();
+            var code = data.isValidToPost(authToken.username);
+            if (code < 1) {
+                LOG.fine(operation + "invalid data to post, " + data.getInvalidReason(code) + ".");
+                return Response.status(Status.BAD_REQUEST)
+                        .entity("Invalid data to post, " + data.getInvalidReason(code) + ".").build();
             }
             if ((data.isLocked || data.isPinned)
                     && !authToken.role.equals(ServerConstants.GC)
@@ -745,7 +783,7 @@ public class Validations {
     }
 
     private static Response checkGetPostValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity token, AuthToken authToken, String communityID) {
+            Entity token, AuthToken authToken) {
         String operation = "Get post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -754,8 +792,8 @@ public class Validations {
         if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
             return tokenValidation;
         } else {
-            if (validateCommunity(operation, community, communityID).getStatus() != Status.OK.getStatusCode()) {
-                return Response.status(Status.NOT_FOUND).entity(communityID + " is not a registered community.")
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
@@ -779,7 +817,7 @@ public class Validations {
     }
 
     private static Response checkEditPostValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity token, AuthToken authToken, PostData data, String communityID) {
+            Entity token, AuthToken authToken, PostData data) {
         String operation = "Edit post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -788,8 +826,8 @@ public class Validations {
         if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
             return tokenValidation;
         } else {
-            if (validateCommunity(operation, community, communityID).getStatus() != Status.OK.getStatusCode()) {
-                return Response.status(Status.NOT_FOUND).entity(communityID + " is not a registered community.")
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
@@ -801,30 +839,32 @@ public class Validations {
                     LOG.info(operation + "user is not a member of the community.");
                     return Response.status(Status.FORBIDDEN).entity("User is not a member of the community.").build();
                 }
-                if (!post.getString("username").equals(user.getString("username")) && !member.getBoolean("isManager")) {
+                if (!post.getString("username").equals(user.getString("username"))) {
                     LOG.info(operation + "user is not authorized to edit this post.");
                     return Response.status(Status.FORBIDDEN).entity("User is not authorized to edit this post.")
                             .build();
                 }
-            } else if (authToken.role.equals(ServerConstants.GC)) {
-            } else if (authToken.role.equals(ServerConstants.GBO) || authToken.role.equals(ServerConstants.GA)
+            } else if (authToken.role.equals(ServerConstants.GC) || authToken.role.equals(ServerConstants.GBO)
+                    || authToken.role.equals(ServerConstants.GA)
                     || authToken.role.equals(ServerConstants.GS) || authToken.role.equals(ServerConstants.SU)) {
-                LOG.info(operation + "GA/GBO users are not authorized to edit posts.");
+                LOG.info(operation + "GC/GBO/GA/GS/SU users are not authorized to edit posts.");
                 return Response.status(Status.FORBIDDEN).entity("User is not authorized to edit posts.").build();
             } else {
                 LOG.severe(operation + "Unrecognized role.");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
             }
-            if (!data.isValidToPost()) {
-                LOG.fine(operation + "title or postBody are blank.");
-                return Response.status(Status.BAD_REQUEST).entity("Please give the post a title and body.").build();
+            var code = data.isValidToPost(authToken.username);
+            if (code < 1) {
+                LOG.fine(operation + "invalid data to post, " + data.getInvalidReason(code) + ".");
+                return Response.status(Status.BAD_REQUEST)
+                        .entity("Invalid data to post, " + data.getInvalidReason(code) + ".").build();
             }
             return Response.ok().build();
         }
     }
 
     private static Response checkRemovePostValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity token, AuthToken authToken, String communityID) {
+            Entity token, AuthToken authToken) {
         String operation = "Remove post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -833,8 +873,8 @@ public class Validations {
         if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
             return tokenValidation;
         } else {
-            if (validateCommunity(operation, community, communityID).getStatus() != Status.OK.getStatusCode()) {
-                return Response.status(Status.NOT_FOUND).entity(communityID + " is not a registered community.")
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
@@ -865,7 +905,7 @@ public class Validations {
     }
 
     private static Response checkLockPostValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity token, AuthToken authToken, PostData data, String communityID) {
+            Entity token, AuthToken authToken, PostData data) {
         String operation = "Lock post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -874,8 +914,8 @@ public class Validations {
         if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
             return tokenValidation;
         } else {
-            if (validateCommunity(operation, community, communityID).getStatus() != Status.OK.getStatusCode()) {
-                return Response.status(Status.NOT_FOUND).entity(communityID + " is not a registered community.")
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
@@ -907,7 +947,7 @@ public class Validations {
     }
 
     private static Response checkPinPostValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity token, AuthToken authToken, PostData data, String communityID) {
+            Entity token, AuthToken authToken, PostData data) {
         String operation = "Pin post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -916,8 +956,8 @@ public class Validations {
         if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
             return tokenValidation;
         } else {
-            if (validateCommunity(operation, community, communityID).getStatus() != Status.OK.getStatusCode()) {
-                return Response.status(Status.NOT_FOUND).entity(communityID + " is not a registered community.")
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
@@ -938,18 +978,25 @@ public class Validations {
             } else if (authToken.role.equals(ServerConstants.GBO) || authToken.role.equals(ServerConstants.GA)
                     || authToken.role.equals(ServerConstants.GS)
                     || authToken.role.equals(ServerConstants.SU)) {
-                LOG.info(operation + "GBO/GA/GS/SU users are not authorized to lock posts.");
-                return Response.status(Status.FORBIDDEN).entity("User is not authorized to lock posts.").build();
+                LOG.info(operation + "GBO/GA/GS/SU users are not authorized to pin posts.");
+                return Response.status(Status.FORBIDDEN).entity("User is not authorized to pin posts.").build();
             } else {
                 LOG.severe(operation + "Unrecognized role.");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+            if ( data.isPinned && post.getBoolean("isPinned") ) {
+                LOG.info(operation + "post is already pinned.");
+                return Response.status(Status.CONFLICT).entity("Post is already pinned.").build();
+            } else if ( !data.isPinned && !post.getBoolean("isPinned") ) {
+                LOG.info(operation + "post is not pinned.");
+                return Response.status(Status.CONFLICT).entity("Post is not pinned.").build();
             }
             return Response.ok().build();
         }
     }
 
     private static Response checkLikePostValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity likeRelation, Entity token, AuthToken authToken, PostData data, String communityID) {
+            Entity likeRelation, Entity token, AuthToken authToken, PostData data) {
         String operation = "Like post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -958,8 +1005,8 @@ public class Validations {
         if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
             return tokenValidation;
         } else {
-            if (validateCommunity(operation, community, communityID).getStatus() != Status.OK.getStatusCode()) {
-                return Response.status(Status.NOT_FOUND).entity(communityID + " is not a registered community.")
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
@@ -993,7 +1040,7 @@ public class Validations {
     }
 
     private static Response checkDislikePostValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity dislikeRelation, Entity token, AuthToken authToken, PostData data, String communityID) {
+            Entity dislikeRelation, Entity token, AuthToken authToken, PostData data) {
         String operation = "Dislike post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1002,8 +1049,8 @@ public class Validations {
         if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
             return tokenValidation;
         } else {
-            if (validateCommunity(operation, community, communityID).getStatus() != Status.OK.getStatusCode()) {
-                return Response.status(Status.NOT_FOUND).entity(communityID + " is not a registered community.")
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
@@ -1038,40 +1085,320 @@ public class Validations {
 
     /************** Comments Validations *******************/
 
+    public static Response checkCommentsValidations(int operation, Entity user, Entity community, Entity post,
+            Entity comment,
+            Entity member, Entity token, AuthToken authToken, CommentData data) {
+        return checkCommentsValidations(operation, user, community, post, comment, member, null, token, authToken,
+                data);
+    }
+
+    public static Response checkCommentsValidations(int operation, Entity user, Entity community, Entity post,
+            Entity comment, Entity member, Entity relation, Entity token, AuthToken authToken, CommentData data) {
+        switch (operation) {
+            case ADD_COMMENT:
+                return checkAddCommentValidation(user, community, post, comment, member, token, authToken, data);
+            case EDIT_COMMENT:
+                return checkEditCommentValidation(user, community, post, comment, member, token, authToken, data);
+            case REMOVE_COMMENT:
+                return checkRemoveCommentValidation(user, community, post, comment, member, token, authToken, data);
+            case LIKE_COMMENT:
+                return checkLikeCommentValidation(user, community, post, comment, member, relation, token, authToken,
+                        data);
+            case DISLIKE_COMMENT:
+                return checkDislikeCommentValidation(user, community, post, comment, member, relation, token, authToken,
+                        data);
+            case PIN_COMMENT:
+                return checkPinCommentValidation(user, community, post, comment, member, token, authToken, data);
+            default:
+                return Response.status(Status.INTERNAL_SERVER_ERROR)
+                        .entity("Internal server error during comments validations.").build();
+        }
+    }
+
+    //TODO: make these operations not work for locked posts/communities
+
     public static Response checkAddCommentValidation(Entity user, Entity community, Entity post, Entity parentComment,
             Entity member, Entity token, AuthToken authToken, CommentData data) {
-        // TODO: make validation
-        return Response.ok().build();
+        String operation = "Add comment: ";
+        if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
+            return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
+        }
+        var tokenValidation = validateToken(operation, user, token, authToken);
+        if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
+            return tokenValidation;
+        } else {
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
+                        .build();
+            }
+            if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
+                        .build();
+            }
+            if (data.parentID != null && !data.parentID.trim().isEmpty()
+                    && validateComment(operation, parentComment).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Parent comment is not registered.").build();
+            }
+            if (authToken.role.equals(ServerConstants.USER) || authToken.role.equals(ServerConstants.EP)) {
+                if (member == null) {
+                    LOG.info(operation + "user is not a member of the community.");
+                    return Response.status(Status.FORBIDDEN).entity("User is not a member of the community.").build();
+                }
+            } else if (authToken.role.equals(ServerConstants.GC)) {
+            } else if (authToken.role.equals(ServerConstants.GBO) || authToken.role.equals(ServerConstants.GA)
+                    || authToken.role.equals(ServerConstants.GS)
+                    || authToken.role.equals(ServerConstants.SU)) {
+                LOG.info(operation + "GBO/GA/GS/SU users are not authorized to add comments.");
+                return Response.status(Status.FORBIDDEN).entity("User is not authorized to add comments.").build();
+            } else {
+                LOG.severe(operation + "Unrecognized role.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+            var code = data.isValidToComment(authToken.username);
+            if (code < 1) {
+                LOG.fine(operation + "invalid data for commenting, " + data.getInvalidReason(code) + ".");
+                return Response.status(Status.BAD_REQUEST)
+                        .entity("Invalid data for commenting, " + data.getInvalidReason(code) + ".").build();
+            }
+            return Response.ok().build();
+        }
     }
 
     public static Response checkEditCommentValidation(Entity user, Entity community, Entity post, Entity comment,
             Entity member, Entity token, AuthToken authToken, CommentData data) {
-        // TODO: make validation
-        return Response.ok().build();
+        String operation = "Edit comment: ";
+        if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
+            return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
+        }
+        var tokenValidation = validateToken(operation, user, token, authToken);
+        if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
+            return tokenValidation;
+        } else {
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
+                        .build();
+            }
+            if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
+                        .build();
+            }
+            if (validateComment(operation, comment).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Comment is not registered.").build();
+            }
+            if (authToken.role.equals(ServerConstants.USER) || authToken.role.equals(ServerConstants.EP)) {
+                if (member == null) {
+                    LOG.info(operation + "user is not a member of the community.");
+                    return Response.status(Status.FORBIDDEN).entity("User is not a member of the community.").build();
+                }
+                if (!comment.getString("username").equals(user.getString("username"))) {
+                    LOG.info(operation + "user is not authorized to edit this comment.");
+                    return Response.status(Status.FORBIDDEN).entity("User is not authorized to edit this comment.")
+                            .build();
+                }
+            } else if (authToken.role.equals(ServerConstants.GC) || authToken.role.equals(ServerConstants.GBO)
+                    || authToken.role.equals(ServerConstants.GA) || authToken.role.equals(ServerConstants.GS)
+                    || authToken.role.equals(ServerConstants.SU)) {
+                LOG.info(operation + "GC/GBO/GA/GS/SU users are not authorized to edit comments.");
+                return Response.status(Status.FORBIDDEN).entity("User is not authorized to edit comments.").build();
+            } else {
+                LOG.severe(operation + "Unrecognized role.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+            return Response.ok().build();
+        }
     }
 
     public static Response checkRemoveCommentValidation(Entity user, Entity community, Entity post, Entity comment,
             Entity member, Entity token, AuthToken authToken, CommentData data) {
-        // TODO: make validation
-        return Response.ok().build();
+        String operation = "Remove comment: ";
+        if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
+            return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
+        }
+        var tokenValidation = validateToken(operation, user, token, authToken);
+        if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
+            return tokenValidation;
+        } else {
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
+                        .build();
+            }
+            if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
+                        .build();
+            }
+            if (validateComment(operation, comment).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Comment is not registered.").build();
+            }
+            if (authToken.role.equals(ServerConstants.USER) || authToken.role.equals(ServerConstants.EP)) {
+                if (member == null) {
+                    LOG.info(operation + "user is not a member of the community.");
+                    return Response.status(Status.FORBIDDEN).entity("User is not a member of the community.").build();
+                }
+                if (!comment.getString("username").equals(user.getString("username"))
+                        && !member.getBoolean("isManager")) {
+                    LOG.info(operation + "user is not authorized to remove this comment.");
+                    return Response.status(Status.FORBIDDEN).entity("User is not authorized to remove this comment.")
+                            .build();
+                }
+            } else if (authToken.role.equals(ServerConstants.GC)) {
+            } else if (authToken.role.equals(ServerConstants.GBO)
+                    || authToken.role.equals(ServerConstants.GA) || authToken.role.equals(ServerConstants.GS)
+                    || authToken.role.equals(ServerConstants.SU)) {
+                LOG.info(operation + "GBO/GA/GS/SU users are not authorized to remove comments.");
+                return Response.status(Status.FORBIDDEN).entity("User is not authorized to remove comments.").build();
+            } else {
+                LOG.severe(operation + "Unrecognized role.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+            return Response.ok().build();
+        }
     }
 
     public static Response checkLikeCommentValidation(Entity user, Entity community, Entity post, Entity comment,
             Entity member, Entity likeRelation, Entity token, AuthToken authToken, CommentData data) {
-        // TODO: make validation
-        return Response.ok().build();
+        String operation = "Like comment: ";
+        if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
+            return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
+        }
+        var tokenValidation = validateToken(operation, user, token, authToken);
+        if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
+            return tokenValidation;
+        } else {
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
+                        .build();
+            }
+            if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
+                        .build();
+            }
+            if (validateComment(operation, comment).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Comment is not registered.").build();
+            }
+            if (authToken.role.equals(ServerConstants.USER) || authToken.role.equals(ServerConstants.EP)) {
+                if (member == null) {
+                    LOG.info(operation + "user is not a member of the community.");
+                    return Response.status(Status.FORBIDDEN).entity("User is not a member of the community.").build();
+                }
+            } else if (authToken.role.equals(ServerConstants.GC)) {
+            } else if (authToken.role.equals(ServerConstants.GBO)
+                    || authToken.role.equals(ServerConstants.GA) || authToken.role.equals(ServerConstants.GS)
+                    || authToken.role.equals(ServerConstants.SU)) {
+                LOG.info(operation + "GBO/GA/GS/SU users are not authorized to like comments.");
+                return Response.status(Status.FORBIDDEN).entity("User is not authorized to like comments.").build();
+            } else {
+                LOG.severe(operation + "Unrecognized role.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+            if (data.isLiked && likeRelation != null) {
+                LOG.info(operation + "user already liked comment.");
+                return Response.status(Status.CONFLICT).entity("User already liked comment.").build();
+            } else if (!data.isLiked && likeRelation == null) {
+                LOG.info(operation + "user hasn't liked the comment.");
+                return Response.status(Status.CONFLICT).entity("User hasn't liked the comment.").build();
+            }
+            return Response.ok().build();
+        }
     }
 
     public static Response checkDislikeCommentValidation(Entity user, Entity community, Entity post, Entity comment,
             Entity member, Entity dislikeRelation, Entity token, AuthToken authToken, CommentData data) {
-        // TODO: make validation
-        return Response.ok().build();
+        String operation = "Dislike comment: ";
+        if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
+            return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
+        }
+        var tokenValidation = validateToken(operation, user, token, authToken);
+        if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
+            return tokenValidation;
+        } else {
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
+                        .build();
+            }
+            if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
+                        .build();
+            }
+            if (validateComment(operation, comment).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Comment is not registered.").build();
+            }
+            if (authToken.role.equals(ServerConstants.USER) || authToken.role.equals(ServerConstants.EP)) {
+                if (member == null) {
+                    LOG.info(operation + "user is not a member of the community.");
+                    return Response.status(Status.FORBIDDEN).entity("User is not a member of the community.").build();
+                }
+            } else if (authToken.role.equals(ServerConstants.GC)) {
+            } else if (authToken.role.equals(ServerConstants.GBO)
+                    || authToken.role.equals(ServerConstants.GA) || authToken.role.equals(ServerConstants.GS)
+                    || authToken.role.equals(ServerConstants.SU)) {
+                LOG.info(operation + "GBO/GA/GS/SU users are not authorized to dislike comments.");
+                return Response.status(Status.FORBIDDEN).entity("User is not authorized to dislike comments.").build();
+            } else {
+                LOG.severe(operation + "Unrecognized role.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+            if (data.isDisliked && dislikeRelation != null) {
+                LOG.info(operation + "user already disliked comment.");
+                return Response.status(Status.CONFLICT).entity("User already disliked comment.").build();
+            } else if (!data.isDisliked && dislikeRelation == null) {
+                LOG.info(operation + "user hasn't disliked the comment.");
+                return Response.status(Status.CONFLICT).entity("User hasn't disliked the comment.").build();
+            }
+            return Response.ok().build();
+        }
     }
 
     public static Response checkPinCommentValidation(Entity user, Entity community, Entity post, Entity comment,
             Entity member, Entity token, AuthToken authToken, CommentData data) {
-        // TODO: make validation
-        return Response.ok().build();
+        String operation = "Pin comment: ";
+        if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
+            return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
+        }
+        var tokenValidation = validateToken(operation, user, token, authToken);
+        if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
+            return tokenValidation;
+        } else {
+            if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
+                        .build();
+            }
+            if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
+                        .build();
+            }
+            if (validateComment(operation, comment).getStatus() != Status.OK.getStatusCode()) {
+                return Response.status(Status.NOT_FOUND).entity("Comment is not registered.").build();
+            }
+            if (authToken.role.equals(ServerConstants.USER) || authToken.role.equals(ServerConstants.EP)) {
+                if (member == null) {
+                    LOG.info(operation + "user is not a member of the community.");
+                    return Response.status(Status.FORBIDDEN).entity("User is not a member of the community.").build();
+                }
+                if (!post.getString("username").equals(authToken.username)
+                        && !member.getBoolean("isManager")) {
+                    LOG.info(operation + "user is not authorized to pin this comment.");
+                    return Response.status(Status.FORBIDDEN).entity("User is not authorized to pin this comment.")
+                            .build();
+                }
+            } else if (authToken.role.equals(ServerConstants.GC)) {
+            } else if (authToken.role.equals(ServerConstants.GBO)
+                    || authToken.role.equals(ServerConstants.GA) || authToken.role.equals(ServerConstants.GS)
+                    || authToken.role.equals(ServerConstants.SU)) {
+                LOG.info(operation + "GBO/GA/GS/SU users are not authorized to pin comments.");
+                return Response.status(Status.FORBIDDEN).entity("User is not authorized to pin comments.").build();
+            } else {
+                LOG.severe(operation + "Unrecognized role.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+            if ( data.isPinned && comment.getBoolean("isPinned") ) {
+                LOG.info(operation + "comment is already pinned.");
+                return Response.status(Status.CONFLICT).entity("Comment is already pinned.").build();
+            } else if ( !data.isPinned && !comment.getBoolean("isPinned") ) {
+                LOG.info(operation + "comment is not pinned.");
+                return Response.status(Status.CONFLICT).entity("Comment is not pinned.").build();
+            }
+            return Response.ok().build();
+        }
     }
 
     /**********************************************************************
@@ -1087,10 +1414,10 @@ public class Validations {
         }
     }
 
-    private static Response validateCommunity(String operation, Entity community, String communityID) {
+    private static Response validateCommunity(String operation, Entity community) {
         if (community == null) {
-            LOG.warning(operation + communityID + " is not a registered community.");
-            return Response.status(Status.NOT_FOUND).entity(communityID + " is not a registered community.").build();
+            LOG.warning(operation + " not a registered community.");
+            return Response.status(Status.NOT_FOUND).entity("Community is not registered.").build();
         } else {
             return Response.ok().build();
         }
@@ -1100,6 +1427,15 @@ public class Validations {
         if (post == null) {
             LOG.warning(operation + " is not a registered post.");
             return Response.status(Status.NOT_FOUND).entity("Post is not registered.").build();
+        } else {
+            return Response.ok().build();
+        }
+    }
+
+    private static Response validateComment(String operation, Entity comment) {
+        if (comment == null) {
+            LOG.warning(operation + " is not a registered comment.");
+            return Response.status(Status.NOT_FOUND).entity("Comment is not registered.").build();
         } else {
             return Response.ok().build();
         }

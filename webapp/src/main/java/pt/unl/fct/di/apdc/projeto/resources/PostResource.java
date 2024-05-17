@@ -60,7 +60,7 @@ public class PostResource {
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
             var validation = Validations.checkPostsValidations(Validations.ADD_POST, user, community, member, token,
-                    authToken, data, communityID);
+                    authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -117,7 +117,7 @@ public class PostResource {
             Entity post = serverConstants.getPost(communityID, postID);
             Entity token = serverConstants.getToken(authToken.username, authToken.tokenID);
             var validation = Validations.checkPostsValidations(Validations.GET_POST, user, community, post, member,
-                    token, authToken, communityID);
+                    token, authToken);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(authToken.username, authToken.tokenID);
                 return validation;
@@ -151,7 +151,7 @@ public class PostResource {
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
             var validation = Validations.checkPostsValidations(Validations.EDIT_POST, user, community, post, member,
-                    token, authToken, data, communityID);
+                    token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -208,7 +208,7 @@ public class PostResource {
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
             var validation = Validations.checkPostsValidations(Validations.REMOVE_POST, user, community, post, member,
-                    token, authToken, communityID);
+                    token, authToken);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -274,7 +274,7 @@ public class PostResource {
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
             var validation = Validations.checkPostsValidations(Validations.LOCK_POST, user, community, post, member,
-                    token, authToken, data, communityID);
+                    token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -335,7 +335,7 @@ public class PostResource {
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
             var validation = Validations.checkPostsValidations(Validations.PIN_POST, user, community, post, member,
-                    token, authToken, data, communityID);
+                    token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -396,7 +396,7 @@ public class PostResource {
             Key likeKey = serverConstants.getPostLikeKey(communityID, data.postID, authToken.username);
             Entity likeRelation = serverConstants.getPostLike(txn, communityID, data.postID, authToken.username);
             var validation = Validations.checkPostsValidations(Validations.LIKE_POST, user, community, post, member,
-                    likeRelation, token, authToken, data, communityID);
+                    likeRelation, token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -470,7 +470,7 @@ public class PostResource {
             Key dislikeKey = serverConstants.getPostDislikeKey(communityID, data.postID, authToken.username);
             Entity dislikeRelation = serverConstants.getPostDislike(txn, communityID, data.postID, authToken.username);
             var validation = Validations.checkPostsValidations(Validations.DISLIKE_POST, user, community, post, member,
-                    dislikeRelation, token, authToken, data, communityID);
+                    dislikeRelation, token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();

@@ -51,11 +51,22 @@ public class PostData {
         this.isDisliked = isDisliked;
     }
 
-    public boolean isValidToPost() {
+    public int isValidToPost(String username) {
         if ( title == null || title.trim().isEmpty() )
-            return false;
+            return -1;
         else if ( postBody == null || postBody.trim().isEmpty() )
-            return false;
-        return true;
+            return -2;
+        else if (!this.username.equals(username))
+            return -3;
+        return 1;
+    }
+
+    public String getInvalidReason(int code) {
+        switch(code) {
+            case -1: return "no title";
+            case -2: return "no post body";
+            case -3: return "different username";
+            default: return "internal error";
+        }
     }
 }

@@ -58,7 +58,7 @@ public class CommunityResource {
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkCreateCommunityValidation(user, token, authToken);
+            var validation = Validations.checkCommunitiesValidations(Validations.CREATE_COMMUNITY, user, token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(authToken.username, authToken.tokenID);
                 return validation;
@@ -116,7 +116,7 @@ public class CommunityResource {
         Entity user = serverConstants.getUser(authToken.username);
         Entity community = serverConstants.getCommunity(communityID);
         Entity token = serverConstants.getToken(authToken.username, authToken.tokenID);
-        var validation = Validations.checkGetCommunityValidation(user, community, token, authToken, communityID);
+        var validation = Validations.checkCommunitiesValidations(Validations.GET_COMMUNITY, user, community, token, authToken);
         if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
             serverConstants.removeToken(authToken.username, authToken.tokenID);
             return validation;
@@ -147,7 +147,7 @@ public class CommunityResource {
             Entity community = serverConstants.getCommunity(txn, data.communityID);
             Entity member = serverConstants.getCommunityMember(txn, data.communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkJoinCommunityValidation(user, community, member, token, authToken, data.communityID);
+            var validation = Validations.checkCommunitiesValidations(Validations.JOIN_COMMUNITY, user, community, member, token, authToken);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -203,7 +203,7 @@ public class CommunityResource {
             Entity community = serverConstants.getCommunity(txn, communityID);
             Entity member = serverConstants.getCommunityMember(txn, data.communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkEditCommunityValidation(user, community, member, token, authToken, data);
+            var validation = Validations.checkCommunitiesValidations(Validations.EDIT_COMMUNITY, user, community, member, token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
