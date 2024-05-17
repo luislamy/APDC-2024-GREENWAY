@@ -1,7 +1,9 @@
 --------------------------------------
-USER/EP/GBO/ - general
+USER/EP/GC - general
 create community
 join community
+--------------------------------------
+ALL User types
 view community
 view communities
 --------------------------------------

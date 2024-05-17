@@ -50,4 +50,12 @@ public class PostData {
         this.isLiked = isLiked;
         this.isDisliked = isDisliked;
     }
+
+    public boolean isValidToPost() {
+        if ( title == null || title.trim().isEmpty() )
+            return false;
+        else if ( postBody == null || postBody.trim().isEmpty() )
+            return false;
+        return true;
+    }
 }
