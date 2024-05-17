@@ -6,18 +6,18 @@ Communities:
 5. leave community (todo, valToDo, review) -> /communities/community/leave
 6. list community members (todo, valToDo, review) -> /communities/community/list/users
 7. edit community (done, done, review) -> /communities/edit
-8. request remove community (todo, valToDo, review) -> /communities/community/remove/request
-9. remove community (todo, valToDo, review) -> /communities/community/remove
-10. lock community (todo, valToDo, review) -> /communities/community/lock
+8. request remove community (done, valToDo, review) -> /communities/community/remove/request
+9. remove community (done, valToDo, review) -> /communities/community/remove
+10. lock community (done, valToDo, review) -> /communities/community/lock
 
 Community Post:
-1. post to community (done, valToDo, review) -> /communities/{communityID}/post
-2. edit post (done, valToDo, review) -> /communities/{communityID}/post/edit
-3. remove post (done, valToDo, review) -> /communities/{communityID}/post/remove
-4. lock post (done, valToDo, review) -> /communities/{communityID}/post/lock
-5. pin post (done, valToDo, review) -> /communities/{communityID}/post/pin
-6. like post (done, valToDo, review) -> /communities/{communityID}/post/like
-7. dislike post (done, valToDo, review) -> /communities/{communityID}/post/dislike
+1. post to community (done, done, review) -> /communities/{communityID}/post
+2. edit post (done, done, review) -> /communities/{communityID}/post/edit
+3. remove post (done, done, review) -> /communities/{communityID}/post/remove
+4. lock post (done, done, review) -> /communities/{communityID}/post/lock
+5. pin post (done, done, review) -> /communities/{communityID}/post/pin
+6. like post (done, done, review) -> /communities/{communityID}/post/like
+7. dislike post (done, done, review) -> /communities/{communityID}/post/dislike
 8. ??share post (todo, valToDo, review) -> /
 
 Post Comment:

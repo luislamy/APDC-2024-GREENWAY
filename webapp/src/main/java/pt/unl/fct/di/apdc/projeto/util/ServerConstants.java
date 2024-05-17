@@ -6,7 +6,7 @@ import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 
 public class ServerConstants {
 
-    public static final String USER = "USER", EP = "EP"/*, GC = "GC"*/, GBO = "GBO", GA = "GA", GS = "GS", SU = "SU";
+    public static final String USER = "USER", EP = "EP", GC = "GC", GBO = "GBO", GA = "GA", GS = "GS", SU = "SU";
 
 	public static final String ACTIVE = "ACTIVE", INACTIVE = "INACTIVE";
 
