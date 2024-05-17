@@ -58,6 +58,7 @@ public class GetCommunitiesResource {
 		} else if ( validation.getStatus() != Status.OK.getStatusCode() ) {
 			return validation;
 		} else {
+            //TODO: don't show locked communities.
             Query<Entity> query = Query.newEntityQueryBuilder().setKind("Community").build();
             QueryResults<Entity> tokens = datastore.run(query);
             List<String> list = new LinkedList<>();

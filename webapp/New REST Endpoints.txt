@@ -10,6 +10,7 @@ Communities:
 9. remove community (done, valToDo, review) -> /communities/community/remove
 10. lock community (done, valToDo, review) -> /communities/community/lock
 11. add/remove manager (done, valToDo, review) -> /communities/{communityID}/update/manager
+12. list posts (todo, valToDo, review) -> /
 
 Community Post:
 1. post to community (done, done, review) -> /communities/{communityID}/post
@@ -19,15 +20,16 @@ Community Post:
 5. pin post (done, done, review) -> /communities/{communityID}/post/pin
 6. like post (done, done, review) -> /communities/{communityID}/post/like
 7. dislike post (done, done, review) -> /communities/{communityID}/post/dislike
-8. ??share post (todo, valToDo, review) -> /
+8. get post(done, done, review) -> /communities/{communityID}/{postID}
+9. ??share post (todo, valToDo, review) -> /
 
 Post Comment:
-1. comment on post (done, valToDo, review) -> /communities/{communityID}/{postID}/comment
-2. edit comment (done, valToDo, review) -> /communities/{communityID}/{postID}/comment/edit
-3. remove comment (done, valToDo, review) -> /communities/{communityID}/{postID}/comment/remove
-4. like comment (done, valToDo, review) -> /communities/{communityID}/{postID}/comment/like
-5. dislike comment (done, valToDo, review) -> /communities/{communityID}/{postID}/comment/dislike
-6. pin comment (done, valToDo, review) -> /communities/{communityID}/{postID}/comment/pin
+1. comment on post (done, done, review) -> /communities/{communityID}/{postID}/comment
+2. edit comment (done, done, review) -> /communities/{communityID}/{postID}/comment/edit
+3. remove comment (done, done, review) -> /communities/{communityID}/{postID}/comment/remove
+4. like comment (done, done, review) -> /communities/{communityID}/{postID}/comment/like
+5. dislike comment (done, done, review) -> /communities/{communityID}/{postID}/comment/dislike
+6. pin comment (done, done, review) -> /communities/{communityID}/{postID}/comment/pin
 
 Community member actions:
 1. message community member (todo, valToDo, review) -> /

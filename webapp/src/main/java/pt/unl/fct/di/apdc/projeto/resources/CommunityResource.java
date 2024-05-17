@@ -16,10 +16,20 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.google.cloud.Timestamp;
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
-import pt.unl.fct.di.apdc.projeto.util.*;
+import pt.unl.fct.di.apdc.projeto.util.AuthToken;
+import pt.unl.fct.di.apdc.projeto.util.Community;
+import pt.unl.fct.di.apdc.projeto.util.CommunityData;
+import pt.unl.fct.di.apdc.projeto.util.JoinCommunityData;
+import pt.unl.fct.di.apdc.projeto.util.RemoveCommunityRequest;
+import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
+import pt.unl.fct.di.apdc.projeto.util.User;
+import pt.unl.fct.di.apdc.projeto.util.Validations;
 
 @Path("/communities")
 public class CommunityResource {
@@ -246,6 +256,7 @@ public class CommunityResource {
         LOG.fine("Remove community request: " + authToken.username + " attempted to edit the community with id " + data.communityID + ".");
         Transaction txn = datastore.newTransaction();
         try {
+            //TODO: add validations
             String key = data.communityID;
             Key removeCommunityRequestKey = datastore.newKeyFactory().setKind("RemoveCommunityRequest").newKey(key);
             if (serverConstants.getCommunity(txn, key) == null) {
@@ -291,7 +302,8 @@ public class CommunityResource {
             Entity community = serverConstants.getCommunity(txn, data.communityID);
             Entity member = serverConstants.getCommunityMember(txn, data.communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkEditCommunityValidation(user, community, member, token, authToken, data);
+            var validation = Validations.checkCommunitiesValidations(Validations.LOCK_COMMUNITY, user, community, member, token, authToken, data);
+            //TODO: check validations params
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -339,7 +351,8 @@ public class CommunityResource {
             Entity community = serverConstants.getCommunity(txn, data.communityID);
             Entity member = serverConstants.getCommunityMember(txn, data.communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkEditCommunityValidation(user, community, member, token, authToken, data);
+            var validation = Validations.checkCommunitiesValidations(Validations.REMOVE_COMMUNITY, user, community, member, token, authToken, data);
+            //TODO: check validations params
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
