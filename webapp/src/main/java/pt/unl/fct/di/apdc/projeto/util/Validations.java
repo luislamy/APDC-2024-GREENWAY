@@ -848,6 +848,9 @@ public class Validations {
             } else if ( member != adminMember && member.getBoolean("isManager") && adminMember.getBoolean("isManager") && !authToken.role.equals(ServerConstants.GC) ) {
                 LOG.info(operation + "community managers can only be banned from the community by a GC user.");
                 return Response.status(Status.FORBIDDEN).entity("Community managers can only be banned from the community by a GC user.").build();
+            } else if ( member == adminMember && !member.getBoolean("isManager") && !authToken.role.equals(ServerConstants.GC) && community.getBoolean("isLocked") ) {
+                LOG.info(operation + "community is locked.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked.").build();
             }
             return Response.ok().build();
             /*if ( member != null && !member.getBoolean("isManager") ) {
