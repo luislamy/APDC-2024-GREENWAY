@@ -120,8 +120,9 @@ public class CommunityResource {
         LOG.fine("Get community: " + authToken.username + " attempted to get community with id " + communityID + ".");
         Entity user = serverConstants.getUser(authToken.username);
         Entity community = serverConstants.getCommunity(communityID);
+        Entity member = serverConstants.getCommunityMember(communityID, authToken.username);
         Entity token = serverConstants.getToken(authToken.username, authToken.tokenID);
-        var validation = Validations.checkCommunitiesValidations(Validations.GET_COMMUNITY, user, community, token, authToken);
+        var validation = Validations.checkCommunitiesValidations(Validations.GET_COMMUNITY, user, community, member, token, authToken);
         if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
             serverConstants.removeToken(authToken.username, authToken.tokenID);
             return validation;
@@ -253,27 +254,39 @@ public class CommunityResource {
     @Path("/remove/request")
     public Response requestRemoveCommunity(@HeaderParam("authToken") String jsonToken, RemoveCommunityRequest data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
-        LOG.fine("Remove community request: " + authToken.username + " attempted to edit the community with id " + data.communityID + ".");
+        LOG.fine("Remove community request: " + authToken.username + " attempted to request the community with id " + data.communityID + " be removed.");
         Transaction txn = datastore.newTransaction();
         try {
-            //TODO: add validations
-            String key = data.communityID;
-            Key removeCommunityRequestKey = datastore.newKeyFactory().setKind("RemoveCommunityRequest").newKey(key);
-            if (serverConstants.getCommunity(txn, key) == null) {
-                Entity removeCommunityRequest = Entity.newBuilder(removeCommunityRequestKey)
-                        .set("id", key)
-                        .set("userID", data.userID)
-                        .set("message", data.message)
-                        .set("creationDate", Timestamp.now())
-                        .build();
-                txn.add(removeCommunityRequest);
+            Entity user = serverConstants.getUser(txn, authToken.username);
+            Entity community = serverConstants.getCommunity(txn, data.communityID);
+            Entity member = serverConstants.getCommunityMember(txn, data.communityID, authToken.username);
+            Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
+            var validation = Validations.checkCommunitiesValidations(Validations.REQUEST_REMOVE_COMMUNITY, user, community, member, token, authToken, data);
+            if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
+                serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
-                LOG.fine("Remove community request: " + data.communityID + "'s remove request was registered in the database.");
-                return Response.ok().build();
-            } else {
+                return validation;
+            } else if (validation.getStatus() != Status.OK.getStatusCode()) {
                 txn.rollback();
-                LOG.fine("Remove community request: request already exists.");
-                return Response.status(Status.CONFLICT).entity("Request already exists.").build();
+                return validation;
+            } else {
+                Key removeCommunityRequestKey = datastore.newKeyFactory().setKind("RemoveCommunityRequest").newKey(data.communityID);
+                if (serverConstants.getCommunity(txn, data.communityID) == null) { // TODO: this gets the community, not the remove request, make new method
+                    Entity removeCommunityRequest = Entity.newBuilder(removeCommunityRequestKey)
+                            .set("communityID", data.communityID)
+                            .set("userID", data.userID)
+                            .set("message", data.message)
+                            .set("creationDate", Timestamp.now())
+                            .build();
+                    txn.add(removeCommunityRequest);
+                    txn.commit();
+                    LOG.fine("Remove community request: " + data.communityID + "'s remove request was registered in the database.");
+                    return Response.ok().build();
+                } else {
+                    txn.rollback();
+                    LOG.fine("Remove community request: another request already exists.");
+                    return Response.status(Status.CONFLICT).entity("Request already exists.").build();
+                }
             }
         } catch (Exception e) {
             txn.rollback();
@@ -349,9 +362,8 @@ public class CommunityResource {
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity community = serverConstants.getCommunity(txn, data.communityID);
-            Entity member = serverConstants.getCommunityMember(txn, data.communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkCommunitiesValidations(Validations.REMOVE_COMMUNITY, user, community, member, token, authToken, data);
+            var validation = Validations.checkCommunitiesValidations(Validations.REMOVE_COMMUNITY, user, community, token, authToken);
             //TODO: check validations params
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
@@ -420,11 +432,10 @@ public class CommunityResource {
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity community = serverConstants.getCommunity(txn, communityID);
-            Entity adminMember = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity member = serverConstants.getCommunityMember(txn, communityID, username);
+            Entity adminMember = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            // var validation = Validations.checkLeaveCommunityValidation(user, community, adminMember, member, token, authToken, communityID);
-            var validation = Response.status(Status.OK).build();
+            var validation = Validations.checkCommunitiesValidations(Validations.LEAVE_COMMUNITY, user, community, member, adminMember, token, authToken);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
