@@ -3,14 +3,14 @@ Communities:
 2. view communities (done, done, review) -> /communities
 3. view community (done, done, review) -> /communities/$communityID
 4. join community (done, done, review) -> /communities/join
-5. leave community (done, valToDo, review) -> /communities/community/leave
-6. list community members (done, valToDo, review) -> /communities/{communityID}/list/users
+5. leave community (done, done, review) -> /communities/{communityID}/leave
+6. list community members (done, done, review) -> /communities/{communityID}/list/users
 7. edit community (done, done, review) -> /communities/edit
-8. request remove community (done, valToDo, review) -> /communities/community/remove/request
-9. remove community (done, valToDo, review) -> /communities/community/remove
-10. lock community (done, valToDo, review) -> /communities/community/lock
-11. add/remove manager (done, valToDo, review) -> /communities/{communityID}/update/manager
-12. list posts (todo, valToDo, review) -> /
+8. request remove community (done, done, review) -> /communities/community/remove/request
+9. remove community (done, done, review) -> /communities/community/remove
+10. lock community (done, done, review) -> /communities/community/lock
+11. add/remove manager (done, done, review) -> /communities/{communityID}/update/manager
+12. list posts (todo, done, review) -> /
 
 Community Post:
 1. post to community (done, done, review) -> /communities/{communityID}/post
@@ -36,7 +36,7 @@ Community member actions:
 2. go to user profile (todo, valToDo, review) -> /
 
 Community manager actions (general community managers and above roles have permission for these):
-1. ban user from community (done, valToDo, review) -> /
+1. ban user from community (done, done, review) -> /communities/{communityID}/leave
 2. kick user for some time (todo, valToDo, review) -> /
 3. warn user (todo, valToDo, review) -> /
 4. check user appeals (todo, valToDo, review) -> /
@@ -44,5 +44,5 @@ Community manager actions (general community managers and above roles have permi
 
 Community manager actions (GC and above roles have permission to do these):
 1. warn community manager (todo, valToDo, review) -> /
-2. ban manager from community (todo, valToDo, review) -> /
+2. ban manager from community (done, done, review) -> /communities/{communityID}/leave
 3. change community manager (todo, valToDo, review) -> /

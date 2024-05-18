@@ -605,7 +605,7 @@ public class Validations {
                         (CommunityData) data);
             case UPDATE_COMMUNITY_MANAGER:
                 return checkUpdateCommunityManagerValidation(user, community, member, adminMember, token, authToken,
-                        (CommunityData) data);
+                        (boolean) data);
             case LIST_COMMUNITY_MEMBERS:
                 return checkListCommunityMembersValidation(user, community, member, token, authToken);
             default:
@@ -842,16 +842,60 @@ public class Validations {
             if ( member == null ) {
                 LOG.info(operation + "user is not a member of the community.");
                 return Response.status(Status.CONFLICT).entity("User is not a member of the community.").build();
-            } else if ( member != adminMember && !adminMember.getBoolean("isManager") && !authToken.role.equals(ServerConstants.GC) ) {
+            } else if ( member != adminMember && (adminMember == null || !adminMember.getBoolean("isManager")) && !authToken.role.equals(ServerConstants.GC) ) {
                 LOG.info(operation + "user is not a manager of the community.");
                 return Response.status(Status.FORBIDDEN).entity("User is not a manager of the community.").build();
+            } else if ( member != adminMember && member.getBoolean("isManager") && adminMember.getBoolean("isManager") && !authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community managers can only be banned from the community by a GC user.");
+                return Response.status(Status.FORBIDDEN).entity("Community managers can only be banned from the community by a GC user.").build();
             }
             return Response.ok().build();
+            /*if ( member != null && !member.getBoolean("isManager") ) {
+                if ( adminMember != null && adminMember == member ) {
+                    return Response.ok().build();
+                } else if ( adminMember != null && adminMember != member && !community.getBoolean("isLocked") ) {
+                    if ( adminMember.getBoolean("isManager") ) {
+                        return Response.ok().build();
+                    } else {
+                        LOG.info(operation + "user is not a manager of the community.");
+                        return Response.status(Status.FORBIDDEN).entity("User is not a manager of the community.").build();
+                    }
+                } else {
+                    if ( authToken.role.equals(ServerConstants.GC) ) {
+                        return Response.ok().build();
+                    } else {
+                        LOG.info(operation + "user is not a manager of the communities.");
+                        return Response.status(Status.FORBIDDEN).entity("User is not a manager of the communities.").build();
+                    }
+                }
+            } else if ( member != null && member.getBoolean("isManager") ) {
+                if ( adminMember != null && adminMember == member ) {
+                    return Response.ok().build();
+                } else if ( adminMember != null && adminMember != member ) {
+                    if ( adminMember.getBoolean("isManager") ) {
+                        LOG.info(operation + "community managers are not allowed to ban other community managers.");
+                        return Response.status(Status.FORBIDDEN).entity("Community managers are not allowed to ban other community managers.").build();
+                    } else {
+                        LOG.info(operation + "user is not a manager of the community.");
+                        return Response.status(Status.FORBIDDEN).entity("User is not a manager of the community.").build();
+                    }
+                } else {
+                    if ( authToken.role.equals(ServerConstants.GC) ) {
+                        return Response.ok().build();
+                    } else {
+                        LOG.info(operation + "user is not a manager of the communities.");
+                        return Response.status(Status.FORBIDDEN).entity("User is not a manager of the communities.").build();
+                    }
+                }
+            } else {
+                LOG.info(operation + "user is not a member of the community.");
+                return Response.status(Status.CONFLICT).entity("User is not a member of the community.").build();
+            }*/
         }
     }
 
     private static Response checkUpdateCommunityManagerValidation(Entity user, Entity community, Entity member,
-            Entity adminMember, Entity token, AuthToken authToken, CommunityData data) {
+            Entity adminMember, Entity token, AuthToken authToken, boolean isManager) {
         String operation = "Update manager status: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -864,7 +908,17 @@ public class Validations {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
-            // TODO: finish these validations
+            if ( member == null ) {
+                LOG.info(operation + "user is not a member of the community.");
+                return Response.status(Status.CONFLICT).entity("User is not a member of the community.").build();
+            } else if ( !adminMember.getBoolean("isManager") && !authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "user is not a manager of the community.");
+                return Response.status(Status.FORBIDDEN).entity("User is not a manager of the community.").build();
+            }
+            if ( (isManager && member.getBoolean("isManager")) || (!isManager && member.getBoolean("isManager")) ) {
+                LOG.fine(operation + "user made no change to the manager status of the member.");
+                return Response.status(Status.BAD_REQUEST).entity("No changes to be made.").build();
+            }
             return Response.ok().build();
         }
     }
@@ -883,7 +937,13 @@ public class Validations {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
-            // TODO: finish these validations
+            if ( member == null && !authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "user is not a member of the community.");
+                return Response.status(Status.CONFLICT).entity("User is not a member of the community.").build();
+            } else if ( community.getBoolean("isLocked") && !member.getBoolean("isManager") && !authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked and user is not a manager of the community.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked and user is not a manager of the community.").build();
+            }
             return Response.ok().build();
         }
     }
@@ -933,8 +993,6 @@ public class Validations {
         }
     }
 
-    // TODO: make these operations not work for locked communities
-
     private static Response checkAddPostValidation(Entity user, Entity community, Entity member, Entity token,
             AuthToken authToken, PostData data) {
         String operation = "Add post: ";
@@ -948,6 +1006,10 @@ public class Validations {
             if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
+            }
+            if ( community.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && !authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked, user may not add posts.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked, user may not add posts.").build();
             }
             if (member == null && !authToken.role.equals(ServerConstants.GC)) {
                 LOG.info(operation + "user is not a member of the community or a community manager.");
@@ -988,6 +1050,10 @@ public class Validations {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
+            if ( community.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && !authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked, user may not access posts.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked, user may not access posts.").build();
+            }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
                         .build();
@@ -997,7 +1063,8 @@ public class Validations {
                     LOG.info(operation + "user is not a member of the community.");
                     return Response.status(Status.FORBIDDEN).entity("User is not a member of the community.").build();
                 }
-            } else if (authToken.role.equals(ServerConstants.GC) || authToken.role.equals(ServerConstants.GBO)
+            } else if (authToken.role.equals(ServerConstants.GC)) {
+            } else if (authToken.role.equals(ServerConstants.GBO)
                     || authToken.role.equals(ServerConstants.GA) || authToken.role.equals(ServerConstants.GS)
                     || authToken.role.equals(ServerConstants.SU)) {
             } else {
@@ -1022,9 +1089,17 @@ public class Validations {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
+            if ( community.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && !authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked, user may not edit posts.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked, user may not edit posts.").build();
+            }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
                         .build();
+            }
+            if ( post.getBoolean("isLocked")) {
+                LOG.info(operation + "post is locked, user may not edit post.");
+                return Response.status(Status.FORBIDDEN).entity("Post is locked, user may not edit post.").build();
             }
             if (authToken.role.equals(ServerConstants.USER) || authToken.role.equals(ServerConstants.EP)) {
                 if (member == null) {
@@ -1036,7 +1111,13 @@ public class Validations {
                     return Response.status(Status.FORBIDDEN).entity("User is not authorized to edit this post.")
                             .build();
                 }
-            } else if (authToken.role.equals(ServerConstants.GC) || authToken.role.equals(ServerConstants.GBO)
+            } else if (authToken.role.equals(ServerConstants.GC)) {
+                if (!post.getString("username").equals(user.getString("username"))) {
+                    LOG.info(operation + "user is not authorized to edit this post.");
+                    return Response.status(Status.FORBIDDEN).entity("User is not authorized to edit this post.")
+                            .build();
+                }
+            } else if (authToken.role.equals(ServerConstants.GBO)
                     || authToken.role.equals(ServerConstants.GA)
                     || authToken.role.equals(ServerConstants.GS) || authToken.role.equals(ServerConstants.SU)) {
                 LOG.info(operation + "GC/GBO/GA/GS/SU users are not authorized to edit posts.");
@@ -1068,6 +1149,10 @@ public class Validations {
             if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
+            }
+            if ( community.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && !authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked, user may not remove post.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked, user may not remove post.").build();
             }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
@@ -1110,6 +1195,10 @@ public class Validations {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
+            if ( community.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && !authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked, user may not lock post.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked, user may not lock post.").build();
+            }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
                         .build();
@@ -1151,6 +1240,10 @@ public class Validations {
             if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
+            }
+            if ( community.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && !authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked, user may not pin post.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked, user may not pin post.").build();
             }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
@@ -1201,6 +1294,10 @@ public class Validations {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
+            if ( community.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && !authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked, user may not like post.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked, user may not like post.").build();
+            }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
                         .build();
@@ -1244,6 +1341,10 @@ public class Validations {
             if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
+            }
+            if ( community.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && !authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked, user may not dislike post.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked, user may not dislike post.").build();
             }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
@@ -1307,8 +1408,6 @@ public class Validations {
         }
     }
 
-    // TODO: make these operations not work for locked posts/communities
-
     public static Response checkAddCommentValidation(Entity user, Entity community, Entity post, Entity parentComment,
             Entity member, Entity token, AuthToken authToken, CommentData data) {
         String operation = "Add comment: ";
@@ -1323,9 +1422,17 @@ public class Validations {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
+            if ( community.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && !authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked, user may not comment on post.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked, user may not comment on post.").build();
+            }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
                         .build();
+            }
+            if ( post.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && !authToken.role.equals(ServerConstants.GC)) {
+                LOG.info(operation + "post is locked, user may not add comment.");
+                return Response.status(Status.FORBIDDEN).entity("Post is locked, user may not add comment.").build();
             }
             if (data.parentID != null && !data.parentID.trim().isEmpty()
                     && validateComment(operation, parentComment).getStatus() != Status.OK.getStatusCode()) {
@@ -1370,9 +1477,17 @@ public class Validations {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
+            if ( community.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && !authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked, user may not edit comment.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked, user may not edit comment.").build();
+            }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
                         .build();
+            }
+            if ( post.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && !authToken.role.equals(ServerConstants.GC)) {
+                LOG.info(operation + "post is locked, user may not edit comment.");
+                return Response.status(Status.FORBIDDEN).entity("Post is locked, user may not edit comment.").build();
             }
             if (validateComment(operation, comment).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Comment is not registered.").build();
@@ -1413,6 +1528,10 @@ public class Validations {
             if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
+            }
+            if ( community.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked, user may not remove comment.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked, user may not remove comment.").build();
             }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
@@ -1459,6 +1578,10 @@ public class Validations {
             if (validateCommunity(operation, community).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
+            }
+            if ( community.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked, user may not like comment.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked, user may not like comment.").build();
             }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
@@ -1507,6 +1630,10 @@ public class Validations {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
+            if ( community.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked, user may not dislike comment.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked, user may not dislike comment.").build();
+            }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
                         .build();
@@ -1554,9 +1681,17 @@ public class Validations {
                 return Response.status(Status.NOT_FOUND).entity("Community is not registered.")
                         .build();
             }
+            if ( community.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && authToken.role.equals(ServerConstants.GC) ) {
+                LOG.info(operation + "community is locked, user may not pin comment.");
+                return Response.status(Status.FORBIDDEN).entity("Community is locked, user may not pin comment.").build();
+            }
             if (validatePost(operation, post).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Post is not registered.")
                         .build();
+            }
+            if ( post.getBoolean("isLocked") && (member == null || !member.getBoolean("isManager")) && !authToken.role.equals(ServerConstants.GC)) {
+                LOG.info(operation + "post is locked, user may not pin comment.");
+                return Response.status(Status.FORBIDDEN).entity("Post is locked, user may not pin comment.").build();
             }
             if (validateComment(operation, comment).getStatus() != Status.OK.getStatusCode()) {
                 return Response.status(Status.NOT_FOUND).entity("Comment is not registered.").build();
