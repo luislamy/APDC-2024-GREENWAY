@@ -10,7 +10,7 @@ Communities:
 9. remove community (done, done, review) -> /communities/community/remove
 10. lock community (done, done, review) -> /communities/community/lock
 11. add/remove manager (done, done, review) -> /communities/{communityID}/update/manager
-12. list posts (todo, done, review) -> /
+12. list posts (todo, valToDo, review) -> /
 
 Community Post:
 1. post to community (done, done, review) -> /communities/{communityID}/post
@@ -21,7 +21,8 @@ Community Post:
 6. like post (done, done, review) -> /communities/{communityID}/post/like
 7. dislike post (done, done, review) -> /communities/{communityID}/post/dislike
 8. get post(done, done, review) -> /communities/{communityID}/{postID}
-9. ??share post (todo, valToDo, review) -> /
+9. Report post (todo, valToDo, review) -> /communities/{communityID}/{postID}/report
+10. ??share post (todo, valToDo, review) -> /
 
 Post Comment:
 1. comment on post (done, done, review) -> /communities/{communityID}/{postID}/comment
@@ -30,6 +31,18 @@ Post Comment:
 4. like comment (done, done, review) -> /communities/{communityID}/{postID}/comment/like
 5. dislike comment (done, done, review) -> /communities/{communityID}/{postID}/comment/dislike
 6. pin comment (done, done, review) -> /communities/{communityID}/{postID}/comment/pin
+7. Report comment (todo, valToDo, review) -> /communities/{communityID}/{postID}/{commentID}/report
+
+Community threads:
+1. Post thread (todo, valToDo, review) -> /communities/{communityID}/thread
+2. Post message to thread (todo, valToDo, review) -> /communities/{communityID}/{threadID}/message
+3. Lock thread (todo, valToDo, review) -> /communities/{communityID}/{threadID}/lock
+4. Remove thread (todo, valToDo, review) -> /communities/{communityID}/{threadID}/remove
+5. Remove message (todo, valToDo, review) -> /communities/{communityID}/{threadID}/{messageID}/remove
+6. React to message (todo, valToDo, review) -> /communities/{communityID}/{threadID}/{messageID}/react
+7. Add tags (todo, valToDo, review) -> /communities/{communityID}/{threadID}/tags
+8. Add threadmark (todo, valToDo, review) -> /communities/{communityID}/{threadID}/{messageID}/threadmark
+9. Report message (todo, valToDo, review) -> /communities/{communityID}/{threadID}/{messageID}/report
 
 Community member actions:
 1. message community member (todo, valToDo, review) -> /

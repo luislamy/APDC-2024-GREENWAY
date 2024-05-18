@@ -313,4 +313,35 @@ public class ServerConstants {
             .build();
         return txn == null ? datastore.run(query): txn.run(query);
     }
+
+    public Key getThreadKey(String communityID, String threadID) {
+        return datastore.newKeyFactory()
+            .addAncestor(PathElement.of("Community", communityID))
+            .setKind("Thread")
+            .newKey(threadID);
+    }
+
+    public Entity getThread(String communityID, String threadID) {
+        return getThread(null, communityID, threadID);
+    }
+
+    public Entity getThread(Transaction txn, String communityID, String threadID) {
+        return txn == null ? datastore.get(getThreadKey(communityID, threadID)) : txn.get(getThreadKey(communityID, threadID));
+    }
+
+    public Key getThreadMessageKey(String communityID, String threadID, long messageID) {
+        return datastore.newKeyFactory()
+            .addAncestor(PathElement.of("Community", communityID))
+            .addAncestor(PathElement.of("Thread", threadID))
+            .setKind("ThreadMessage")
+            .newKey(threadID);
+    }
+
+    public Entity getThreadMessage(String communityID, String threadID, long messageID) {
+        return getThreadMessage(null, communityID, threadID, messageID);
+    }
+
+    public Entity getThreadMessage(Transaction txn, String communityID, String threadID, long messageID) {
+        return txn == null ? datastore.get(getThreadMessageKey(communityID, threadID, messageID)) : txn.get(getThreadMessageKey(communityID, threadID, messageID));
+    }
 }
