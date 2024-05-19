@@ -59,9 +59,7 @@ public class CommentResource {
             Entity parentComment = data.parentID != null && !data.parentID.trim().isEmpty() ? serverConstants.getParentComment(txn, communityID, postID, data.parentID) : null;
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkAddCommentValidation(user, community, post, parentComment, member, token, authToken, data);
-            //TODO: make validations
-            validation = Response.ok().build();
+            var validation = Validations.checkCommentsValidations(Validations.ADD_COMMENT, user, community, post, parentComment, member, token, authToken, data);
             if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -70,8 +68,17 @@ public class CommentResource {
                 txn.rollback();
 				return validation;
 			} else {
-                String commentID = UUID.randomUUID().toString();
-                Key commentKey = data.parentID != null && data.parentID.trim().isEmpty() ? serverConstants.getTopLevelCommentKey(communityID, postID, commentID) : serverConstants.getChildCommentKey(communityID, postID, data.parentID, commentID);
+                String commentID;
+                if ( data.parentID != null && !data.parentID.trim().isEmpty() ) {
+                    do {
+                        commentID = UUID.randomUUID().toString();
+                    } while ( serverConstants.getChildComment(txn, communityID, postID, data.parentID, commentID) != null );
+                } else {
+                    do {
+                        commentID = UUID.randomUUID().toString();
+                    } while ( serverConstants.getTopLevelComment(txn, communityID, postID, commentID) != null );
+                }
+                Key commentKey = data.parentID != null && !data.parentID.trim().isEmpty() ? serverConstants.getChildCommentKey(communityID, postID, data.parentID, commentID) : serverConstants.getTopLevelCommentKey(communityID, postID, commentID);
                 Entity comment = Entity.newBuilder(commentKey)
                     .set("commentID", commentID)
                     .set("postID", postID)
@@ -120,9 +127,7 @@ public class CommentResource {
                 serverConstants.getTopLevelComment(communityID, postID, data.commentID);
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkEditCommentValidation(user, community, post, comment, member, token, authToken, data);
-            //TODO: make validations
-            validation = Response.ok().build();
+            var validation = Validations.checkCommentsValidations(Validations.EDIT_COMMENT, user, community, post, comment, member, token, authToken, data);
             if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -178,9 +183,7 @@ public class CommentResource {
                 serverConstants.getTopLevelComment(communityID, postID, data.commentID);
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkRemoveCommentValidation(user, community, post, comment, member, token, authToken, data);
-            //TODO: make validations
-            validation = Response.ok().build();
+            var validation = Validations.checkCommentsValidations(Validations.REMOVE_COMMENT, user, community, post, comment, member, token, authToken, data);
             if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -239,8 +242,7 @@ public class CommentResource {
             Key likeKey = serverConstants.getCommentLikeKey(communityID, postID, data.commentID, authToken.username);
             Entity likeRelation = serverConstants.getCommentLike(txn, communityID, postID, data.commentID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkLikeCommentValidation(user, community, post, comment, member, likeRelation, token, authToken, data);
-            //TODO: make validations
+            var validation = Validations.checkCommentsValidations(Validations.LIKE_COMMENT, user, community, post, comment, member, likeRelation, token, authToken, data);
             validation = Response.ok().build();
             if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
@@ -309,9 +311,7 @@ public class CommentResource {
             Key dislikeKey = serverConstants.getCommentLikeKey(communityID, postID, data.commentID, authToken.username);
             Entity dislikeRelation = serverConstants.getCommentLike(txn, communityID, postID, data.commentID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkDislikeCommentValidation(user, community, post, comment, member, dislikeRelation, token, authToken, data);
-            //TODO: make validations
-            validation = Response.ok().build();
+            var validation = Validations.checkCommentsValidations(Validations.DISLIKE_COMMENT, user, community, post, comment, member, dislikeRelation, token, authToken, data);
             if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -377,9 +377,7 @@ public class CommentResource {
                 serverConstants.getTopLevelComment(communityID, postID, data.commentID);
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkPinCommentValidation(user, community, post, comment, member, token, authToken, data);
-            //TODO: make validations
-            validation = Response.ok().build();
+            var validation = Validations.checkCommentsValidations(Validations.PIN_COMMENT, user, community, post, comment, member, token, authToken, data);
             if ( validation.getStatus() == Status.UNAUTHORIZED.getStatusCode() ) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();

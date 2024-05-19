@@ -69,7 +69,10 @@ public class PostResource {
                 txn.rollback();
                 return validation;
             } else {
-                String postID = UUID.randomUUID().toString();
+                String postID;
+                do {
+                    postID = UUID.randomUUID().toString();
+                } while ( serverConstants.getPost(txn, communityID, postID) != null );
                 Entity post = Entity.newBuilder(serverConstants.getPostKey(communityID, postID))
                         .set("postID", postID)
                         .set("title", data.title)

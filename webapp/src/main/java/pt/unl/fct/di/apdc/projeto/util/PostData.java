@@ -1,7 +1,5 @@
 package pt.unl.fct.di.apdc.projeto.util;
 
-import java.util.List;
-
 import com.google.cloud.Timestamp;
 
 public class PostData {
@@ -33,8 +31,6 @@ public class PostData {
     public boolean isLiked;
 
     public boolean isDisliked;
-
-    public List<String> tags;
 
     public PostData() {}
 

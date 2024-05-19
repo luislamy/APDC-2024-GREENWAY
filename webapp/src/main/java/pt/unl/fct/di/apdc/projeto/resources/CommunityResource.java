@@ -183,12 +183,12 @@ public class CommunityResource {
             }
         } catch (Exception e) {
             txn.rollback();
-            LOG.severe("Login: " + e.getMessage());
+            LOG.severe("Join community: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         } finally {
             if (txn.isActive()) {
                 txn.rollback();
-                LOG.severe("Login: Internal server error.");
+                LOG.severe("Join community: Internal server error.");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
             }
         }

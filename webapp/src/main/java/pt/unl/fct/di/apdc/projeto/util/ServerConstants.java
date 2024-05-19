@@ -8,7 +8,7 @@ public class ServerConstants {
 
     public static final String USER = "USER", EP = "EP", GC = "GC", GBO = "GBO", GA = "GA", GS = "GS", SU = "SU";
 
-	public static final String ACTIVE = "ACTIVE", INACTIVE = "INACTIVE";
+    public static final String ACTIVE = "ACTIVE", INACTIVE = "INACTIVE";
 
     public static final String PUBLIC = "PUBLIC", PRIVATE = "PRIVATE";
 
@@ -19,14 +19,15 @@ public class ServerConstants {
     private static ServerConstants singleton = null;
 
     private ServerConstants() {
-       //this.datastore = DatastoreOptions.newBuilder().setProjectId("apdc-grupo-7").setHost("localhost:8081").build().getService();
+        // this.datastore =
+        // DatastoreOptions.newBuilder().setProjectId("apdc-grupo-7").setHost("localhost:8081").build().getService();
         this.datastore = DatastoreOptions.getDefaultInstance().getService();
         this.userKeyFactory = datastore.newKeyFactory().setKind("User");
         this.communityKeyFactory = datastore.newKeyFactory().setKind("Community");
     }
 
     public static ServerConstants getServerConstants() {
-        if ( singleton == null )
+        if (singleton == null)
             singleton = new ServerConstants();
         return singleton;
     }
@@ -49,9 +50,9 @@ public class ServerConstants {
 
     public Key getTokenKey(String username, String tokenID) {
         Key tokenKey = datastore.newKeyFactory()
-				.addAncestor(PathElement.of("User", username))
-				.setKind("Token")
-				.newKey(tokenID);
+                .addAncestor(PathElement.of("User", username))
+                .setKind("Token")
+                .newKey(tokenID);
         return tokenKey;
     }
 
@@ -70,7 +71,7 @@ public class ServerConstants {
 
     public void removeToken(Transaction txn, String username, String tokenID) {
         Key tokenKey = this.getTokenKey(username, tokenID);
-        if ( txn == null )
+        if (txn == null)
             this.datastore.delete(tokenKey);
         else
             txn.delete(tokenKey);
@@ -90,9 +91,9 @@ public class ServerConstants {
 
     public Key getPostKey(String communityID, String postID) {
         return datastore.newKeyFactory()
-            .addAncestor(PathElement.of("Community", communityID))
-            .setKind("Post")
-            .newKey(postID);
+                .addAncestor(PathElement.of("Community", communityID))
+                .setKind("Post")
+                .newKey(postID);
     }
 
     public Entity getPost(String communityID, String postID) {
@@ -106,12 +107,12 @@ public class ServerConstants {
     public QueryResults<Entity> getPostsFromCommunity(String communityID) {
         return getPostsFromCommunity(null, communityID);
     }
-    
+
     public QueryResults<Entity> getPostsFromCommunity(Transaction txn, String communityID) {
         Query<Entity> query = Query.newEntityQueryBuilder()
-            .setKind("Post")
-            .setFilter(PropertyFilter.hasAncestor(getCommunityKey(communityID)))
-            .build();
+                .setKind("Post")
+                .setFilter(PropertyFilter.hasAncestor(getCommunityKey(communityID)))
+                .build();
         return txn == null ? datastore.run(query) : txn.run(query);
     }
 
@@ -121,9 +122,9 @@ public class ServerConstants {
 
     public QueryResults<Entity> getCommentsFromPost(Transaction txn, Key postKey) {
         Query<Entity> query = Query.newEntityQueryBuilder()
-            .setKind("Comment")
-            .setFilter(PropertyFilter.hasAncestor(postKey))
-            .build();
+                .setKind("Comment")
+                .setFilter(PropertyFilter.hasAncestor(postKey))
+                .build();
         return txn == null ? datastore.run(query) : txn.run(query);
     }
 
@@ -142,10 +143,10 @@ public class ServerConstants {
 
     public Key getPostLikeKey(String communityID, String postID, String username) {
         return datastore.newKeyFactory()
-            .addAncestor(PathElement.of("Community", communityID))
-            .addAncestor(PathElement.of("Post", postID))
-            .setKind("PostLike")
-            .newKey(username);
+                .addAncestor(PathElement.of("Community", communityID))
+                .addAncestor(PathElement.of("Post", postID))
+                .setKind("PostLike")
+                .newKey(username);
     }
 
     public Entity getPostLike(String communityID, String postID, String username) {
@@ -153,15 +154,16 @@ public class ServerConstants {
     }
 
     public Entity getPostLike(Transaction txn, String communityID, String postID, String username) {
-        return txn == null ? datastore.get(getPostLikeKey(communityID, postID, username)) : txn.get(getPostLikeKey(communityID, postID, username));
+        return txn == null ? datastore.get(getPostLikeKey(communityID, postID, username))
+                : txn.get(getPostLikeKey(communityID, postID, username));
     }
 
     public Key getPostDislikeKey(String communityID, String postID, String username) {
         return datastore.newKeyFactory()
-            .addAncestor(PathElement.of("Community", communityID))
-            .addAncestor(PathElement.of("Post", postID))
-            .setKind("PostDislike")
-            .newKey(username);
+                .addAncestor(PathElement.of("Community", communityID))
+                .addAncestor(PathElement.of("Post", postID))
+                .setKind("PostDislike")
+                .newKey(username);
     }
 
     public Entity getPostDislike(String communityID, String postID, String username) {
@@ -169,14 +171,15 @@ public class ServerConstants {
     }
 
     public Entity getPostDislike(Transaction txn, String communityID, String postID, String username) {
-        return txn == null ? datastore.get(getPostDislikeKey(communityID, postID, username)) : txn.get(getPostDislikeKey(communityID, postID, username));
+        return txn == null ? datastore.get(getPostDislikeKey(communityID, postID, username))
+                : txn.get(getPostDislikeKey(communityID, postID, username));
     }
 
     public Key getCommunityMemberKey(String communityID, String username) {
         return datastore.newKeyFactory()
-            .addAncestor(PathElement.of("Community", communityID))
-            .setKind("Member")
-            .newKey(username);
+                .addAncestor(PathElement.of("Community", communityID))
+                .setKind("Member")
+                .newKey(username);
     }
 
     public Entity getCommunityMember(String communityID, String username) {
@@ -184,15 +187,16 @@ public class ServerConstants {
     }
 
     public Entity getCommunityMember(Transaction txn, String communityID, String username) {
-        return txn ==null ? datastore.get(getCommunityMemberKey(communityID, username)) : txn.get(getCommunityMemberKey(communityID, username));
+        return txn == null ? datastore.get(getCommunityMemberKey(communityID, username))
+                : txn.get(getCommunityMemberKey(communityID, username));
     }
 
     public Key getTopLevelCommentKey(String communityID, String postID, String commentID) {
         return datastore.newKeyFactory()
-            .addAncestor(PathElement.of("Community", communityID))
-            .addAncestor(PathElement.of("Post", postID))
-            .setKind("Comment")
-            .newKey(commentID);
+                .addAncestor(PathElement.of("Community", communityID))
+                .addAncestor(PathElement.of("Post", postID))
+                .setKind("Comment")
+                .newKey(commentID);
     }
 
     public Entity getTopLevelComment(String communityID, String postID, String commentID) {
@@ -200,70 +204,77 @@ public class ServerConstants {
     }
 
     public Entity getTopLevelComment(Transaction txn, String communityID, String postID, String commentID) {
-        return txn == null ? datastore.get(getTopLevelCommentKey(communityID, postID, commentID)) : txn.get(getTopLevelCommentKey(communityID, postID, commentID));
+        return txn == null ? datastore.get(getTopLevelCommentKey(communityID, postID, commentID))
+                : txn.get(getTopLevelCommentKey(communityID, postID, commentID));
     }
 
     public Key getChildCommentKey(String communityID, String postID, String parentCommentID, String commentID) {
         return datastore.newKeyFactory()
-            .addAncestor(PathElement.of("Community", communityID))
-            .addAncestor(PathElement.of("Post", postID))
-            .addAncestor(PathElement.of("Comment", parentCommentID))
-            .setKind("Comment")
-            .newKey(commentID);
+                .addAncestor(PathElement.of("Community", communityID))
+                .addAncestor(PathElement.of("Post", postID))
+                .addAncestor(PathElement.of("Comment", parentCommentID))
+                .setKind("Comment")
+                .newKey(commentID);
     }
 
     public Entity getChildComment(String communityID, String postID, String parentCommentID, String commentID) {
         return getChildComment(null, communityID, postID, parentCommentID, commentID);
     }
 
-    public Entity getChildComment(Transaction txn, String communityID, String postID, String parentCommentID, String commentID) {
-        return txn == null ? datastore.get(getChildCommentKey(communityID, postID, parentCommentID, commentID)) : txn.get(getChildCommentKey(communityID, postID, parentCommentID, commentID));
+    public Entity getChildComment(Transaction txn, String communityID, String postID, String parentCommentID,
+            String commentID) {
+        return txn == null ? datastore.get(getChildCommentKey(communityID, postID, parentCommentID, commentID))
+                : txn.get(getChildCommentKey(communityID, postID, parentCommentID, commentID));
     }
 
     public Entity getParentComment(Transaction txn, String communityID, String postID, String parentCommentID) {
         Query<Entity> query = Query.newEntityQueryBuilder()
-            .setKind("Comment")
-            .setFilter(CompositeFilter.and(
-                PropertyFilter.hasAncestor(getCommunityKey(communityID)), 
-                CompositeFilter.and(PropertyFilter.hasAncestor(getPostKey(communityID, postID)), 
-                PropertyFilter.eq("commentID", parentCommentID))))
-            .build();
+                .setKind("Comment")
+                .setFilter(CompositeFilter.and(
+                        PropertyFilter.hasAncestor(getCommunityKey(communityID)),
+                        CompositeFilter.and(PropertyFilter.hasAncestor(getPostKey(communityID, postID)),
+                                PropertyFilter.eq("commentID", parentCommentID))))
+                .build();
         var results = txn == null ? datastore.run(query) : txn.run(query);
         return results.hasNext() ? results.next() : null;
     }
 
     public Key getCommentLikeKey(String communityID, String postID, String commentID, String username) {
         return datastore.newKeyFactory()
-            .addAncestor(PathElement.of("Community", communityID))
-            .addAncestor(PathElement.of("Post", postID))
-            .addAncestor(PathElement.of("Comment", commentID))
-            .setKind("CommentLike")
-            .newKey(username);
+                .addAncestor(PathElement.of("Community", communityID))
+                .addAncestor(PathElement.of("Post", postID))
+                .addAncestor(PathElement.of("Comment", commentID))
+                .setKind("CommentLike")
+                .newKey(username);
     }
 
     public Entity getCommentLike(String communityID, String postID, String commentID, String username) {
         return getCommentLike(null, communityID, postID, commentID, username);
     }
 
-    public Entity getCommentLike(Transaction txn, String communityID, String postID, String commentID, String username) {
-        return txn == null ? datastore.get(getCommentLikeKey(communityID, postID, commentID, username)) : txn.get(getCommentLikeKey(communityID, postID, commentID, username));
+    public Entity getCommentLike(Transaction txn, String communityID, String postID, String commentID,
+            String username) {
+        return txn == null ? datastore.get(getCommentLikeKey(communityID, postID, commentID, username))
+                : txn.get(getCommentLikeKey(communityID, postID, commentID, username));
     }
 
     public Key getCommentDislikeKey(String communityID, String postID, String commentID, String username) {
         return datastore.newKeyFactory()
-            .addAncestor(PathElement.of("Community", communityID))
-            .addAncestor(PathElement.of("Post", postID))
-            .addAncestor(PathElement.of("Comment", commentID))
-            .setKind("CommentDislike")
-            .newKey(username);
+                .addAncestor(PathElement.of("Community", communityID))
+                .addAncestor(PathElement.of("Post", postID))
+                .addAncestor(PathElement.of("Comment", commentID))
+                .setKind("CommentDislike")
+                .newKey(username);
     }
 
     public Entity getCommentDislike(String communityID, String postID, String commentID, String username) {
         return getCommentDislike(null, communityID, postID, commentID, username);
     }
 
-    public Entity getCommentDislike(Transaction txn, String communityID, String postID, String commentID, String username) {
-        return txn == null ? datastore.get(getCommentDislikeKey(communityID, postID, commentID, username)) : txn.get(getCommentDislikeKey(communityID, postID, commentID, username));
+    public Entity getCommentDislike(Transaction txn, String communityID, String postID, String commentID,
+            String username) {
+        return txn == null ? datastore.get(getCommentDislikeKey(communityID, postID, commentID, username))
+                : txn.get(getCommentDislikeKey(communityID, postID, commentID, username));
     }
 
     public QueryResults<Entity> getLikesFromPost(Key postKey) {
@@ -272,10 +283,10 @@ public class ServerConstants {
 
     public QueryResults<Entity> getLikesFromPost(Transaction txn, Key postKey) {
         Query<Entity> query = Query.newEntityQueryBuilder()
-            .setKind("PostLike")
-            .setFilter(PropertyFilter.hasAncestor(postKey))
-            .build();
-        return txn == null ? datastore.run(query): txn.run(query);
+                .setKind("PostLike")
+                .setFilter(PropertyFilter.hasAncestor(postKey))
+                .build();
+        return txn == null ? datastore.run(query) : txn.run(query);
     }
 
     public QueryResults<Entity> getDislikesFromPost(Key postKey) {
@@ -284,10 +295,10 @@ public class ServerConstants {
 
     public QueryResults<Entity> getDislikesFromPost(Transaction txn, Key postKey) {
         Query<Entity> query = Query.newEntityQueryBuilder()
-            .setKind("PostDislike")
-            .setFilter(PropertyFilter.hasAncestor(postKey))
-            .build();
-        return txn == null ? datastore.run(query): txn.run(query);
+                .setKind("PostDislike")
+                .setFilter(PropertyFilter.hasAncestor(postKey))
+                .build();
+        return txn == null ? datastore.run(query) : txn.run(query);
     }
 
     public QueryResults<Entity> getLikesFromComment(Key commentKey) {
@@ -296,10 +307,10 @@ public class ServerConstants {
 
     public QueryResults<Entity> getLikesFromComment(Transaction txn, Key commentKey) {
         Query<Entity> query = Query.newEntityQueryBuilder()
-            .setKind("CommentLike")
-            .setFilter(PropertyFilter.hasAncestor(commentKey))
-            .build();
-        return txn == null ? datastore.run(query): txn.run(query);
+                .setKind("CommentLike")
+                .setFilter(PropertyFilter.hasAncestor(commentKey))
+                .build();
+        return txn == null ? datastore.run(query) : txn.run(query);
     }
 
     public QueryResults<Entity> getDislikesFromComment(Key commentKey) {
@@ -308,17 +319,17 @@ public class ServerConstants {
 
     public QueryResults<Entity> getDislikesFromComment(Transaction txn, Key commentKey) {
         Query<Entity> query = Query.newEntityQueryBuilder()
-            .setKind("CommentDislike")
-            .setFilter(PropertyFilter.hasAncestor(commentKey))
-            .build();
-        return txn == null ? datastore.run(query): txn.run(query);
+                .setKind("CommentDislike")
+                .setFilter(PropertyFilter.hasAncestor(commentKey))
+                .build();
+        return txn == null ? datastore.run(query) : txn.run(query);
     }
 
     public Key getThreadKey(String communityID, String threadID) {
         return datastore.newKeyFactory()
-            .addAncestor(PathElement.of("Community", communityID))
-            .setKind("Thread")
-            .newKey(threadID);
+                .addAncestor(PathElement.of("Community", communityID))
+                .setKind("Thread")
+                .newKey(threadID);
     }
 
     public Entity getThread(String communityID, String threadID) {
@@ -326,22 +337,67 @@ public class ServerConstants {
     }
 
     public Entity getThread(Transaction txn, String communityID, String threadID) {
-        return txn == null ? datastore.get(getThreadKey(communityID, threadID)) : txn.get(getThreadKey(communityID, threadID));
+        return txn == null ? datastore.get(getThreadKey(communityID, threadID))
+                : txn.get(getThreadKey(communityID, threadID));
     }
 
-    public Key getThreadMessageKey(String communityID, String threadID, long messageID) {
+    public Key getThreadReplyKey(String communityID, String threadID, long replyID) {
         return datastore.newKeyFactory()
-            .addAncestor(PathElement.of("Community", communityID))
-            .addAncestor(PathElement.of("Thread", threadID))
-            .setKind("ThreadMessage")
-            .newKey(threadID);
+                .addAncestor(PathElement.of("Community", communityID))
+                .addAncestor(PathElement.of("Thread", threadID))
+                .setKind("ThreadReply")
+                .newKey(threadID);
     }
 
-    public Entity getThreadMessage(String communityID, String threadID, long messageID) {
-        return getThreadMessage(null, communityID, threadID, messageID);
+    public Entity getThreadReply(String communityID, String threadID, long replyID) {
+        return getThreadReply(null, communityID, threadID, replyID);
     }
 
-    public Entity getThreadMessage(Transaction txn, String communityID, String threadID, long messageID) {
-        return txn == null ? datastore.get(getThreadMessageKey(communityID, threadID, messageID)) : txn.get(getThreadMessageKey(communityID, threadID, messageID));
+    public Entity getThreadReply(Transaction txn, String communityID, String threadID, long replyID) {
+        return txn == null ? datastore.get(getThreadReplyKey(communityID, threadID, replyID))
+                : txn.get(getThreadReplyKey(communityID, threadID, replyID));
+    }
+
+    public Key getThreadReplyLikeKey(String communityID, String threadID, long replyID, String username) {
+        return datastore.newKeyFactory()
+                .addAncestor(PathElement.of("Community", communityID))
+                .addAncestor(PathElement.of("Thread", threadID))
+                .addAncestor(PathElement.of("ThreadReply", replyID))
+                .setKind("ReplyLike")
+                .newKey(username);
+    }
+
+    public Entity getThreadReplyLike(String communityID, String threadID, long replyID, String username) {
+        return getThreadReplyLike(null, communityID, threadID, replyID, username);
+    }
+
+    public Entity getThreadReplyLike(Transaction txn, String communityID, String threadID, long replyID,
+            String username) {
+        return txn == null ? datastore.get(getThreadReplyLikeKey(communityID, threadID, replyID, username))
+                : txn.get(getThreadReplyLikeKey(communityID, threadID, replyID, username));
+    }
+
+    public QueryResults<Entity> getThreadReplies(Key threadKey) {
+        return getThreadReplies(null, threadKey);
+    }
+
+    public QueryResults<Entity> getThreadReplies(Transaction txn, Key threadKey) {
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind("ThreadReply")
+                .setFilter(PropertyFilter.hasAncestor(threadKey))
+                .build();
+        return txn == null ? datastore.run(query) : txn.run(query);
+    }
+
+    public QueryResults<Entity> getThreadReplyLikes(Key replyKey) {
+        return getThreadReplyLikes(null, replyKey);
+    }
+
+    public QueryResults<Entity> getThreadReplyLikes(Transaction txn, Key replyKey) {
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind("ReplyLike")
+                .setFilter(PropertyFilter.hasAncestor(replyKey))
+                .build();
+        return txn == null ? datastore.run(query) : txn.run(query);
     }
 }

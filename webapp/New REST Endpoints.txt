@@ -34,15 +34,17 @@ Post Comment:
 7. Report comment (todo, valToDo, review) -> /communities/{communityID}/{postID}/{commentID}/report
 
 Community threads:
-1. Post thread (todo, valToDo, review) -> /communities/{communityID}/thread
-2. Post message to thread (todo, valToDo, review) -> /communities/{communityID}/{threadID}/message
-3. Lock thread (todo, valToDo, review) -> /communities/{communityID}/{threadID}/lock
-4. Remove thread (todo, valToDo, review) -> /communities/{communityID}/{threadID}/remove
-5. Remove message (todo, valToDo, review) -> /communities/{communityID}/{threadID}/{messageID}/remove
-6. React to message (todo, valToDo, review) -> /communities/{communityID}/{threadID}/{messageID}/react
-7. Add tags (todo, valToDo, review) -> /communities/{communityID}/{threadID}/tags
-8. Add threadmark (todo, valToDo, review) -> /communities/{communityID}/{threadID}/{messageID}/threadmark
-9. Report message (todo, valToDo, review) -> /communities/{communityID}/{threadID}/{messageID}/report
+1. Post thread (done, done, review) -> /communities/{communityID}/thread
+2. Lock thread (done, done, review) -> /communities/{communityID}/{threadID}/lock
+3. Pin thread (done, done, review) -> /communities/{communityID}/{threadID}/pin
+4. Remove thread (done, done, review) -> /communities/{communityID}/{threadID}/remove
+5. Add tags (done, done, review) -> /communities/{communityID}/{threadID}/tags
+6. Post reply (done, done, review) -> /communities/{communityID}/{threadID}/reply
+7. Edit reply (done, done, review) -> /communities/{communityID}/{threadID}/{replyID}/edit
+8. Add threadmark (done, done, review) -> /communities/{communityID}/{threadID}/{replyID}/threadmark
+9. Remove reply (done, done, review) -> /communities/{communityID}/{threadID}/{replyID}/remove
+10. Like reply (done, done, review) -> /communities/{communityID}/{threadID}/{replyID}/like
+11. Report reply (todo, valToDo, review) -> /communities/{communityID}/{threadID}/{replyID}/report
 
 Community member actions:
 1. message community member (todo, valToDo, review) -> /
