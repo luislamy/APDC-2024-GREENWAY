@@ -661,7 +661,7 @@ public class CommunityResource {
             @PathParam("communityID") String communityID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         LOG.fine("List community threads: " + authToken.username
-                + " attempted to list all posts of the community with id " + communityID
+                + " attempted to list all threads of the community with id " + communityID
                 + ".");
         Transaction txn = datastore.newTransaction();
         try {
@@ -695,7 +695,7 @@ public class CommunityResource {
                 }
                 threadsList.sort(Comparator.comparing(ThreadData::isPinned).reversed().thenComparing(ThreadData::pinDate).thenComparing(Comparator.comparing(ThreadData::lastReplyDate).reversed()));
                 LOG.fine("List community threads: " + authToken.username
-                        + " received list of all posts of the community with id " + communityID
+                        + " received list of all threads of the community with id " + communityID
                         + ".");
                 return Response.ok(g.toJson(threadsList)).build();
             }
