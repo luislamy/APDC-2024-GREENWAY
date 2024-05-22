@@ -49,7 +49,7 @@ const questionnaireData = [
     },
     {
         section: "travel",
-        logo: "../assets/carros.png",
+        logo: "./assets/carros.png",
         title: "Travel",
         questions: [
             {
@@ -133,7 +133,7 @@ const questionnaireData = [
     },
     {
         section: "home",
-       logo: "../assets/botao-de-inicio.png",
+       logo: "./assets/botao-de-inicio.png",
         title: "Home",
        questions: [
             {
@@ -222,7 +222,7 @@ const questionnaireData = [
     }, 
     {
         section: "Stuff",
-        logo: "../assets/carrinho.png",
+        logo: "./assets/carrinho.png",
         title: "Stuff",
         questions: [
             {
