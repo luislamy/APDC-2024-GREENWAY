@@ -18,11 +18,11 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(async response => {
             if (response.ok) {
                 localStorage.removeItem('authToken');
-                window.location.href = 'index.html';
+                window.location.href = '../index.html';
             } else {
                 const errorMessage = await response.text();
                 alert('Fetch error: ' + errorMessage);
-                window.location.href = 'index.html';
+                window.location.href = '../index.html';
             }
         })
         .catch(error => {
@@ -45,14 +45,14 @@ function checkLoginStatus() {
             if (response.ok) {
             } else {
                 localStorage.removeItem('authToken');
-                window.location.href = 'index.html';
+                window.location.href = '../index.html';
             }
         })
         .catch(error => {
             console.error('Error checking login status: ', error);
         });
     } else {
-        window.location.href = 'index.html';
+        window.location.href = '../index.html';
     }
 }
 
