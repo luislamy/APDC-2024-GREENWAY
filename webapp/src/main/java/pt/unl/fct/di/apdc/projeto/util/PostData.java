@@ -4,33 +4,13 @@ import com.google.cloud.Timestamp;
 
 public class PostData {
 
-    public String postID;
+    public String postID, title, postBody, username;
 
-    public String title;
+    public Timestamp postDate, lastEdit, pinDate;
 
-    public String postBody;
+    public long likes, dislikes, comments;
 
-    public String username;
-
-    public Timestamp postDate;
-
-    public Timestamp lastEdit;
-
-    public long likes;
-
-    public long dislikes;
-
-    public long comments;
-
-    public boolean isLocked;
-
-    public boolean isPinned;
-
-    public Timestamp pinDate;
-
-    public boolean isLiked;
-
-    public boolean isDisliked;
+    public boolean isLocked, isPinned, isLiked, isDisliked;
 
     public PostData() {}
 
@@ -49,6 +29,18 @@ public class PostData {
         this.pinDate = pinDate;
         this.isLiked = isLiked;
         this.isDisliked = isDisliked;
+    }
+
+    public boolean isPinned() {
+        return this.isPinned;
+    }
+
+    public Timestamp pinDate() {
+        return this.pinDate;
+    }
+
+    public long likeRatio() {
+        return this.likes - this.dislikes;
     }
 
     public int isValidToPost(String username) {

@@ -1,11 +1,16 @@
 package pt.unl.fct.di.apdc.projeto.resources;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -63,7 +68,8 @@ public class ThreadResource {
             Entity community = serverConstants.getCommunity(txn, communityID);
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkThreadsValidations(Validations.START_THREAD, user, community, member, token, authToken, data);
+            var validation = Validations.checkThreadsValidations(Validations.START_THREAD, user, community, member,
+                    token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -97,6 +103,9 @@ public class ThreadResource {
                         .set("replyDate", Timestamp.now())
                         .set("lastEdit", Timestamp.MIN_VALUE)
                         .set("likes", 0L)
+                        .set("threadmark", "")
+                        .set("previousThreadmark", Long.MIN_VALUE)
+                        .set("nextThreadmark", Long.MAX_VALUE)
                         .build();
                 txn.put(thread, reply);
                 txn.commit();
@@ -132,7 +141,8 @@ public class ThreadResource {
             Entity thread = serverConstants.getThread(communityID, threadID);
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkThreadsValidations(Validations.PIN_THREAD, user, community, thread, member, token, authToken, isLocked);
+            var validation = Validations.checkThreadsValidations(Validations.PIN_THREAD, user, community, thread,
+                    member, token, authToken, isLocked);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -177,7 +187,8 @@ public class ThreadResource {
             Entity thread = serverConstants.getThread(communityID, threadID);
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkThreadsValidations(Validations.PIN_THREAD, user, community, thread, member, token, authToken, isPinned);
+            var validation = Validations.checkThreadsValidations(Validations.PIN_THREAD, user, community, thread,
+                    member, token, authToken, isPinned);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -222,7 +233,8 @@ public class ThreadResource {
             Entity thread = serverConstants.getThread(communityID, threadID);
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkThreadsValidations(Validations.REMOVE_THREAD, user, community, thread, member, token, authToken);
+            var validation = Validations.checkThreadsValidations(Validations.REMOVE_THREAD, user, community, thread,
+                    member, token, authToken);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -271,7 +283,8 @@ public class ThreadResource {
             Entity thread = serverConstants.getThread(communityID, threadID);
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkThreadsValidations(Validations.POST_THREAD_REPLY, user, community, thread, member, token, authToken, data);
+            var validation = Validations.checkThreadsValidations(Validations.POST_THREAD_REPLY, user, community, thread,
+                    member, token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -280,9 +293,14 @@ public class ThreadResource {
                 txn.rollback();
                 return validation;
             } else {
+                List<StringValue> newTags = new ArrayList<>(thread.getList("tags"));
+                if (data.isTagging) {
+                    newTags.addAll(data.tags.stream().map(StringValue::new).collect(Collectors.toList()));
+                } else {
+                    newTags.removeAll(data.tags.stream().map(StringValue::new).collect(Collectors.toList()));
+                }
                 thread = Entity.newBuilder(thread)
-                        .set("tags",
-                                ListValue.of(data.tags.stream().map(StringValue::new).collect(Collectors.toList())))
+                        .set("tags", newTags)
                         .build();
                 txn.put(thread);
                 txn.commit();
@@ -316,7 +334,8 @@ public class ThreadResource {
             Entity thread = serverConstants.getThread(communityID, threadID);
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkThreadsValidations(Validations.POST_THREAD_REPLY, user, community, thread, member, token, authToken, data);
+            var validation = Validations.checkThreadsValidations(Validations.POST_THREAD_REPLY, user, community, thread,
+                    member, token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -338,6 +357,9 @@ public class ThreadResource {
                         .set("replyDate", Timestamp.now())
                         .set("lastEdit", Timestamp.MIN_VALUE)
                         .set("likes", 0L)
+                        .set("threadmark", "")
+                        .set("previousThreadmark", Long.MIN_VALUE)
+                        .set("nextThreadmark", Long.MAX_VALUE)
                         .build();
                 txn.put(thread, reply);
                 txn.commit();
@@ -373,7 +395,8 @@ public class ThreadResource {
             Entity reply = serverConstants.getThreadReply(txn, communityID, threadID, Long.parseLong(replyID));
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkThreadsValidations(Validations.EDIT_THREAD_REPLY, user, community, thread, reply, member, token, authToken, data);
+            var validation = Validations.checkThreadsValidations(Validations.EDIT_THREAD_REPLY, user, community, thread,
+                    reply, member, token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -422,7 +445,8 @@ public class ThreadResource {
             Entity previousThreadmark = serverConstants.getThreadReply(txn, communityID, threadID, data.previous);
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkThreadsValidations(Validations.ADD_THREADMARK, user, community, thread, newThreadmark, previousThreadmark, member, token, authToken, data);
+            var validation = Validations.checkThreadsValidations(Validations.ADD_THREADMARK, user, community, thread,
+                    newThreadmark, previousThreadmark, member, token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -474,8 +498,8 @@ public class ThreadResource {
             Entity reply = serverConstants.getThreadReply(txn, communityID, threadID, Long.parseLong(replyID));
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkThreadsValidations(Validations.REMOVE_THREAD_REPLY, user, community, thread, reply, member, token, authToken);
-            // TODO: make validations
+            var validation = Validations.checkThreadsValidations(Validations.REMOVE_THREAD_REPLY, user, community,
+                    thread, reply, member, token, authToken);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -531,7 +555,8 @@ public class ThreadResource {
                     Long.parseLong(replyID), authToken.username);
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkThreadsValidations(Validations.LIKE_THREAD_REPLY, user, community, thread, reply, likeRelation, member, token, authToken, isLiked);
+            var validation = Validations.checkThreadsValidations(Validations.LIKE_THREAD_REPLY, user, community, thread,
+                    reply, likeRelation, member, token, authToken, isLiked);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -568,6 +593,72 @@ public class ThreadResource {
             if (txn.isActive()) {
                 txn.rollback();
                 LOG.severe("Like reply: Internal server error.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
+
+    @GET
+    @Path("/{threadID}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response getThread(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
+            @PathParam("threadID") String threadID) {
+        AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
+        LOG.fine("Get thread: " + authToken.username + " attempted to get a thread with id " + threadID + ".");
+        Transaction txn = datastore.newTransaction();
+        try {
+            Entity user = serverConstants.getUser(txn, authToken.username);
+            Entity community = serverConstants.getCommunity(txn, communityID);
+            Entity thread = serverConstants.getThread(communityID, threadID);
+            Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
+            Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
+            var validation = Validations.checkThreadsValidations(Validations.GET_THREAD, user, community, thread,
+                    member, token, authToken);
+            if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
+                serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
+                txn.commit();
+                return validation;
+            } else if (validation.getStatus() != Status.OK.getStatusCode()) {
+                txn.rollback();
+                return validation;
+            } else {
+                var results = serverConstants.getThreadReplies(txn, thread.getKey());
+                List<ReplyData> replies = new LinkedList<>();
+                while (results.hasNext()) {
+                    var next = results.next();
+                    var like = serverConstants.getThreadReplyLike(txn, communityID, threadID, next.getLong("replyID"), authToken.username);
+                    ReplyData reply = new ReplyData(next.getLong("replyID"), next.getString("username"),
+                            next.getString("replyBody"), next.getTimestamp("replyDate"), next.getTimestamp("lastEdit"),
+                            next.getLong("likes"), like != null);
+                    var threadmark = next.getString("threadmark");
+                    var previousThreadmark = next.getLong("previousThreadmark");
+                    var nextThreadmark = next.getLong("nextThreadmark");
+                    if (threadmark == null || threadmark.trim().isEmpty()) {
+                    } else if (previousThreadmark != Long.MIN_VALUE && nextThreadmark == Long.MAX_VALUE) {
+                        reply.threadmark = new ThreadmarkData(threadmark, previousThreadmark);
+                    } else if (previousThreadmark == Long.MIN_VALUE && nextThreadmark != Long.MAX_VALUE) {
+                        reply.threadmark = new ThreadmarkData(threadmark, nextThreadmark, true);
+                    } else if (previousThreadmark == Long.MIN_VALUE && nextThreadmark == Long.MAX_VALUE) {
+                        reply.threadmark = new ThreadmarkData(threadmark);
+                    } else {
+                        reply.threadmark = new ThreadmarkData(threadmark, next.getLong("previousThreadmark"),
+                                next.getLong("nextThreadmark"));
+                    }
+                    replies.add(reply);
+                }
+                replies.sort(Comparator.comparing(ReplyData::getReplyID));
+                txn.commit();
+                LOG.fine("Get thread: " + authToken.username + " received thread with id " + threadID + ".");
+                return Response.ok(g.toJson(replies)).build();
+            }
+        } catch (Exception e) {
+            txn.rollback();
+            LOG.severe("Get thread: " + e.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+                LOG.severe("Get thread: Internal server error.");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
             }
         }

@@ -116,6 +116,18 @@ public class ServerConstants {
         return txn == null ? datastore.run(query) : txn.run(query);
     }
 
+    public QueryResults<Entity> getThreadsFromCommunity(String communityID) {
+        return getPostsFromCommunity(null, communityID);
+    }
+
+    public QueryResults<Entity> getThreadsFromCommunity(Transaction txn, String communityID) {
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind("Thread")
+                .setFilter(PropertyFilter.hasAncestor(getCommunityKey(communityID)))
+                .build();
+        return txn == null ? datastore.run(query) : txn.run(query);
+    }
+
     public QueryResults<Entity> getCommentsFromPost(Key postKey) {
         return getCommentsFromPost(null, postKey);
     }

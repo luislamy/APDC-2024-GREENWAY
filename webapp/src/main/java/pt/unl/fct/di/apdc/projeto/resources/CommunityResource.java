@@ -1,6 +1,8 @@
 package pt.unl.fct.di.apdc.projeto.resources;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -26,8 +28,10 @@ import pt.unl.fct.di.apdc.projeto.util.AuthToken;
 import pt.unl.fct.di.apdc.projeto.util.Community;
 import pt.unl.fct.di.apdc.projeto.util.CommunityData;
 import pt.unl.fct.di.apdc.projeto.util.JoinCommunityData;
+import pt.unl.fct.di.apdc.projeto.util.PostData;
 import pt.unl.fct.di.apdc.projeto.util.RemoveCommunityRequest;
 import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
+import pt.unl.fct.di.apdc.projeto.util.ThreadData;
 import pt.unl.fct.di.apdc.projeto.util.User;
 import pt.unl.fct.di.apdc.projeto.util.Validations;
 
@@ -62,7 +66,8 @@ public class CommunityResource {
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkCommunitiesValidations(Validations.CREATE_COMMUNITY, user, token, authToken, data);
+            var validation = Validations.checkCommunitiesValidations(Validations.CREATE_COMMUNITY, user, token,
+                    authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(authToken.username, authToken.tokenID);
                 return validation;
@@ -122,19 +127,20 @@ public class CommunityResource {
         Entity community = serverConstants.getCommunity(communityID);
         Entity member = serverConstants.getCommunityMember(communityID, authToken.username);
         Entity token = serverConstants.getToken(authToken.username, authToken.tokenID);
-        var validation = Validations.checkCommunitiesValidations(Validations.GET_COMMUNITY, user, community, member, token, authToken);
+        var validation = Validations.checkCommunitiesValidations(Validations.GET_COMMUNITY, user, community, member,
+                token, authToken);
         if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
             serverConstants.removeToken(authToken.username, authToken.tokenID);
             return validation;
         } else if (validation.getStatus() != Status.OK.getStatusCode()) {
             return validation;
         } else {
-            // TODO: send boolean true if member of community, false otherwise
             LOG.fine("Get community: " + authToken.username + " received the community.");
             Community communityData = new Community(community.getString("communityID"), community.getString("name"),
                     community.getString("description"),
                     community.getLong("num_members"), community.getString("username"),
-                    community.getTimestamp("creationDate"));
+                    community.getTimestamp("creationDate"),
+                    member != null || authToken.role.equals(ServerConstants.GC));
             return Response.ok(g.toJson(communityData)).build();
         }
     }
@@ -153,7 +159,8 @@ public class CommunityResource {
             Entity community = serverConstants.getCommunity(txn, data.communityID);
             Entity member = serverConstants.getCommunityMember(txn, data.communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkCommunitiesValidations(Validations.JOIN_COMMUNITY, user, community, member, token, authToken);
+            var validation = Validations.checkCommunitiesValidations(Validations.JOIN_COMMUNITY, user, community,
+                    member, token, authToken);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -209,7 +216,8 @@ public class CommunityResource {
             Entity community = serverConstants.getCommunity(txn, communityID);
             Entity member = serverConstants.getCommunityMember(txn, data.communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkCommunitiesValidations(Validations.EDIT_COMMUNITY, user, community, member, token, authToken, data);
+            var validation = Validations.checkCommunitiesValidations(Validations.EDIT_COMMUNITY, user, community,
+                    member, token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -254,14 +262,16 @@ public class CommunityResource {
     @Path("/remove/request")
     public Response requestRemoveCommunity(@HeaderParam("authToken") String jsonToken, RemoveCommunityRequest data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
-        LOG.fine("Remove community request: " + authToken.username + " attempted to request the community with id " + data.communityID + " be removed.");
+        LOG.fine("Remove community request: " + authToken.username + " attempted to request the community with id "
+                + data.communityID + " be removed.");
         Transaction txn = datastore.newTransaction();
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity community = serverConstants.getCommunity(txn, data.communityID);
             Entity member = serverConstants.getCommunityMember(txn, data.communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkCommunitiesValidations(Validations.REQUEST_REMOVE_COMMUNITY, user, community, member, token, authToken, data);
+            var validation = Validations.checkCommunitiesValidations(Validations.REQUEST_REMOVE_COMMUNITY, user,
+                    community, member, token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -270,8 +280,9 @@ public class CommunityResource {
                 txn.rollback();
                 return validation;
             } else {
-                Key removeCommunityRequestKey = datastore.newKeyFactory().setKind("RemoveCommunityRequest").newKey(data.communityID);
-                if (serverConstants.getCommunity(txn, data.communityID) == null) { // TODO: this gets the community, not the remove request, make new method
+                Key removeCommunityRequestKey = datastore.newKeyFactory().setKind("RemoveCommunityRequest")
+                        .newKey(data.communityID);
+                if (txn.get(removeCommunityRequestKey) == null) {
                     Entity removeCommunityRequest = Entity.newBuilder(removeCommunityRequestKey)
                             .set("communityID", data.communityID)
                             .set("userID", data.userID)
@@ -280,7 +291,8 @@ public class CommunityResource {
                             .build();
                     txn.add(removeCommunityRequest);
                     txn.commit();
-                    LOG.fine("Remove community request: " + data.communityID + "'s remove request was registered in the database.");
+                    LOG.fine("Remove community request: " + data.communityID
+                            + "'s remove request was registered in the database.");
                     return Response.ok().build();
                 } else {
                     txn.rollback();
@@ -293,7 +305,7 @@ public class CommunityResource {
             LOG.severe("Remove community request: " + e.getMessage());
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         } finally {
-            if ( txn.isActive() ) {
+            if (txn.isActive()) {
                 txn.rollback();
                 LOG.severe("Remove community request: Internal server error.");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -307,15 +319,17 @@ public class CommunityResource {
     @Path("/lock")
     public Response lockCommunity(@HeaderParam("authToken") String jsonToken, CommunityData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
-        LOG.fine("Lock community: " + authToken.username + " attempted to lock the community with id " + data.communityID
-                + ".");
+        LOG.fine(
+                "Lock community: " + authToken.username + " attempted to lock the community with id " + data.communityID
+                        + ".");
         Transaction txn = datastore.newTransaction();
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity community = serverConstants.getCommunity(txn, data.communityID);
             Entity member = serverConstants.getCommunityMember(txn, data.communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkCommunitiesValidations(Validations.LOCK_COMMUNITY, user, community, member, token, authToken, data);
+            var validation = Validations.checkCommunitiesValidations(Validations.LOCK_COMMUNITY, user, community,
+                    member, token, authToken, data);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -362,7 +376,8 @@ public class CommunityResource {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity community = serverConstants.getCommunity(txn, data.communityID);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkCommunitiesValidations(Validations.REMOVE_COMMUNITY, user, community, token, authToken);
+            var validation = Validations.checkCommunitiesValidations(Validations.REMOVE_COMMUNITY, user, community,
+                    token, authToken);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -372,7 +387,7 @@ public class CommunityResource {
                 return validation;
             } else {
                 var members = serverConstants.getMembersFromCommunity(txn, data.communityID);
-                while ( members.hasNext() ) {
+                while (members.hasNext()) {
                     txn.delete(members.next().getKey());
                 }
                 var posts = serverConstants.getPostsFromCommunity(txn, data.communityID);
@@ -422,7 +437,8 @@ public class CommunityResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{communityID}/leave")
-    public Response leaveCommunity(@HeaderParam("authToken") String jsonToken, @HeaderParam("username") String username, @PathParam("communityID") String communityID) {
+    public Response leaveCommunity(@HeaderParam("authToken") String jsonToken, @HeaderParam("username") String username,
+            @PathParam("communityID") String communityID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         LOG.fine("Leave community: " + username + " attempted to leave the community with id " + communityID
                 + ".");
@@ -433,7 +449,8 @@ public class CommunityResource {
             Entity member = serverConstants.getCommunityMember(txn, communityID, username);
             Entity adminMember = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkCommunitiesValidations(Validations.LEAVE_COMMUNITY, user, community, member, adminMember, token, authToken);
+            var validation = Validations.checkCommunitiesValidations(Validations.LEAVE_COMMUNITY, user, community,
+                    member, adminMember, token, authToken);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -474,9 +491,12 @@ public class CommunityResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{communityID}/update/manager")
-    public Response updateManagerStatus(@HeaderParam("authToken") String jsonToken, @HeaderParam("username") String username, @HeaderParam("isManager") boolean isManager, @PathParam("communityID") String communityID) {
+    public Response updateManagerStatus(@HeaderParam("authToken") String jsonToken,
+            @HeaderParam("username") String username, @HeaderParam("isManager") boolean isManager,
+            @PathParam("communityID") String communityID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
-        LOG.fine("Update manager status: " + username + " attempted to be added or removed as a manager of the community with id " + communityID
+        LOG.fine("Update manager status: " + username
+                + " attempted to be added or removed as a manager of the community with id " + communityID
                 + ".");
         Transaction txn = datastore.newTransaction();
         try {
@@ -485,7 +505,8 @@ public class CommunityResource {
             Entity adminMember = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity member = serverConstants.getCommunityMember(txn, communityID, username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkCommunitiesValidations(Validations.UPDATE_COMMUNITY_MANAGER, user, community, member, adminMember, token, authToken, isManager);
+            var validation = Validations.checkCommunitiesValidations(Validations.UPDATE_COMMUNITY_MANAGER, user,
+                    community, member, adminMember, token, authToken, isManager);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -518,13 +539,15 @@ public class CommunityResource {
         }
     }
 
-    @POST
+    @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{communityID}/list/users")
-    public Response listCommunityMembers(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID) {
+    public Response listCommunityMembers(@HeaderParam("authToken") String jsonToken,
+            @PathParam("communityID") String communityID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
-        LOG.fine("List community members: " + authToken.username + " attempted to list all members of the community with id " + communityID
+        LOG.fine("List community members: " + authToken.username
+                + " attempted to list all members of the community with id " + communityID
                 + ".");
         Transaction txn = datastore.newTransaction();
         try {
@@ -532,7 +555,8 @@ public class CommunityResource {
             Entity community = serverConstants.getCommunity(txn, communityID);
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
-            var validation = Validations.checkCommunitiesValidations(Validations.LIST_COMMUNITY_MEMBERS, user, community, member, token, authToken);
+            var validation = Validations.checkCommunitiesValidations(Validations.LIST_COMMUNITY_MEMBERS, user,
+                    community, member, token, authToken);
             if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
                 serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
                 txn.commit();
@@ -545,11 +569,13 @@ public class CommunityResource {
                 var members = serverConstants.getMembersFromCommunity(txn, communityID);
                 while (members.hasNext()) {
                     Entity next = serverConstants.getUser(txn, members.next().getString("username"));
-                    membersList.add(new User(next.getString("username"), next.getString("password"), next.getString("email"),
-                            next.getString("name"), next.getString("phone"), next.getString("profile"),
-                            next.getString("work"), next.getString("workplace"), next.getString("address"),
-                            next.getString("postalcode"), next.getString("fiscal"), next.getString("role"),
-                            next.getString("state"), next.getTimestamp("userCreationTime").toDate(), next.getString("photo")));
+                    membersList.add(
+                            new User(next.getString("username"), next.getString("password"), next.getString("email"),
+                                    next.getString("name"), next.getString("phone"), next.getString("profile"),
+                                    next.getString("work"), next.getString("workplace"), next.getString("address"),
+                                    next.getString("postalcode"), next.getString("fiscal"), next.getString("role"),
+                                    next.getString("state"), next.getTimestamp("userCreationTime").toDate(),
+                                    next.getString("photo")));
                 }
                 return Response.ok(g.toJson(membersList)).build();
             }
@@ -566,4 +592,123 @@ public class CommunityResource {
         }
     }
 
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{communityID}/list/posts")
+    public Response listCommunityPosts(@HeaderParam("authToken") String jsonToken,
+            @PathParam("communityID") String communityID) {
+        AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
+        LOG.fine("List community posts: " + authToken.username
+                + " attempted to list all posts of the community with id " + communityID
+                + ".");
+        Transaction txn = datastore.newTransaction();
+        try {
+            Entity user = serverConstants.getUser(txn, authToken.username);
+            Entity community = serverConstants.getCommunity(txn, communityID);
+            Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
+            Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
+            var validation = Validations.checkCommunitiesValidations(Validations.LIST_COMMUNITY_MEMBERS, user,
+                    community, member, token, authToken);
+            if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
+                serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
+                txn.commit();
+                return validation;
+            } else if (validation.getStatus() != Status.OK.getStatusCode()) {
+                txn.rollback();
+                return validation;
+            } else {
+                List<PostData> postsList = new ArrayList<>();
+                var posts = serverConstants.getPostsFromCommunity(txn, communityID);
+                while (posts.hasNext()) {
+                    var next = posts.next();
+                    var like = serverConstants.getPostLike(txn, communityID, next.getString("postID"),
+                            authToken.username);
+                    var dislike = serverConstants.getPostDislike(txn, communityID, next.getString("postID"),
+                            authToken.username);
+                    var post = new PostData(next.getString("postID"), next.getString("tilte"),
+                            next.getString("postBody"), next.getString("username"), next.getTimestamp("postDate"),
+                            next.getTimestamp("lastEdit"), next.getLong("likes"), next.getLong("dislikes"),
+                            next.getLong("comments"), next.getBoolean("isLocked"), next.getBoolean("isPinned"),
+                            next.getTimestamp("pinDate"), like != null, dislike != null);
+                    postsList.add(post);
+                }
+                postsList.sort(Comparator.comparing(PostData::isPinned).reversed().thenComparing(PostData::pinDate)
+                        .thenComparing(Comparator.comparing(PostData::likeRatio).reversed()));
+                LOG.fine("List community posts: " + authToken.username
+                        + " received list of all posts of the community with id " + communityID
+                        + ".");
+                return Response.ok(g.toJson(postsList)).build();
+            }
+        } catch (Exception e) {
+            txn.rollback();
+            LOG.severe("List community posts: " + e.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+                LOG.severe("List community posts: Internal server error.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
+
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{communityID}/list/threads")
+    public Response listCommunityThreads(@HeaderParam("authToken") String jsonToken,
+            @PathParam("communityID") String communityID) {
+        AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
+        LOG.fine("List community threads: " + authToken.username
+                + " attempted to list all posts of the community with id " + communityID
+                + ".");
+        Transaction txn = datastore.newTransaction();
+        try {
+            Entity user = serverConstants.getUser(txn, authToken.username);
+            Entity community = serverConstants.getCommunity(txn, communityID);
+            Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
+            Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
+            var validation = Validations.checkCommunitiesValidations(Validations.LIST_COMMUNITY_MEMBERS, user,
+                    community, member, token, authToken);
+            if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
+                serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
+                txn.commit();
+                return validation;
+            } else if (validation.getStatus() != Status.OK.getStatusCode()) {
+                txn.rollback();
+                return validation;
+            } else {
+                List<ThreadData> threadsList = new ArrayList<>();
+                var threads = serverConstants.getThreadsFromCommunity(txn, communityID);
+                while (threads.hasNext()) {
+                    var next = threads.next();
+                    var stringValueTags = next.getList("tags");
+                    List<String> tags = new LinkedList<>();
+                    stringValueTags.forEach(s -> {
+                        tags.add(s.toString());
+                    });
+                    var thread = new ThreadData(next.getString("threadID"), next.getString("title"), next.getString("username"), 
+                            next.getTimestamp("threadStartDate"), next.getLong("replies"), next.getBoolean("isLocked"), next.getBoolean("isPinned"), 
+                            next.getTimestamp("pinDate"), tags, next.getString("lastReplyUsername"), next.getTimestamp("lastReplyDate"));
+                    threadsList.add(thread);
+                }
+                threadsList.sort(Comparator.comparing(ThreadData::isPinned).reversed().thenComparing(ThreadData::pinDate).thenComparing(Comparator.comparing(ThreadData::lastReplyDate).reversed()));
+                LOG.fine("List community threads: " + authToken.username
+                        + " received list of all posts of the community with id " + communityID
+                        + ".");
+                return Response.ok(g.toJson(threadsList)).build();
+            }
+        } catch (Exception e) {
+            txn.rollback();
+            LOG.severe("List community threads: " + e.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+                LOG.severe("List community threads: Internal server error.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
 }

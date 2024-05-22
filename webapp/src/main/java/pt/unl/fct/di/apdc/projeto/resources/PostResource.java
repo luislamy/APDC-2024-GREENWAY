@@ -1,5 +1,10 @@
 package pt.unl.fct.di.apdc.projeto.resources;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -21,6 +26,8 @@ import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
+import pt.unl.fct.di.apdc.projeto.util.CommentData;
+import pt.unl.fct.di.apdc.projeto.util.CommentNode;
 import pt.unl.fct.di.apdc.projeto.util.PostData;
 import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 import pt.unl.fct.di.apdc.projeto.util.Validations;
@@ -72,7 +79,7 @@ public class PostResource {
                 String postID;
                 do {
                     postID = UUID.randomUUID().toString();
-                } while ( serverConstants.getPost(txn, communityID, postID) != null );
+                } while (serverConstants.getPost(txn, communityID, postID) != null);
                 Entity post = Entity.newBuilder(serverConstants.getPostKey(communityID, postID))
                         .set("postID", postID)
                         .set("title", data.title)
@@ -85,7 +92,7 @@ public class PostResource {
                         .set("comments", 0L)
                         .set("isLocked", data.isLocked)
                         .set("isPinned", data.isPinned)
-                        .set("pinDate", Timestamp.MIN_VALUE)
+                        .set("pinDate", data.isPinned ? Timestamp.now() : Timestamp.MIN_VALUE)
                         .build();
                 txn.put(post);
                 txn.commit();
@@ -127,10 +134,15 @@ public class PostResource {
             } else if (validation.getStatus() != Status.OK.getStatusCode()) {
                 return validation;
             } else {
-
-                datastore.put(post);
-                LOG.fine("Get post: " + authToken.username + " posted to the community with id " + communityID + ".");
-                return Response.ok().build();
+                Entity like = serverConstants.getPostLike(communityID, postID, authToken.username);
+                Entity dislike = serverConstants.getPostLike(communityID, postID, authToken.username);
+                var postData = new PostData(postID, post.getString("title"), post.getString("postBody"),
+                        post.getString("username"), post.getTimestamp("postDate"), post.getTimestamp("lastEdit"),
+                        post.getLong("likes"), post.getLong("dislikes"), post.getLong("comments"),
+                        post.getBoolean("isLocked"), post.getBoolean("isPinned"), post.getTimestamp("pinDate"),
+                        like != null, dislike != null);
+                LOG.fine("Get post: " + authToken.username + " received post with id " + postID + ".");
+                return Response.ok(g.toJson(postData)).build();
             }
         } catch (Exception e) {
             LOG.severe("Get post: " + e.getMessage());
@@ -524,6 +536,81 @@ public class PostResource {
             if (txn.isActive()) {
                 txn.rollback();
                 LOG.severe("Dislike post: Internal server error.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
+
+    @GET
+    @Path("/{communityID}/{postID}/list/comments")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response listComments(@HeaderParam("authToken") String jsonToken,
+            @PathParam("communityID") String communityID, @PathParam("postID") String postID) {
+        AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
+        LOG.fine("List comments: " + authToken.username + " attempted to view post with id " + postID
+                + " from the community with id " + communityID + ".");
+        Transaction txn = datastore.newTransaction();
+        try {
+            Entity user = serverConstants.getUser(txn, authToken.username);
+            Entity community = serverConstants.getCommunity(txn, communityID);
+            Entity post = serverConstants.getPost(communityID, postID);
+            Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
+            Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
+            var validation = Validations.checkPostsValidations(Validations.LIST_COMMENTS, user, community, post, member,
+                    token, authToken);
+            if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
+                serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
+                txn.commit();
+                return validation;
+            } else if (validation.getStatus() != Status.OK.getStatusCode()) {
+                txn.rollback();
+                return validation;
+            } else {
+                var results = serverConstants.getCommentsFromPost(txn, post.getKey());
+                Map<String, CommentNode> commentNodeMap = new HashMap<>();
+                List<CommentNode> rootComments = new ArrayList<>();
+                while (results.hasNext()) {
+                    var next = results.next();
+                    var like = serverConstants.getCommentLike(txn, communityID, postID, next.getString("commentID"),
+                            authToken.username);
+                    var dislike = serverConstants.getCommentDislike(txn, communityID, postID,
+                            next.getString("commentID"), authToken.username);
+                    var comment = new CommentData(next.getString("commentBody"), next.getString("username"),
+                            next.getString("commentID"), next.getString("parentID"), next.getTimestamp("commentDate"),
+                            next.getTimestamp("lastEdit"), next.getTimestamp("pinDate"), next.getLong("likes"),
+                            next.getLong("dislikes"), next.getLong("comments"), next.getBoolean("isPinned"),
+                            like != null, dislike != null);
+                    CommentNode node = new CommentNode(comment);
+                    commentNodeMap.put(comment.commentID, node);
+                }
+                for (CommentNode node : commentNodeMap.values()) {
+                    if (node.commentData.parentID.isEmpty()) {
+                        rootComments.add(node);
+                    } else {
+                        CommentNode parentNode = commentNodeMap.get(node.commentData.parentID);
+                        if (parentNode != null) {
+                            parentNode.children.add(node);
+                        }
+                    }
+                }
+                rootComments.sort(Comparator.comparing((CommentNode cn) -> cn.commentData.isPinned())
+                        .thenComparing((CommentNode cn) -> cn.commentData.likeRatio()));
+                for (CommentNode node : commentNodeMap.values()) {
+                    node.children.sort(Comparator.comparing((CommentNode cn) -> cn.commentData.likeRatio()));
+                }
+                txn.commit();
+                LOG.fine("List comments: " + authToken.username + " view comments from the post with id "
+                        + postID + ".");
+                return Response.ok(g.toJson(rootComments)).build();
+            }
+        } catch (Exception e) {
+            txn.rollback();
+            LOG.severe("List comments: " + e.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+                LOG.severe("List comments: Internal server error.");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
             }
         }

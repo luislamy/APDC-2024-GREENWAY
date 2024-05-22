@@ -10,7 +10,8 @@ Communities:
 9. remove community (done, done, review) -> /communities/community/remove
 10. lock community (done, done, review) -> /communities/community/lock
 11. add/remove manager (done, done, review) -> /communities/{communityID}/update/manager
-12. list posts (todo, valToDo, review) -> /
+12. list posts (done, done, review) -> /communities/{communityID}/list/posts
+13. list threads (done, done, review) -> /communities/{communityID}/list/threads
 
 Community Post:
 1. post to community (done, done, review) -> /communities/{communityID}/post
@@ -23,6 +24,7 @@ Community Post:
 8. get post(done, done, review) -> /communities/{communityID}/{postID}
 9. Report post (todo, valToDo, review) -> /communities/{communityID}/{postID}/report
 10. ??share post (todo, valToDo, review) -> /
+11. List comments (done, done, review) -> /communities/{communityID}/{postID}/list/comments
 
 Post Comment:
 1. comment on post (done, done, review) -> /communities/{communityID}/{postID}/comment
@@ -45,6 +47,7 @@ Community threads:
 9. Remove reply (done, done, review) -> /communities/{communityID}/{threadID}/{replyID}/remove
 10. Like reply (done, done, review) -> /communities/{communityID}/{threadID}/{replyID}/like
 11. Report reply (todo, valToDo, review) -> /communities/{communityID}/{threadID}/{replyID}/report
+12. Get thread (done, done, review) -> /communities/{communityID}/{threadID}
 
 Community member actions:
 1. message community member (todo, valToDo, review) -> /

@@ -16,6 +16,10 @@ public class ThreadData {
 
     public Timestamp threadStartDate;
 
+    public String lastReplyUsername;
+
+    public Timestamp lastReplyDate;
+
     public long replies;
 
     public boolean isLocked;
@@ -32,7 +36,7 @@ public class ThreadData {
 
     public ThreadData() {}
 
-    public ThreadData(String threadID, String title, String username, Timestamp threadStartDate, long replies, boolean isLocked, boolean isPinned, Timestamp pinDate, List<String> tags) {
+    public ThreadData(String threadID, String title, String username, Timestamp threadStartDate, long replies, boolean isLocked, boolean isPinned, Timestamp pinDate, List<String> tags, String lastReplyUsername, Timestamp lastReplyDate) {
         this.threadID = threadID;
         this.title = title;
         this.username = username;
@@ -42,6 +46,20 @@ public class ThreadData {
         this.isPinned = isPinned;
         this.pinDate = pinDate;
         this.tags = tags;
+        this.lastReplyUsername = lastReplyUsername;
+        this.lastReplyDate = lastReplyDate;
+    }
+
+    public boolean isPinned() {
+        return this.isPinned;
+    }
+
+    public Timestamp pinDate() {
+        return this.pinDate;
+    }
+
+    public Timestamp lastReplyDate() {
+        return this.lastReplyDate;
     }
 
     public int isValidToStartThread(String username) {

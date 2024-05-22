@@ -10,14 +10,17 @@ public class Community {
 
     public Timestamp creationDate;
 
+    public boolean isMember;
+
     public Community() {}
 
-    public Community(String communityID, String name, String description, long members, String creator, Timestamp creationDate) {
+    public Community(String communityID, String name, String description, long members, String creator, Timestamp creationDate, boolean isMember) {
         this.communityID = communityID;
         this.name = name;
         this.description = description;
         this.members = members;
         this.creator = creator;
         this.creationDate = creationDate;
+        this.isMember = isMember;
     }
 }

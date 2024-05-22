@@ -10,6 +10,20 @@ public class ThreadmarkData {
 
     public ThreadmarkData() {}
 
+    public ThreadmarkData(String type) {
+        this.type = type;
+    }
+
+    public ThreadmarkData(String type, long previous) {
+        this.type = type;
+        this.previous = previous;
+    }
+
+    public ThreadmarkData(String type, long next, boolean isFirst) {
+        this.type = type;
+        this.next = next;
+    }
+
     public ThreadmarkData(String type, long previous, long next) {
         this.type = type;
         this.previous = previous;

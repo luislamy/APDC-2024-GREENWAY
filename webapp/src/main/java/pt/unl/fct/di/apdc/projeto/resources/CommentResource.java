@@ -55,7 +55,7 @@ public class CommentResource {
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity community = serverConstants.getCommunity(txn, communityID);
-            Entity post = serverConstants.getPost(communityID, data.postID);
+            Entity post = serverConstants.getPost(communityID, postID);
             Entity parentComment = data.parentID != null && !data.parentID.trim().isEmpty() ? serverConstants.getParentComment(txn, communityID, postID, data.parentID) : null;
             Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
             Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
@@ -82,10 +82,10 @@ public class CommentResource {
                 Entity comment = Entity.newBuilder(commentKey)
                     .set("commentID", commentID)
                     .set("postID", postID)
-                    .set("parentID", data.parentID != null && !data.parentID.trim().isEmpty() ? data.parentID : null)
-                    .set("commentBody", data.postBody)
+                    .set("parentID", data.parentID != null && !data.parentID.trim().isEmpty() ? data.parentID : "")
+                    .set("commentBody", data.commentBody)
                     .set("username", authToken.username)
-                    .set("postDate", Timestamp.now())
+                    .set("commentDate", Timestamp.now())
                     .set("lastEdit", Timestamp.MIN_VALUE)
                     .set("likes", 0L)
                     .set("dislikes", 0L)
@@ -121,7 +121,7 @@ public class CommentResource {
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity community = serverConstants.getCommunity(txn, communityID);
-            Entity post = serverConstants.getPost(communityID, data.postID);
+            Entity post = serverConstants.getPost(communityID, postID);
             Entity comment = data.parentID != null && !data.parentID.trim().isEmpty() ? 
                 serverConstants.getChildComment(communityID, postID, data.parentID, data.commentID) : 
                 serverConstants.getTopLevelComment(communityID, postID, data.commentID);
@@ -140,9 +140,9 @@ public class CommentResource {
                     .set("commentID", comment.getString("commentID"))
                     .set("postID", comment.getString("postID"))
                     .set("parentID", comment.getString("parentID"))
-                    .set("commentBody", data.postBody != null && !data.postBody.trim().isEmpty() ? data.postBody : comment.getString("commentBody"))
+                    .set("commentBody", data.commentBody != null && !data.commentBody.trim().isEmpty() ? data.commentBody : comment.getString("commentBody"))
                     .set("username", comment.getString("username"))
-                    .set("postDate", comment.getTimestamp("postDate"))
+                    .set("commentDate", comment.getTimestamp("commentDate"))
                     .set("lastEdit", Timestamp.now())
                     .set("likes", comment.getLong("likes"))
                     .set("dislikes", comment.getLong("dislikes"))
@@ -177,7 +177,7 @@ public class CommentResource {
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity community = serverConstants.getCommunity(txn, communityID);
-            Entity post = serverConstants.getPost(communityID, data.postID);
+            Entity post = serverConstants.getPost(communityID, postID);
             Entity comment = data.parentID != null && !data.parentID.trim().isEmpty() ? 
                 serverConstants.getChildComment(communityID, postID, data.parentID, data.commentID) : 
                 serverConstants.getTopLevelComment(communityID, postID, data.commentID);
@@ -198,7 +198,7 @@ public class CommentResource {
                     .set("parentID", comment.getString("parentID"))
                     .set("commentBody", "Deleted")
                     .set("username", "Redacted")
-                    .set("postDate", comment.getTimestamp("postDate"))
+                    .set("commentDate", comment.getTimestamp("commentDate"))
                     .set("lastEdit", Timestamp.now())
                     .set("likes", comment.getLong("likes"))
                     .set("dislikes", comment.getLong("dislikes"))
@@ -234,7 +234,7 @@ public class CommentResource {
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity community = serverConstants.getCommunity(txn, communityID);
-            Entity post = serverConstants.getPost(communityID, data.postID);
+            Entity post = serverConstants.getPost(communityID, postID);
             Entity comment = data.parentID != null && !data.parentID.trim().isEmpty() ? 
                 serverConstants.getChildComment(communityID, postID, data.parentID, data.commentID) : 
                 serverConstants.getTopLevelComment(communityID, postID, data.commentID);
@@ -258,7 +258,7 @@ public class CommentResource {
                     .set("parentID", comment.getString("parentID"))
                     .set("commentBody", comment.getString("commentBody"))
                     .set("username", comment.getString("username"))
-                    .set("postDate", comment.getTimestamp("postDate"))
+                    .set("commentDate", comment.getTimestamp("commentDate"))
                     .set("lastEdit", comment.getTimestamp("lastEdit"))
                     .set("likes", data.isLiked ? comment.getLong("likes") + 1L : comment.getLong("likes") - 1L)
                     .set("dislikes", comment.getLong("dislikes"))
@@ -303,7 +303,7 @@ public class CommentResource {
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity community = serverConstants.getCommunity(txn, communityID);
-            Entity post = serverConstants.getPost(communityID, data.postID);
+            Entity post = serverConstants.getPost(communityID, postID);
             Entity comment = data.parentID != null && !data.parentID.trim().isEmpty() ? 
                 serverConstants.getChildComment(communityID, postID, data.parentID, data.commentID) : 
                 serverConstants.getTopLevelComment(communityID, postID, data.commentID);
@@ -326,7 +326,7 @@ public class CommentResource {
                     .set("parentID", comment.getString("parentID"))
                     .set("commentBody", comment.getString("commentBody"))
                     .set("username", comment.getString("username"))
-                    .set("postDate", comment.getTimestamp("postDate"))
+                    .set("commentDate", comment.getTimestamp("commentDate"))
                     .set("lastEdit", comment.getTimestamp("lastEdit"))
                     .set("likes", comment.getLong("likes"))
                     .set("dislikes", data.isDisliked ? comment.getLong("dislikes") + 1L : comment.getLong("dislikes") - 1L)
@@ -371,7 +371,7 @@ public class CommentResource {
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
             Entity community = serverConstants.getCommunity(txn, communityID);
-            Entity post = serverConstants.getPost(communityID, data.postID);
+            Entity post = serverConstants.getPost(communityID, postID);
             Entity comment = data.parentID != null && !data.parentID.trim().isEmpty() ? 
                 serverConstants.getChildComment(communityID, postID, data.parentID, data.commentID) : 
                 serverConstants.getTopLevelComment(communityID, postID, data.commentID);
@@ -392,7 +392,7 @@ public class CommentResource {
                     .set("parentID", comment.getString("parentID"))
                     .set("commentBody", comment.getString("commentBody"))
                     .set("username", comment.getString("username"))
-                    .set("postDate", comment.getTimestamp("postDate"))
+                    .set("commentDate", comment.getTimestamp("commentDate"))
                     .set("lastEdit", comment.getTimestamp("lastEdit"))
                     .set("likes", comment.getLong("likes"))
                     .set("dislikes", comment.getLong("dislikes"))
