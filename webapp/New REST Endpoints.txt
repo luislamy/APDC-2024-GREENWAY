@@ -47,7 +47,8 @@ Community threads:
 9. Remove reply (done, done, review) -> /communities/{communityID}/{threadID}/{replyID}/remove
 10. Like reply (done, done, review) -> /communities/{communityID}/{threadID}/{replyID}/like
 11. Report reply (todo, valToDo, review) -> /communities/{communityID}/{threadID}/{replyID}/report
-12. Get thread (done, done, review) -> /communities/{communityID}/{threadID}
+12. Get thread replies (done, done, review) -> /communities/{communityID}/{threadID}/replies
+13. Get thread data (todo, valToDo, review) -> /communities/{communityID}/{threadID}
 
 Community member actions:
 1. message community member (todo, valToDo, review) -> /

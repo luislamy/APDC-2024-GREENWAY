@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="communities.css">
+    <title>Post</title>
+</head>
+<body>
+    <nav id="navbar" style="position: fixed; top: 0; background: white; width: 100vw; height: 60px; display: flex; flex-direction: row; justify-content: end; gap: 1rem; text-align: center;">
+        <div id="home" onclick="location.href='../dashboard/dashboard.html';" style="border-radius: 10px; cursor: pointer; padding: 0.7rem 2rem; color: white; align-self: center; text-align: center; background: black;">Home</div>
+        <div id="login" onclick="" style="border-radius: 10px; padding: 0.7rem 2rem; cursor: pointer; color: white; align-self: center; text-align: center; background: black;">Button1</div>
+        <div id="register" onclick="" style="cursor: pointer; margin-right: 2rem; border-radius: 10px; padding: 0.7rem 2rem; color: white; align-self: center; text-align: center; background: black;">Button2</div>
+    </nav>
+    <h1 style="margin-top: 90px; display: inline-block;">Post Details</h1>
+    <div id="postDetails" style="display: flex; flex-direction: column; gap: 1rem; padding: 2rem; background: #F2F2F2; width: 80%; margin: auto;"></div>
+    <h2 style="margin-top: 30px;">Comments</h2>
+    <div id="commentsContainer" style="display: flex; flex-direction: column; gap: 1rem; padding: 2rem; background: #E9E9E9; width: 80%; margin: auto;"></div>
+</body>
+<script>
+    function getData() {
+        fetch(`https://apdc-grupo-7.oa.r.appspot.com/rest/communities/${localStorage.getItem("communityID")}/${localStorage.getItem("postID")}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "authToken": localStorage.getItem("authToken")
+            }
+        })
+        .then(async response => {
+            if (response.ok) {
+                const postData = await response.json();
+                displayPostDetails(postData);
+                getComments();
+            } else {
+                const message = await response.text();
+                console.error("Failed to fetch data:", message);
+            }
+        })
+        .catch(err => console.error("Error fetching data:", err));
+    }
+
+    function displayPostDetails(post) {
+        const postDetailsDiv = document.getElementById("postDetails");
+
+        const titleDiv = document.createElement("div");
+        titleDiv.innerHTML = `<strong>Title:</strong> ${post.title}`;
+        postDetailsDiv.appendChild(titleDiv);
+
+        const bodyDiv = document.createElement("div");
+        bodyDiv.innerHTML = `<strong>Body:</strong> ${post.postBody}`;
+        postDetailsDiv.appendChild(bodyDiv);
+
+        const usernameDiv = document.createElement("div");
+        usernameDiv.innerHTML = `<strong>Posted by:</strong> ${post.username}`;
+        postDetailsDiv.appendChild(usernameDiv);
+
+        const postDateDiv = document.createElement("div");
+        postDateDiv.innerHTML = `<strong>Posted on:</strong> ${new Date(post.postDate).toLocaleString()}`;
+        postDetailsDiv.appendChild(postDateDiv);
+
+        if (post.lastEdit) {
+            const lastEditDiv = document.createElement("div");
+            lastEditDiv.innerHTML = `<strong>Last edited on:</strong> ${new Date(post.lastEdit).toLocaleString()}`;
+            postDetailsDiv.appendChild(lastEditDiv);
+        }
+
+        const likesDiv = document.createElement("div");
+        likesDiv.innerHTML = `<strong>Likes:</strong> ${post.likes}`;
+        postDetailsDiv.appendChild(likesDiv);
+
+        const dislikesDiv = document.createElement("div");
+        dislikesDiv.innerHTML = `<strong>Dislikes:</strong> ${post.dislikes}`;
+        postDetailsDiv.appendChild(dislikesDiv);
+
+        const commentsDiv = document.createElement("div");
+        commentsDiv.innerHTML = `<strong>Comments:</strong> ${post.comments}`;
+        postDetailsDiv.appendChild(commentsDiv);
+
+        const statusDiv = document.createElement("div");
+        statusDiv.innerHTML = `<strong>Status:</strong> ${post.isLocked ? 'Locked' : 'Open'} ${post.isPinned ? '(Pinned)' : ''}`;
+        postDetailsDiv.appendChild(statusDiv);
+
+        if (post.pinDate) {
+            const pinDateDiv = document.createElement("div");
+            pinDateDiv.innerHTML = `<strong>Pinned on:</strong> ${new Date(post.pinDate).toLocaleString()}`;
+            postDetailsDiv.appendChild(pinDateDiv);
+        }
+    }
+
+    function getComments() {
+        fetch(`https://apdc-grupo-7.oa.r.appspot.com/rest/communities/${localStorage.getItem("communityID")}/${localStorage.getItem("postID")}/list/comments`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "authToken": localStorage.getItem("authToken")
+            }
+        })
+        .then(async response => {
+            if (response.ok) {
+                const commentsData = await response.json();
+                displayComments(commentsData);
+            } else {
+                const message = await response.text();
+                console.error("Failed to fetch comments:", message);
+            }
+        })
+        .catch(err => console.error("Error fetching comments:", err));
+    }
+
+    function displayComments(comments) {
+        const commentsContainer = document.getElementById("commentsContainer");
+        comments.forEach(commentNode => {
+            commentsContainer.appendChild(createCommentElement(commentNode));
+        });
+    }
+
+    function createCommentElement(commentNode) {
+        const commentDiv = document.createElement("div");
+        commentDiv.style.border = "1px solid #ccc";
+        commentDiv.style.padding = "1rem";
+        commentDiv.style.margin = "0.5rem 0";
+
+        const commentData = commentNode.commentData;
+        const bodyDiv = document.createElement("div");
+        bodyDiv.innerHTML = `<strong>Comment:</strong> ${commentData.commentBody}`;
+        commentDiv.appendChild(bodyDiv);
+
+        const usernameDiv = document.createElement("div");
+        usernameDiv.innerHTML = `<strong>Posted by:</strong> ${commentData.username}`;
+        commentDiv.appendChild(usernameDiv);
+
+        const commentDateDiv = document.createElement("div");
+        commentDateDiv.innerHTML = `<strong>Posted on:</strong> ${new Date(commentData.commentDate).toLocaleString()}`;
+        commentDiv.appendChild(commentDateDiv);
+
+        if (commentData.lastEdit) {
+            const lastEditDiv = document.createElement("div");
+            lastEditDiv.innerHTML = `<strong>Last edited on:</strong> ${new Date(commentData.lastEdit).toLocaleString()}`;
+            commentDiv.appendChild(lastEditDiv);
+        }
+
+        const likesDiv = document.createElement("div");
+        likesDiv.innerHTML = `<strong>Likes:</strong> ${commentData.likes}`;
+        commentDiv.appendChild(likesDiv);
+
+        const dislikesDiv = document.createElement("div");
+        dislikesDiv.innerHTML = `<strong>Dislikes:</strong> ${commentData.dislikes}`;
+        commentDiv.appendChild(dislikesDiv);
+
+        if (commentData.isPinned) {
+            const pinDateDiv = document.createElement("div");
+            pinDateDiv.innerHTML = `<strong>Pinned on:</strong> ${new Date(commentData.pinDate).toLocaleString()}`;
+            commentDiv.appendChild(pinDateDiv);
+        }
+
+        // Recursive call for children comments
+        if (commentNode.children && commentNode.children.length > 0) {
+            const childrenContainer = document.createElement("div");
+            childrenContainer.style.marginLeft = "2rem";
+            commentNode.children.forEach(childNode => {
+                childrenContainer.appendChild(createCommentElement(childNode));
+            });
+            commentDiv.appendChild(childrenContainer);
+        }
+
+        return commentDiv;
+    }
+
+    function checkLoginStatus() {
+        var authToken = localStorage.getItem('authToken');
+        if (authToken != null) {
+            fetch('/rest/login/check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: authToken
+            })
+            .then(response => {
+                if (!response.ok) {
+                    localStorage.removeItem('authToken');
+                    window.location.href = '../index.html';
+                }
+            })
+            .catch(error => {
+                console.error('Error checking login status: ', error);
+            });
+        } else {
+            window.location.href = '../index.html';
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        checkLoginStatus();
+        getData();
+    });
+</script>
+</html>

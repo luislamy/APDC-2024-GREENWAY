@@ -622,6 +622,55 @@ public class ThreadResource {
                 txn.rollback();
                 return validation;
             } else {
+                var stringValueTags = thread.getList("tags");
+                List<String> tags = new LinkedList<>();
+                stringValueTags.forEach(s -> {
+                    tags.add(s.toString());
+                });
+                var result = new ThreadData(thread.getString("threadID"), thread.getString("title"), thread.getString("username"), 
+                        thread.getTimestamp("threadStartDate"), thread.getLong("replies"), thread.getBoolean("isLocked"), thread.getBoolean("isPinned"), 
+                        thread.getTimestamp("pinDate"), tags, thread.getString("lastReplyUsername"), thread.getTimestamp("lastReplyDate"));
+                txn.commit();
+                LOG.fine("Get thread: " + authToken.username + " received thread with id " + threadID + ".");
+                return Response.ok(g.toJson(result)).build();
+            }
+        } catch (Exception e) {
+            txn.rollback();
+            LOG.severe("Get thread: " + e.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+                LOG.severe("Get thread: Internal server error.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
+
+    @GET
+    @Path("/{threadID}/replies")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response getThreadReplies(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
+            @PathParam("threadID") String threadID) {
+        AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
+        LOG.fine("Get thread: " + authToken.username + " attempted to get a thread with id " + threadID + ".");
+        Transaction txn = datastore.newTransaction();
+        try {
+            Entity user = serverConstants.getUser(txn, authToken.username);
+            Entity community = serverConstants.getCommunity(txn, communityID);
+            Entity thread = serverConstants.getThread(communityID, threadID);
+            Entity member = serverConstants.getCommunityMember(txn, communityID, authToken.username);
+            Entity token = serverConstants.getToken(txn, authToken.username, authToken.tokenID);
+            var validation = Validations.checkThreadsValidations(Validations.GET_THREAD, user, community, thread,
+                    member, token, authToken);
+            if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
+                serverConstants.removeToken(txn, authToken.username, authToken.tokenID);
+                txn.commit();
+                return validation;
+            } else if (validation.getStatus() != Status.OK.getStatusCode()) {
+                txn.rollback();
+                return validation;
+            } else {
                 var results = serverConstants.getThreadReplies(txn, thread.getKey());
                 List<ReplyData> replies = new LinkedList<>();
                 while (results.hasNext()) {

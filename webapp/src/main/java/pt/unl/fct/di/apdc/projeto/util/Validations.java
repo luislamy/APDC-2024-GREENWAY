@@ -25,8 +25,7 @@ public class Validations {
     public static final int CREATE_COMMUNITY = 201, GET_COMMUNITIES = 202, GET_COMMUNITY = 203, JOIN_COMMUNITY = 204,
             EDIT_COMMUNITY = 205, REQUEST_REMOVE_COMMUNITY = 206, LOCK_COMMUNITY = 207, REMOVE_COMMUNITY = 208,
             LEAVE_COMMUNITY = 209, UPDATE_COMMUNITY_MANAGER = 210, LIST_COMMUNITY_MEMBERS = 211,
-            LIST_COMMUNITY_POSTS = 212,
-            LIST_COMMUNITY_THREADS = 213;
+            LIST_COMMUNITY_POSTS = 212, LIST_COMMUNITY_THREADS = 213;
 
     public static final int ADD_POST = 241, GET_POST = 242, EDIT_POST = 243, REMOVE_POST = 244, LOCK_POST = 245,
             PIN_POST = 246, LIKE_POST = 247, DISLIKE_POST = 248, REPORT_POST = 249, LIST_COMMENTS = 250;
@@ -36,7 +35,7 @@ public class Validations {
 
     public static final int START_THREAD = 281, LOCK_THREAD = 282, PIN_THREAD = 283, REMOVE_THREAD = 284,
             ADD_THREAD_TAGS = 285, POST_THREAD_REPLY = 286, EDIT_THREAD_REPLY = 287, ADD_THREADMARK = 288,
-            REMOVE_THREAD_REPLY = 289, LIKE_THREAD_REPLY = 290, REPORT_THREAD_REPLY = 291, GET_THREAD = 292;
+            REMOVE_THREAD_REPLY = 289, LIKE_THREAD_REPLY = 290, REPORT_THREAD_REPLY = 291, GET_THREAD = 292, GET_THREAD_REPLIES = 293;
 
     public static <T> Response checkValidation(int operation, Entity user, T data) {
         return checkValidation(operation, user, null, null, null, data);
@@ -1905,6 +1904,8 @@ public class Validations {
             case REPORT_THREAD_REPLY:
                 return Response.status(Status.NOT_IMPLEMENTED).build();
             case GET_THREAD:
+                return checkGetThreadValidation(user, community, thread, member, token, authToken);
+            case GET_THREAD_REPLIES:
                 return checkGetThreadValidation(user, community, thread, member, token, authToken);
             default:
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
