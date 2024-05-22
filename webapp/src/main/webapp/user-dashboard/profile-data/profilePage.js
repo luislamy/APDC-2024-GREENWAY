@@ -20,14 +20,14 @@ function checkLoginStatus() {
                 }
             } else {
                 localStorage.removeItem('authToken');
-                window.location.href = 'index.html';
+                window.location.href = '../../index.html';
             }
         })
         .catch(error => {
             console.error('Error checking login status: ', error);
         });
     } else {
-        window.location.href = 'index.html';
+        window.location.href = '../../index.html';
     }
 }
 

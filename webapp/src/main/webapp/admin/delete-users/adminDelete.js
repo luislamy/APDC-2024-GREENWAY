@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var authToken = localStorage.getItem('authToken')
         if ( authToken == null ) {
             alert('Auth Token not found.');
-            window.location.href = 'login.html';
+            window.location.href = '../../login/login.html';
             return;
         }
         var token = JSON.parse(authToken);
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 const message = await response.text();
                 console.log('Remove user: ', message);
-                window.location.href = 'index.html';
+                window.location.href = '../../index.html';
             } else {
                 const errorMessage = await response.text();
                 alert('Fetch error: ' + errorMessage);
@@ -58,14 +58,14 @@ function checkLoginStatus() {
             if (response.ok) {
             } else {
                 localStorage.removeItem('authToken');
-                window.location.href = 'index.html';
+                window.location.href = '../../index.html';
             }
         })
         .catch(error => {
             console.error('Error checking login status: ', error);
         });
     } else {
-        window.location.href = 'index.html';
+        window.location.href = '../../index.html';
     }
 }
 

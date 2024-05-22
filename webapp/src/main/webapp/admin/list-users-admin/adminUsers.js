@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var authToken = localStorage.getItem('authToken');
     if ( authToken == null ) {
         alert('Auth Token not found. Login again.');
-        window.location.href = 'login.html';
+        window.location.href = '../../login/login.html';
         return;
     }
     fetch('/rest/list/users', {
@@ -51,14 +51,14 @@ function checkLoginStatus() {
             if (response.ok) {
             } else {
                 localStorage.removeItem('authToken');
-                window.location.href = 'index.html';
+                window.location.href = '../../index.html';
             }
         })
         .catch(error => {
             console.error('Error checking login status: ', error);
         });
     } else {
-        window.location.href = 'index.html';
+        window.location.href = '../../index.html';
     }
 }
 

@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var authToken = localStorage.getItem('authToken')
         if ( authToken == null ) {
             alert('Auth Token not found.');
-            window.location.href = 'login.html';
+            window.location.href = '../../login/login.html';
             return;
         }
         var token = JSON.parse(authToken);
@@ -91,14 +91,14 @@ function checkLoginStatus() {
                 }
             } else {
                 localStorage.removeItem('authToken');
-                window.location.href = 'index.html';
+                window.location.href = '../../index.html';
             }
         })
         .catch(error => {
             console.error('Error checking login status: ', error);
         });
     } else {
-        window.location.href = 'index.html';
+        window.location.href = '../../index.html';
     }
 }
 

@@ -33,14 +33,14 @@ function checkLoginStatus() {
             if (response.ok) {
             } else {
                 localStorage.removeItem('authToken');
-                window.location.href = 'dashboard.html';
+                window.location.href = '../dashboard/dashboard.html';
             }
         })
         .catch(error => {
             console.error('Error checking login status: ', error);
         });
     } else {
-        window.location.href = 'index.html';
+        window.location.href = '../index.html';
     }
 }
 

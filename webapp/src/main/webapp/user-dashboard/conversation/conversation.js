@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var authToken = localStorage.getItem('authToken')
         if ( authToken == null ) {
             alert('Auth Token not found.');
-            window.location.href = 'login.html';
+            window.location.href = '../../login/login.html';
             return;
         }
         var token = JSON.parse(authToken);
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var authToken = localStorage.getItem('authToken')
             if ( authToken == null ) {
                 alert('Auth Token not found.');
-                window.location.href = 'login.html';
+                window.location.href = '../../login/login.html';
                 return;
             }
             var token = JSON.parse(authToken);
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var authToken = localStorage.getItem('authToken')
                 if ( authToken == null ) {
                     alert('Auth Token not found.');
-                    window.location.href = 'login.html';
+                    window.location.href = '../../login.html';
                     return;
                 }
                 var token = JSON.parse(authToken);

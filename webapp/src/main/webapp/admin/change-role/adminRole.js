@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 const message = await response.text();
                 console.log('Change user role: ', message);
-                window.location.href = 'admin.html';
+                window.location.href = '../admin.html';
             } else {
                 const errorMessage = await response.text();
                 alert('Fetch error: ' + errorMessage);
@@ -56,14 +56,14 @@ function checkLoginStatus() {
             if (response.ok) {
             } else {
                 localStorage.removeItem('authToken');
-                window.location.href = 'index.html';
+                window.location.href = '../../index.html';
             }
         })
         .catch(error => {
             console.error('Error checking login status: ', error);
         });
     } else {
-        window.location.href = 'index.html';
+        window.location.href = '../../index.html';
     }
 }
 
