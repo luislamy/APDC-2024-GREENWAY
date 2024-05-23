@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-        document.querySelector('#addCommunity').onsubmit = () => {
+        document.querySelector('#addCommunity').onsubmit = (event) => {
+            event.preventDefault();
             const name = document.getElementById("communityName").value;
             const nickname = document.getElementById("nickname").value;
             const description = document.getElementById("description").value;
@@ -17,10 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: bodyData
             })
                 .then(async response => {
-                    if (await response.ok) {
-                        window.location.href = "communities.html";
+                    if (response.ok) {
+                        //window.location.href = "communities.html";
+                        console.log("Success")
                     } else {
-                        window.location.href = "communities.html";
+                        //window.location.href = "communities.html";
+                        console.log("Failure")
                     }
                 })
                 .catch(err => console.log(err));
