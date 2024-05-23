@@ -2,8 +2,10 @@ package pt.unl.fct.di.apdc.projeto.resources;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
@@ -16,11 +18,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
@@ -55,13 +61,47 @@ public class CommunityResource {
     public CommunityResource() {
     }
 
+    @GET
+    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCommunities(@HeaderParam("authToken") String jsonToken) {
+        AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
+        LOG.fine("Get Communities: attempt to get the communities by user " + authToken.username + ".");
+        Entity user = serverConstants.getUser(authToken.username);
+        Entity token = serverConstants.getToken(authToken.username, authToken.tokenID);
+        var validation = Validations.checkCommunitiesValidations(Validations.GET_COMMUNITIES, user, token, authToken);
+        if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
+            serverConstants.removeToken(authToken.username, authToken.tokenID);
+            return validation;
+        } else if (validation.getStatus() != Status.OK.getStatusCode()) {
+            return validation;
+        } else {
+            // TODO: don't show locked communities.
+            Query<Entity> query = Query.newEntityQueryBuilder().setKind("Community").build();
+            QueryResults<Entity> tokens = datastore.run(query);
+            List<String> list = new LinkedList<>();
+            tokens.forEachRemaining(communityLog -> {
+                Map<String, Object> m = new HashMap<>();
+                String name = communityLog.getString("name");
+                String communityID = communityLog.getString("communityID");
+                String description = communityLog.getString("description");
+                Long members = communityLog.getLong("num_members");
+                m.put("name", name);
+                m.put("communityID", communityID);
+                m.put("description", description);
+                m.put("num_members", members);
+                list.add(g.toJson(m));
+            });
+            return Response.ok(g.toJson(list)).status(Status.ACCEPTED).build();
+        }
+    }
+
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response createCommunity(@HeaderParam("authToken") String jsonToken, CommunityData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
-        LOG.fine("Attempt to create community by: " + authToken.username + ".");
+        LOG.fine("Create community: Attempt to create community by: " + authToken.username + ".");
         Transaction txn = datastore.newTransaction();
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
@@ -74,13 +114,14 @@ public class CommunityResource {
             } else if (validation.getStatus() != Status.OK.getStatusCode()) {
                 return validation;
             } else {
+                // TODO: add community privacy setting
                 String communityID = data.communityID;
                 if (serverConstants.getCommunity(txn, communityID) == null) {
                     Entity community = Entity.newBuilder(serverConstants.getCommunityKey(communityID))
                             .set("communityID", data.communityID)
                             .set("name", data.name)
                             .set("description", data.description)
-                            .set("num_members", 1)
+                            .set("num_members", 1L)
                             .set("username", authToken.username)
                             .set("isLocked", false)
                             .set("creationDate", Timestamp.now())
@@ -226,6 +267,7 @@ public class CommunityResource {
                 txn.rollback();
                 return validation;
             } else {
+                // TODO: add community privacy setting
                 community = Entity.newBuilder(community.getKey())
                         .set("communityID", community.getString("communityID"))
                         .set("name",
@@ -688,12 +730,17 @@ public class CommunityResource {
                     stringValueTags.forEach(s -> {
                         tags.add(s.toString());
                     });
-                    var thread = new ThreadData(next.getString("threadID"), next.getString("title"), next.getString("username"), 
-                            next.getTimestamp("threadStartDate"), next.getLong("replies"), next.getBoolean("isLocked"), next.getBoolean("isPinned"), 
-                            next.getTimestamp("pinDate"), tags, next.getString("lastReplyUsername"), next.getTimestamp("lastReplyDate"));
+                    var thread = new ThreadData(next.getString("threadID"), next.getString("title"),
+                            next.getString("username"),
+                            next.getTimestamp("threadStartDate"), next.getLong("replies"), next.getBoolean("isLocked"),
+                            next.getBoolean("isPinned"),
+                            next.getTimestamp("pinDate"), tags, next.getString("lastReplyUsername"),
+                            next.getTimestamp("lastReplyDate"));
                     threadsList.add(thread);
                 }
-                threadsList.sort(Comparator.comparing(ThreadData::isPinned).reversed().thenComparing(ThreadData::pinDate).thenComparing(Comparator.comparing(ThreadData::lastReplyDate).reversed()));
+                threadsList
+                        .sort(Comparator.comparing(ThreadData::isPinned).reversed().thenComparing(ThreadData::pinDate)
+                                .thenComparing(Comparator.comparing(ThreadData::lastReplyDate).reversed()));
                 LOG.fine("List community threads: " + authToken.username
                         + " received list of all threads of the community with id " + communityID
                         + ".");

@@ -14,11 +14,47 @@
 </nav>
 <h1>Create Community</h1>
 <form id="addCommunity">
-    <input type="text" id="communityName" placeholder="Community Name" required>
-    <input type="text" id="nickname" placeholder="Community Nickname" required>
+    <input type="text" id="communityID" placeholder="Community Name" required>
+    <input type="text" id="name" placeholder="Community Nickname" required>
     <input type="text" id="description" placeholder="Description">
     <input id="submit" type="submit" value="Enter">
 </form>
-<script src="addCommunity.js"></script>
+
+
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('#addCommunity').onsubmit = (event) => {
+            event.preventDefault();
+            const name = document.getElementById("communityName").value;
+            const nickname = document.getElementById("nickname").value;
+            const description = document.getElementById("description").value;
+            const bodyData = JSON.stringify({
+                "communityID": nickname,
+                "name": name,
+                "description": description,
+                "isLocked": false
+            });
+            fetch('https://apdc-grupo-7.oa.r.appspot.com/rest/communities/create', {
+                method: "POST",
+                headers: {
+                    "Content-type": "application/json",
+                    "authToken": localStorage.getItem("authToken"),
+                },
+                body: bodyData
+            })
+                .then(async response => {
+                    if (response.ok) {
+                        //window.location.href = "communities.html";
+                        console.log("Success")
+                    } else {
+                        //window.location.href = "communities.html";
+                        console.log("eRROr: " + response.statusText)
+                    }
+                })
+                .catch(err => console.log(err));
+        }
+    }
+)
+</script>
 </html>
