@@ -5,15 +5,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const nickname = document.getElementById("nickname").value;
             const description = document.getElementById("description").value;
             const bodyData = JSON.stringify({
+                "communityID": communityID,
                 "name": name,
-                "nickname": nickname,
-                "description": description
+                "description": description,
+                "isLocked": false
             });
             fetch('https://apdc-grupo-7.oa.r.appspot.com/rest/communities/create', {
                 method: "POST",
                 headers: {
                     "Content-type": "application/json",
-                    "authToken": localStorage.getItem("authToken"),
+                    "authToken": localStorage.getItem("authToken")
                 },
                 body: bodyData
             })

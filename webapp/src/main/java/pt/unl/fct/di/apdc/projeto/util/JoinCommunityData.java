@@ -8,5 +8,5 @@ public class JoinCommunityData {
 
     public JoinCommunityData(String communityID) {
         this.communityID = communityID;
-    }   
+    }
 }

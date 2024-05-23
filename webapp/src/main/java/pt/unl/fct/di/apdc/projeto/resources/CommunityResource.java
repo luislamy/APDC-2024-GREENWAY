@@ -2,13 +2,10 @@ package pt.unl.fct.di.apdc.projeto.resources;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
@@ -28,6 +25,8 @@ import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
@@ -63,6 +62,7 @@ public class CommunityResource {
     }
 
     @GET
+    @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCommunities(@HeaderParam("authToken") String jsonToken) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -101,7 +101,7 @@ public class CommunityResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createCommunity(@HeaderParam("authToken") String jsonToken, CommunityData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
-        LOG.fine("Attempt to create community by: " + authToken.username + ".");
+        LOG.fine("Create community: Attempt to create community by: " + authToken.username + ".");
         Transaction txn = datastore.newTransaction();
         try {
             Entity user = serverConstants.getUser(txn, authToken.username);
@@ -114,13 +114,14 @@ public class CommunityResource {
             } else if (validation.getStatus() != Status.OK.getStatusCode()) {
                 return validation;
             } else {
+                // TODO: add community privacy setting
                 String communityID = data.communityID;
                 if (serverConstants.getCommunity(txn, communityID) == null) {
                     Entity community = Entity.newBuilder(serverConstants.getCommunityKey(communityID))
                             .set("communityID", data.communityID)
                             .set("name", data.name)
                             .set("description", data.description)
-                            .set("num_members", 1)
+                            .set("num_members", 1L)
                             .set("username", authToken.username)
                             .set("isLocked", false)
                             .set("creationDate", Timestamp.now())
@@ -266,6 +267,7 @@ public class CommunityResource {
                 txn.rollback();
                 return validation;
             } else {
+                // TODO: add community privacy setting
                 community = Entity.newBuilder(community.getKey())
                         .set("communityID", community.getString("communityID"))
                         .set("name",
