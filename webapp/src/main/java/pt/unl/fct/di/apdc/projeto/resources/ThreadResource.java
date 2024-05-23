@@ -15,6 +15,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -57,6 +58,7 @@ public class ThreadResource {
     @POST
     @Path("/thread")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response startThread(@HeaderParam("authToken") String jsonToken,
             @PathParam("communityID") String communityID, ThreadData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -129,6 +131,7 @@ public class ThreadResource {
     @POST
     @Path("/{threadID}/lock")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response lockThread(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
             @PathParam("threadID") String threadID, boolean isLocked) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -175,6 +178,7 @@ public class ThreadResource {
     @POST
     @Path("/{threadID}/pin")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response pinThread(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
             @PathParam("threadID") String threadID, boolean isPinned) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -222,6 +226,7 @@ public class ThreadResource {
     @DELETE
     @Path("/{threadID}/remove")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response removeThread(@HeaderParam("authToken") String jsonToken,
             @PathParam("communityID") String communityID, @PathParam("threadID") String threadID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -272,6 +277,7 @@ public class ThreadResource {
     @POST
     @Path("/{threadID}/tags")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response ThreadTags(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
             @PathParam("threadID") String threadID, ThreadData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -323,6 +329,7 @@ public class ThreadResource {
     @POST
     @Path("/{threadID}/reply")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response postReply(@HeaderParam("authToken") String jsonToken,
             @PathParam("communityID") String communityID, @PathParam("threadID") String threadID, ReplyData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -382,6 +389,7 @@ public class ThreadResource {
     @POST
     @Path("/{threadID}/{replyID}/edit")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response editReply(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
             @PathParam("threadID") String threadID, @PathParam("replyID") String replyID, ReplyData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -430,6 +438,7 @@ public class ThreadResource {
     @POST
     @Path("/{threadID}/{replyID}/threadmark")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response threadmarkReply(@HeaderParam("authToken") String jsonToken,
             @PathParam("communityID") String communityID, @PathParam("threadID") String threadID,
             @PathParam("replyID") String replyID, ThreadmarkData data) {
@@ -484,6 +493,7 @@ public class ThreadResource {
     @POST
     @Path("/{threadID}/{replyID}/remove")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response removeReply(@HeaderParam("authToken") String jsonToken,
             @PathParam("communityID") String communityID, @PathParam("threadID") String threadID,
             @PathParam("replyID") String replyID) {
@@ -539,6 +549,7 @@ public class ThreadResource {
     @POST
     @Path("/{threadID}/{replyID}/like")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response likeReply(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
             @PathParam("threadID") String threadID, @PathParam("replyID") String replyID, boolean isLiked) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -599,8 +610,8 @@ public class ThreadResource {
     }
 
     @GET
-    @Path("/{threadID}")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/get/{threadID}")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response getThread(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
             @PathParam("threadID") String threadID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -649,7 +660,7 @@ public class ThreadResource {
 
     @GET
     @Path("/{threadID}/replies")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response getThreadReplies(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
             @PathParam("threadID") String threadID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);

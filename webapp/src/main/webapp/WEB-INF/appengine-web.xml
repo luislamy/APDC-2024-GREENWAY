@@ -14,9 +14,9 @@
 	</automatic-scaling>
 
   	<static-files>
-	    <include path="/**.html" expiration="5m" /> <!-- 5 minutes, normal is 12h or more -->
-	    <include path="/**.css" expiration="5m" />  <!-- 5 minutes, normal is 12h or more -->
-	    <include path="/**.js"  expiration="5m" />  <!-- 5 minutes, normal is 12h or more -->
+	    <include path="/**.html" expiration="1m" /> <!-- 5 minutes, normal is 12h or more -->
+	    <include path="/**.css" expiration="1m" />  <!-- 5 minutes, normal is 12h or more -->
+	    <include path="/**.js"  expiration="1m" />  <!-- 5 minutes, normal is 12h or more -->
 	    <include path="/**.jpg" expiration="5m" />  <!-- 5 minutes, normal is 12h or more -->
 	    <include path="/**.gif" expiration="5m" />  <!-- 5 minutes, normal is 12h or more -->
 	    <include path="/**.png" expiration="5m" />  <!-- 5 minutes, normal is 12h or more -->

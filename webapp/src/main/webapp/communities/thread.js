@@ -8,7 +8,7 @@ function getThreadDetails() {
     const threadID = localStorage.getItem("threadID");
     const authToken = localStorage.getItem("authToken");
 
-    fetch(`https://apdc-grupo-7.oa.r.appspot.com/rest/communities/${communityID}/${threadID}`, {
+    fetch(`https://apdc-grupo-7.oa.r.appspot.com/rest/communities/${communityID}/get/${threadID}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",

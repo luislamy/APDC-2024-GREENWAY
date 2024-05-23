@@ -19,7 +19,7 @@
 </body>
 <script>
     function getData() {
-        fetch(`https://apdc-grupo-7.oa.r.appspot.com/rest/communities/${localStorage.getItem("communityID")}/${localStorage.getItem("postID")}`, {
+        fetch(`https://apdc-grupo-7.oa.r.appspot.com/rest/communities/${localStorage.getItem("communityID")}/get/${localStorage.getItem("postID")}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

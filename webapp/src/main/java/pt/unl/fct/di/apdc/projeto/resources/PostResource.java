@@ -14,6 +14,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -32,7 +33,7 @@ import pt.unl.fct.di.apdc.projeto.util.PostData;
 import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 import pt.unl.fct.di.apdc.projeto.util.Validations;
 
-@Path("/communities")
+@Path("/communities/{communityID}")
 public class PostResource {
 
     /**
@@ -53,8 +54,9 @@ public class PostResource {
     }
 
     @POST
-    @Path("/{communityID}/post")
+    @Path("/post")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response addPost(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
             PostData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -113,8 +115,9 @@ public class PostResource {
     }
 
     @GET
-    @Path("/{communityID}/{postID}")
+    @Path("/get/{postID}")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response getPost(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
             @PathParam("postID") String postID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -151,8 +154,9 @@ public class PostResource {
     }
 
     @POST
-    @Path("/{communityID}/post/edit")
+    @Path("/post/edit")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response editPost(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
             PostData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -208,8 +212,9 @@ public class PostResource {
     }
 
     @POST
-    @Path("/{communityID}/{postID}/remove")
+    @Path("/{postID}/remove")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response removePost(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
             @PathParam("postID") String postID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -273,8 +278,9 @@ public class PostResource {
     }
 
     @POST
-    @Path("/{communityID}/post/lock")
+    @Path("/post/lock")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response lockPost(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
             PostData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -334,8 +340,9 @@ public class PostResource {
     }
 
     @POST
-    @Path("/{communityID}/post/pin")
+    @Path("/post/pin")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response pinPost(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
             PostData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -393,8 +400,9 @@ public class PostResource {
     }
 
     @POST
-    @Path("/{communityID}/post/like")
+    @Path("/post/like")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response likePost(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID,
             PostData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -467,8 +475,9 @@ public class PostResource {
     }
 
     @POST
-    @Path("/{communityID}/post/dislike")
+    @Path("/post/dislike")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response dislikePost(@HeaderParam("authToken") String jsonToken,
             @PathParam("communityID") String communityID, PostData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -542,8 +551,9 @@ public class PostResource {
     }
 
     @GET
-    @Path("/{communityID}/{postID}/list/comments")
+    @Path("/{postID}/list/comments")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response listComments(@HeaderParam("authToken") String jsonToken,
             @PathParam("communityID") String communityID, @PathParam("postID") String postID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);

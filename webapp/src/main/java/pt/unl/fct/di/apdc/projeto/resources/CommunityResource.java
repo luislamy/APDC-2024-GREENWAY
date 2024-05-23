@@ -18,8 +18,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.QueryResults;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
@@ -59,46 +57,13 @@ public class CommunityResource {
     private final Gson g = new Gson();
 
     public CommunityResource() {
-    }
 
-    @GET
-    @Path("/")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getCommunities(@HeaderParam("authToken") String jsonToken) {
-        AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
-        LOG.fine("Get Communities: attempt to get the communities by user " + authToken.username + ".");
-        Entity user = serverConstants.getUser(authToken.username);
-        Entity token = serverConstants.getToken(authToken.username, authToken.tokenID);
-        var validation = Validations.checkCommunitiesValidations(Validations.GET_COMMUNITIES, user, token, authToken);
-        if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
-            serverConstants.removeToken(authToken.username, authToken.tokenID);
-            return validation;
-        } else if (validation.getStatus() != Status.OK.getStatusCode()) {
-            return validation;
-        } else {
-            // TODO: don't show locked communities.
-            Query<Entity> query = Query.newEntityQueryBuilder().setKind("Community").build();
-            QueryResults<Entity> tokens = datastore.run(query);
-            List<String> list = new LinkedList<>();
-            tokens.forEachRemaining(communityLog -> {
-                Map<String, Object> m = new HashMap<>();
-                String name = communityLog.getString("name");
-                String communityID = communityLog.getString("communityID");
-                String description = communityLog.getString("description");
-                Long members = communityLog.getLong("num_members");
-                m.put("name", name);
-                m.put("communityID", communityID);
-                m.put("description", description);
-                m.put("num_members", members);
-                list.add(g.toJson(m));
-            });
-            return Response.ok(g.toJson(list)).status(Status.ACCEPTED).build();
-        }
     }
 
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response createCommunity(@HeaderParam("authToken") String jsonToken, CommunityData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         LOG.fine("Create community: Attempt to create community by: " + authToken.username + ".");
@@ -154,12 +119,46 @@ public class CommunityResource {
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
             }
         }
+    }
 
+    @GET
+    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    public Response getCommunities(@HeaderParam("authToken") String jsonToken) {
+        AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
+        LOG.fine("Get Communities: attempt to get the communities by user " + authToken.username + ".");
+        Entity user = serverConstants.getUser(authToken.username);
+        Entity token = serverConstants.getToken(authToken.username, authToken.tokenID);
+        var validation = Validations.checkCommunitiesValidations(Validations.GET_COMMUNITIES, user, token, authToken);
+        if (validation.getStatus() == Status.UNAUTHORIZED.getStatusCode()) {
+            serverConstants.removeToken(authToken.username, authToken.tokenID);
+            return validation;
+        } else if (validation.getStatus() != Status.OK.getStatusCode()) {
+            return validation;
+        } else {
+            // TODO: don't show locked communities.
+            Query<Entity> query = Query.newEntityQueryBuilder().setKind("Community").build();
+            QueryResults<Entity> tokens = datastore.run(query);
+            List<String> list = new LinkedList<>();
+            tokens.forEachRemaining(communityLog -> {
+                Map<String, Object> m = new HashMap<>();
+                String name = communityLog.getString("name");
+                String communityID = communityLog.getString("communityID");
+                String description = communityLog.getString("description");
+                Long members = communityLog.getLong("num_members");
+                m.put("name", name);
+                m.put("communityID", communityID);
+                m.put("description", description);
+                m.put("num_members", members);
+                list.add(g.toJson(m));
+            });
+            return Response.ok(g.toJson(list)).status(Status.ACCEPTED).build();
+        }
     }
 
     @GET
     @Path("/{communityID}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response getCommunity(@HeaderParam("authToken") String jsonToken,
             @PathParam("communityID") String communityID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -187,9 +186,9 @@ public class CommunityResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/join")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response joinCommunity(@HeaderParam("authToken") String jsonToken, JoinCommunityData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         LOG.fine("Join community: " + authToken.username + " attempted to join the community with id "
@@ -243,9 +242,9 @@ public class CommunityResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{communityID}/edit")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response editCommunity(@HeaderParam("authToken") String jsonToken,
             @PathParam("communityID") String communityID, CommunityData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -299,9 +298,9 @@ public class CommunityResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/remove/request")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response requestRemoveCommunity(@HeaderParam("authToken") String jsonToken, RemoveCommunityRequest data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         LOG.fine("Remove community request: " + authToken.username + " attempted to request the community with id "
@@ -356,9 +355,9 @@ public class CommunityResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/lock")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response lockCommunity(@HeaderParam("authToken") String jsonToken, CommunityData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         LOG.fine(
@@ -407,9 +406,9 @@ public class CommunityResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/remove")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response removeCommunity(@HeaderParam("authToken") String jsonToken, CommunityData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         LOG.fine("Remove Community: removal attempt of " + data.communityID + " by " + authToken.username + ".");
@@ -476,9 +475,9 @@ public class CommunityResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{communityID}/leave")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response leaveCommunity(@HeaderParam("authToken") String jsonToken, @HeaderParam("username") String username,
             @PathParam("communityID") String communityID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -530,9 +529,9 @@ public class CommunityResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{communityID}/update/manager")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response updateManagerStatus(@HeaderParam("authToken") String jsonToken,
             @HeaderParam("username") String username, @HeaderParam("isManager") boolean isManager,
             @PathParam("communityID") String communityID) {
@@ -582,9 +581,9 @@ public class CommunityResource {
     }
 
     @GET
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{communityID}/list/users")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response listCommunityMembers(@HeaderParam("authToken") String jsonToken,
             @PathParam("communityID") String communityID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -635,9 +634,9 @@ public class CommunityResource {
     }
 
     @GET
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{communityID}/list/posts")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response listCommunityPosts(@HeaderParam("authToken") String jsonToken,
             @PathParam("communityID") String communityID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
@@ -696,9 +695,9 @@ public class CommunityResource {
     }
 
     @GET
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{communityID}/list/threads")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response listCommunityThreads(@HeaderParam("authToken") String jsonToken,
             @PathParam("communityID") String communityID) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);

@@ -38,11 +38,11 @@
                         const communityDiv =  document.createElement("div");
                     
                         const div1 = document.createElement("div");
-                        div1.innerHTML = "Name: " + data["name"];
+                        div1.innerHTML = "CommunityID: " + data["communityID"];
                         communityDiv.appendChild(div1);
 
                         const nickname = document.createElement("div");
-                        nickname.innerHTML = data["nickname"];
+                        nickname.innerHTML = "Name: " + data["name"];
                         communityDiv.appendChild(nickname);
 
                         const div2 = document.createElement("div");
@@ -64,8 +64,8 @@
                                     "authToken": localStorage.getItem("authToken")
                                 },
                                 body: JSON.stringify({
-                                    "communityID": data["nickname"]
-                                }) 
+                                    "communityID": data["communityID"]
+                                })
                             })
                             .then(
                                 async response => {
@@ -77,7 +77,7 @@
                                         alert("Failed to fetch data:", message);
                                     }
                                 }
-                            )   
+                            )
                             .catch(err => console.error("Error fetching data:", err))
                         })
                         communitiesDiv.append(communityDiv);

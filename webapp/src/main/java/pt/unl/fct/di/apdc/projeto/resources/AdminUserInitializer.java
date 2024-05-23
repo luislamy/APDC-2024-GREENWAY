@@ -59,7 +59,10 @@ public class AdminUserInitializer extends HttpServlet {
                 txn.put(root);
                 txn.commit();
                 LOG.fine("Root register: root user was registered in the database.");
-            }
+            } else {
+				txn.rollback();
+                LOG.fine("Root register: root user is already registered in the database.");
+			}
         } catch ( Exception e ) {
 			txn.rollback();
 			LOG.severe("Root register: " + e.getMessage());

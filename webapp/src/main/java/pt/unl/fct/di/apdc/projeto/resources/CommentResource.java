@@ -46,8 +46,9 @@ public class CommentResource {
     public CommentResource() {}
 
     @POST
+    @Path("/add")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response addComment(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID, @PathParam("postID") String postID, CommentData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         LOG.fine("Add comment: " + authToken.username + " attempted to comment on post with id " + postID + " to the community with id " + communityID + ".");
@@ -112,8 +113,9 @@ public class CommentResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/edit")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response editComment(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID, @PathParam("postID") String postID, CommentData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         LOG.fine("Edit comment: " + authToken.username + " attempted to edit comment with id " + data.commentID + " on post with id " + postID + " to the community with id " + communityID + ".");
@@ -168,8 +170,9 @@ public class CommentResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/remove")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response removeComment(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID, @PathParam("postID") String postID, CommentData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         LOG.fine("Remove comment: " + authToken.username + " attempted to edit comment with id " + data.commentID + " on post with id " + postID + " to the community with id " + communityID + ".");
@@ -224,8 +227,9 @@ public class CommentResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/like")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response likeComment(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID, @PathParam("postID") String postID, CommentData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         String like = data.isLiked ? "like" : "unlike";
@@ -293,8 +297,9 @@ public class CommentResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/dislike")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response dislikeComment(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID, @PathParam("postID") String postID, CommentData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         String dislike = data.isLiked ? "dislike" : "undislike";
@@ -361,8 +366,9 @@ public class CommentResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/pin")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response pinComment(@HeaderParam("authToken") String jsonToken, @PathParam("communityID") String communityID, @PathParam("postID") String postID, CommentData data) {
         AuthToken authToken = g.fromJson(jsonToken, AuthToken.class);
         String pin = data.isPinned ? "pin" : "unpin";

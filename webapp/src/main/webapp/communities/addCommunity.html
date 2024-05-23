@@ -26,11 +26,11 @@
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('#addCommunity').onsubmit = (event) => {
             event.preventDefault();
-            const name = document.getElementById("communityName").value;
-            const nickname = document.getElementById("nickname").value;
+            const communityID = document.getElementById("communityID").value;
+            const name = document.getElementById("name").value;
             const description = document.getElementById("description").value;
             const bodyData = JSON.stringify({
-                "communityID": nickname,
+                "communityID": communityID,
                 "name": name,
                 "description": description,
                 "isLocked": false
@@ -39,7 +39,7 @@
                 method: "POST",
                 headers: {
                     "Content-type": "application/json",
-                    "authToken": localStorage.getItem("authToken"),
+                    "authToken": localStorage.getItem("authToken")
                 },
                 body: bodyData
             })
