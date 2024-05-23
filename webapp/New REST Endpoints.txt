@@ -5,7 +5,7 @@ Communities:
 4. join community (done, done, review) -> /communities/join
 5. leave community (done, done, review) -> /communities/{communityID}/leave
 6. list community members (done, done, review) -> /communities/{communityID}/list/users
-7. edit community (done, done, review) -> /communities/edit
+7. edit community (done, done, review) -> /communities/{communityID}/edit
 8. request remove community (done, done, review) -> /communities/community/remove/request
 9. remove community (done, done, review) -> /communities/community/remove
 10. lock community (done, done, review) -> /communities/community/lock
@@ -48,7 +48,7 @@ Community threads:
 10. Like reply (done, done, review) -> /communities/{communityID}/{threadID}/{replyID}/like
 11. Report reply (todo, valToDo, review) -> /communities/{communityID}/{threadID}/{replyID}/report
 12. Get thread replies (done, done, review) -> /communities/{communityID}/{threadID}/replies
-13. Get thread data (todo, valToDo, review) -> /communities/{communityID}/{threadID}
+13. Get thread data (done, done, review) -> /communities/{communityID}/{threadID}
 
 Community member actions:
 1. message community member (todo, valToDo, review) -> /
