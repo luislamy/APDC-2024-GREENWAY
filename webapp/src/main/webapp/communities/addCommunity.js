@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 "description": description,
                 "isLocked": false
             });
-            fetch('https://apdc-grupo-7.oa.r.appspot.com/rest/communities/create', {
+            fetch('https://greenway-be.nw.r.appspot.com/rest/communities/create', {
                 method: "POST",
                 headers: {
                     "Content-type": "application/json",

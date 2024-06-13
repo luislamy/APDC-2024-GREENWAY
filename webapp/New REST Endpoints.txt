@@ -1,7 +1,7 @@
 Communities:
 1. create community (done, done, review) -> /communities/create
 2. view communities (done, done, review) -> /communities
-3. view community (done, done, review) -> /communities/$communityID
+3. view community (done, done, review) -> /communities/{communityID}
 4. join community (done, done, review) -> /communities/join
 5. leave community (done, done, review) -> /communities/{communityID}/leave
 6. list community members (done, done, review) -> /communities/{communityID}/list/users
@@ -15,40 +15,40 @@ Communities:
 
 Community Post:
 1. post to community (done, done, review) -> /communities/{communityID}/post
+2. get post(done, done, review) -> /communities/{communityID}/post/{postID}
 2. edit post (done, done, review) -> /communities/{communityID}/post/edit
-3. remove post (done, done, review) -> /communities/{communityID}/post/remove
+3. remove post (done, done, review) -> /communities/{communityID}/post/{postId}/remove
 4. lock post (done, done, review) -> /communities/{communityID}/post/lock
 5. pin post (done, done, review) -> /communities/{communityID}/post/pin
 6. like post (done, done, review) -> /communities/{communityID}/post/like
 7. dislike post (done, done, review) -> /communities/{communityID}/post/dislike
-8. get post(done, done, review) -> /communities/{communityID}/{postID}
 9. Report post (todo, valToDo, review) -> /communities/{communityID}/{postID}/report
 10. ??share post (todo, valToDo, review) -> /
-11. List comments (done, done, review) -> /communities/{communityID}/{postID}/list/comments
+11. List comments (done, done, review) -> /communities/{communityID}/post/{postID}/list/comments
 
 Post Comment:
-1. comment on post (done, done, review) -> /communities/{communityID}/{postID}/comment
-2. edit comment (done, done, review) -> /communities/{communityID}/{postID}/comment/edit
-3. remove comment (done, done, review) -> /communities/{communityID}/{postID}/comment/remove
-4. like comment (done, done, review) -> /communities/{communityID}/{postID}/comment/like
-5. dislike comment (done, done, review) -> /communities/{communityID}/{postID}/comment/dislike
-6. pin comment (done, done, review) -> /communities/{communityID}/{postID}/comment/pin
-7. Report comment (todo, valToDo, review) -> /communities/{communityID}/{postID}/{commentID}/report
+1. comment on post (done, done, review) -> /communities/{communityID}/post/{postID}/comment
+2. edit comment (done, done, review) -> /communities/{communityID}/post/{postID}/comment/edit
+3. remove comment (done, done, review) -> /communities/{communityID}/post/{postID}/comment/remove
+4. like comment (done, done, review) -> /communities/{communityID}/post/{postID}/comment/like
+5. dislike comment (done, done, review) -> /communities/{communityID}/post/{postID}/comment/dislike
+6. pin comment (done, done, review) -> /communities/{communityID}/post/{postID}/comment/pin
+7. Report comment (todo, valToDo, review) -> /communities/{communityID}/post/{postID}/comment/{commentID}/report
 
 Community threads:
 1. Post thread (done, done, review) -> /communities/{communityID}/thread
-2. Lock thread (done, done, review) -> /communities/{communityID}/{threadID}/lock
-3. Pin thread (done, done, review) -> /communities/{communityID}/{threadID}/pin
-4. Remove thread (done, done, review) -> /communities/{communityID}/{threadID}/remove
-5. Add tags (done, done, review) -> /communities/{communityID}/{threadID}/tags
-6. Post reply (done, done, review) -> /communities/{communityID}/{threadID}/reply
-7. Edit reply (done, done, review) -> /communities/{communityID}/{threadID}/{replyID}/edit
-8. Add threadmark (done, done, review) -> /communities/{communityID}/{threadID}/{replyID}/threadmark
-9. Remove reply (done, done, review) -> /communities/{communityID}/{threadID}/{replyID}/remove
-10. Like reply (done, done, review) -> /communities/{communityID}/{threadID}/{replyID}/like
-11. Report reply (todo, valToDo, review) -> /communities/{communityID}/{threadID}/{replyID}/report
-12. Get thread replies (done, done, review) -> /communities/{communityID}/{threadID}/replies
-13. Get thread data (done, done, review) -> /communities/{communityID}/{threadID}
+2. Lock thread (done, done, review) -> /communities/{communityID}/thread/{threadID}/lock
+3. Pin thread (done, done, review) -> /communities/{communityID}/thread/{threadID}/pin
+4. Remove thread (done, done, review) -> /communities/{communityID}/thread/{threadID}/remove
+5. Add tags (done, done, review) -> /communities/{communityID}/thread/{threadID}/tags
+6. Post reply (done, done, review) -> /communities/{communityID}/thread/{threadID}/reply
+7. Edit reply (done, done, review) -> /communities/{communityID}/thread/{threadID}/{replyID}/edit
+8. Add threadmark (done, done, review) -> /communities/{communityID}/thread/{threadID}/{replyID}/threadmark
+9. Remove reply (done, done, review) -> /communities/{communityID}/thread/{threadID}/{replyID}/remove
+10. Like reply (done, done, review) -> /communities/{communityID}/thread/{threadID}/{replyID}/like
+11. Get thread data (done, done, review) -> /communities/{communityID}/thread/{threadID}
+12. Get thread replies (done, done, review) -> /communities/{communityID}/thread/{threadID}/replies
+11. Report reply (todo, valToDo, review) -> /communities/{communityID}/thread/{threadID}/{replyID}/report
 
 Community member actions:
 1. message community member (todo, valToDo, review) -> /

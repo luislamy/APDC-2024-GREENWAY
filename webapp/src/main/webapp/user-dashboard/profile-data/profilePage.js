@@ -1,7 +1,7 @@
 function checkLoginStatus() {
     var authToken = localStorage.getItem('authToken');
     if ( authToken != null ) {
-        fetch('/rest/login/check', {
+        fetch('https://greenway-be.nw.r.appspot.com/rest/login/check', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -33,7 +33,7 @@ function checkLoginStatus() {
 
 function getUserProfile() {
     var authToken = localStorage.getItem('authToken');
-    fetch('/rest/user/profile', {
+    fetch('https://greenway-be.nw.r.appspot.com/rest/user/profile', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

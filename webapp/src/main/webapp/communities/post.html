@@ -19,7 +19,7 @@
 </body>
 <script>
     function getData() {
-        fetch(`https://apdc-grupo-7.oa.r.appspot.com/rest/communities/${localStorage.getItem("communityID")}/get/${localStorage.getItem("postID")}`, {
+        fetch(`https://greenway-be.nw.r.appspot.com/rest/communities/${localStorage.getItem("communityID")}/get/${localStorage.getItem("postID")}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -88,7 +88,7 @@
     }
 
     function getComments() {
-        fetch(`https://apdc-grupo-7.oa.r.appspot.com/rest/communities/${localStorage.getItem("communityID")}/${localStorage.getItem("postID")}/list/comments`, {
+        fetch(`https://greenway-be.nw.r.appspot.com/rest/communities/${localStorage.getItem("communityID")}/${localStorage.getItem("postID")}/list/comments`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -169,7 +169,7 @@
     function checkLoginStatus() {
         var authToken = localStorage.getItem('authToken');
         if (authToken != null) {
-            fetch('/rest/login/check', {
+            fetch('https://greenway-be.nw.r.appspot.com/rest/login/check', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

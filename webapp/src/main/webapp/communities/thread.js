@@ -8,7 +8,7 @@ function getThreadDetails() {
     const threadID = localStorage.getItem("threadID");
     const authToken = localStorage.getItem("authToken");
 
-    fetch(`https://apdc-grupo-7.oa.r.appspot.com/rest/communities/${communityID}/get/${threadID}`, {
+    fetch(`https://greenway-be.nw.r.appspot.com/rest/communities/${communityID}/get/${threadID}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -41,7 +41,7 @@ function getThreadReplies() {
     const threadID = localStorage.getItem("threadID");
     const authToken = localStorage.getItem("authToken");
 
-    fetch(`https://apdc-grupo-7.oa.r.appspot.com/rest/communities/${communityID}/${threadID}/replies`, {
+    fetch(`https://greenway-be.nw.r.appspot.com/rest/communities/${communityID}/${threadID}/replies`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -74,7 +74,7 @@ function displayThreadReplies(replies) {
 function checkLoginStatus() {
     var authToken = localStorage.getItem('authToken');
     if ( authToken != null ) {
-        fetch('/rest/login/check', {
+        fetch('https://greenway-be.nw.r.appspot.com/rest/login/check', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

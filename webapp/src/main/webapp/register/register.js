@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function registerUser(jsonData) {
-        fetch('/rest/register/user', {
+        fetch('https://greenway-be.nw.r.appspot.com/rest/register/user', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

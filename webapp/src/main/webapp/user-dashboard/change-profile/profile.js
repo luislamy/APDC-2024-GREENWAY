@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function changeUserData(jsonData) {
-        fetch('/rest/user/change/data', {
+        fetch('https://greenway-be.nw.r.appspot.com/rest/user/change/data', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function checkLoginStatus() {
     var authToken = localStorage.getItem('authToken');
     if ( authToken != null ) {
-        fetch('/rest/login/check', {
+        fetch('https://greenway-be.nw.r.appspot.com/rest/login/check', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

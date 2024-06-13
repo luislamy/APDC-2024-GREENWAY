@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function loginUser(jsonData) {
-        fetch('/rest/login/user', {
+        fetch('https://greenway-be.nw.r.appspot.com/rest/login/user', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

@@ -35,7 +35,7 @@
                 "description": description,
                 "isLocked": false
             });
-            fetch('https://apdc-grupo-7.oa.r.appspot.com/rest/communities/create', {
+            fetch('https://greenway-be.nw.r.appspot.com/rest/communities/create', {
                 method: "POST",
                 headers: {
                     "Content-type": "application/json",
@@ -45,11 +45,11 @@
             })
                 .then(async response => {
                     if (response.ok) {
-                        //window.location.href = "communities.html";
+                        window.location.href = "./communities.html";
                         console.log("Success")
                     } else {
                         //window.location.href = "communities.html";
-                        console.log("eRROr: " + response.statusText)
+                        console.log("Error: " + response.statusText)
                     }
                 })
                 .catch(err => console.log(err));

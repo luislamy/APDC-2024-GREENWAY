@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = '../../login/login.html';
         return;
     }
-    fetch('/rest/list/users', {
+    fetch('https://greenway-be.nw.r.appspot.com/rest/list/users', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function checkLoginStatus() {
     var authToken = localStorage.getItem('authToken');
     if ( authToken != null ) {
-        fetch('/rest/login/check', {
+        fetch('https://greenway-be.nw.r.appspot.com/rest/login/check', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
