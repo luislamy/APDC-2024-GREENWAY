@@ -16,7 +16,9 @@ public class Validations {
      */
     private static Logger LOG = Logger.getLogger(Validations.class.getName());
 
-    /** Operation codes */
+    /**
+     * Operation codes
+     */
     public static final int LOGIN = 101, GET_TOKEN = 102, LOGOUT = 103, LIST_USERS = 104, CHANGE_USER_DATA = 105,
             CHANGE_PASSWORD = 106, CHANGE_USER_ROLE = 107, CHANGE_USER_STATE = 108, REMOVE_USER = 109,
             SEARCH_USER = 110,
@@ -37,6 +39,8 @@ public class Validations {
             ADD_THREAD_TAGS = 285, POST_THREAD_REPLY = 286, EDIT_THREAD_REPLY = 287, ADD_THREADMARK = 288,
             REMOVE_THREAD_REPLY = 289, LIKE_THREAD_REPLY = 290, REPORT_THREAD_REPLY = 291, GET_THREAD = 292, GET_THREAD_REPLIES = 293;
 
+    public static final int SUBMIT_APPLICATION = 301, PROCESS_APPLICATION = 302;
+
     public static <T> Response checkValidation(int operation, Entity user, T data) {
         return checkValidation(operation, user, null, null, null, data);
     }
@@ -50,7 +54,7 @@ public class Validations {
     }
 
     public static <T> Response checkValidation(int operation, Entity admin, Entity user, Entity token,
-            AuthToken authToken, T data) {
+                                               AuthToken authToken, T data) {
         if (operation == LOGIN)
             return checkLoginValidation(admin, (LoginData) data);
         else if (operation == GET_TOKEN)
@@ -126,7 +130,7 @@ public class Validations {
     }
 
     private static Response checkChangeUserDataValidation(Entity admin, Entity user, Entity token, AuthToken authToken,
-            ChangeData data) {
+                                                          ChangeData data) {
         String operation = "Data change: ";
         if (validateUser(operation, user, data.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(data.username + " is not a registered user.").build();
@@ -200,7 +204,7 @@ public class Validations {
     }
 
     private static Response checkChangePasswordValidation(Entity user, Entity token, AuthToken authToken,
-            PasswordData data) {
+                                                          PasswordData data) {
         String operation = "Password change: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -224,7 +228,7 @@ public class Validations {
     }
 
     private static Response checkChangeUserRoleValidation(Entity admin, Entity user, Entity token, AuthToken authToken,
-            RoleData data) {
+                                                          RoleData data) {
         String operation = "Role change: ";
         if (validateUser(operation, admin, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -263,7 +267,7 @@ public class Validations {
     }
 
     private static Response checkChangeUserStateValidation(Entity admin, Entity user, Entity token, AuthToken authToken,
-            UsernameData data) {
+                                                           UsernameData data) {
         String operation = "State change: ";
         if (validateUser(operation, admin, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -317,7 +321,7 @@ public class Validations {
     }
 
     private static Response checkRemoveUserValidation(Entity admin, Entity user, Entity token, AuthToken authToken,
-            UsernameData data) {
+                                                      UsernameData data) {
         String operation = "Remove user: ";
         if (validateUser(operation, admin, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -390,7 +394,7 @@ public class Validations {
     }
 
     private static Response checkSearchUserValidation(Entity admin, Entity user, Entity token, AuthToken authToken,
-            UsernameData data) {
+                                                      UsernameData data) {
         String operation = "Search user: ";
         if (validateUser(operation, admin, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -412,7 +416,7 @@ public class Validations {
                     LOG.warning(operation + authToken.username
                             + " (USER/EP role) attempted to search non USER/EP, inactive or private users' information.");
                     return Response.status(Status.FORBIDDEN).entity(
-                            "USER/EP roles cannot search for other non USER/EP, inactive or private users' from the database.")
+                                    "USER/EP roles cannot search for other non USER/EP, inactive or private users' from the database.")
                             .build();
                 }
             } else if (adminRole.equals(ServerConstants.GC)) {
@@ -459,7 +463,7 @@ public class Validations {
     }
 
     private static Response checkSendMessageValidation(Entity sender, Entity receiver, Entity token,
-            AuthToken authToken, MessageClass message) {
+                                                       AuthToken authToken, MessageClass message) {
         String operation = "Send Message: ";
         if (validateUser(operation, sender, message.sender).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(message.sender + " is not a registered user.").build();
@@ -483,7 +487,7 @@ public class Validations {
                     LOG.fine(
                             operation + "USER/EP roles cannot send messages to non USER/EP roles or private profiles.");
                     return Response.status(Status.FORBIDDEN).entity(
-                            "USER/EP roles cannot send messages to non USER/EP roles or users with private profiles.")
+                                    "USER/EP roles cannot send messages to non USER/EP roles or users with private profiles.")
                             .build();
                 }
             } else if (senderRole.equals(ServerConstants.GC)) {
@@ -543,7 +547,7 @@ public class Validations {
     }
 
     private static Response checkLoadConversationValidation(Entity sender, Entity receiver, Entity token,
-            AuthToken authToken, ConversationClass data) {
+                                                            AuthToken authToken, ConversationClass data) {
         String operation = "Load Conversation: ";
         if (validateUser(operation, sender, data.sender).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(data.sender + " is not a registered user.").build();
@@ -561,32 +565,32 @@ public class Validations {
     }
 
     public static Response checkCommunitiesValidations(int operation, Entity user, Entity token, AuthToken authToken,
-            CommunityData data) {
+                                                       CommunityData data) {
         return checkCommunitiesValidations(operation, user, null, null, token, authToken, data);
     }
 
     public static Response checkCommunitiesValidations(int operation, Entity user, Entity community, Entity token,
-            AuthToken authToken) {
+                                                       AuthToken authToken) {
         return checkCommunitiesValidations(operation, user, community, null, token, authToken, null);
     }
 
     public static Response checkCommunitiesValidations(int operation, Entity user, Entity community, Entity member,
-            Entity token, AuthToken authToken) {
+                                                       Entity token, AuthToken authToken) {
         return checkCommunitiesValidations(operation, user, community, member, token, authToken, null);
     }
 
     public static <T> Response checkCommunitiesValidations(int operation, Entity user, Entity community, Entity member,
-            Entity token, AuthToken authToken, T data) {
+                                                           Entity token, AuthToken authToken, T data) {
         return checkCommunitiesValidations(operation, user, community, member, null, token, authToken, data);
     }
 
     public static Response checkCommunitiesValidations(int operation, Entity user, Entity community, Entity member,
-            Entity adminMember, Entity token, AuthToken authToken) {
+                                                       Entity adminMember, Entity token, AuthToken authToken) {
         return checkCommunitiesValidations(operation, user, community, member, adminMember, token, authToken, null);
     }
 
     public static <T> Response checkCommunitiesValidations(int operation, Entity user, Entity community, Entity member,
-            Entity adminMember, Entity token, AuthToken authToken, T data) {
+                                                           Entity adminMember, Entity token, AuthToken authToken, T data) {
         switch (operation) {
             case GET_COMMUNITIES:
                 return checkGetCommunitiesValidation(user, token, authToken);
@@ -632,7 +636,7 @@ public class Validations {
     }
 
     private static Response checkCreateCommunityValidation(Entity user, Entity token, AuthToken authToken,
-            CommunityData data) {
+                                                           CommunityData data) {
         String operation = "Create community: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -658,7 +662,7 @@ public class Validations {
     }
 
     private static Response checkGetCommunityValidation(Entity user, Entity community, Entity member, Entity token,
-            AuthToken authToken) {
+                                                        AuthToken authToken) {
         String operation = "Get community: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -685,7 +689,7 @@ public class Validations {
     }
 
     private static Response checkJoinCommunityValidation(Entity user, Entity community, Entity member, Entity token,
-            AuthToken authToken) {
+                                                         AuthToken authToken) {
         String operation = "Join community: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -717,7 +721,7 @@ public class Validations {
     }
 
     private static Response checkEditCommunityValidation(Entity user, Entity community, Entity member, Entity token,
-            AuthToken authToken, CommunityData data) {
+                                                         AuthToken authToken, CommunityData data) {
         String operation = "Edit community: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -735,7 +739,7 @@ public class Validations {
                 LOG.info(operation
                         + "community is locked and user is not a manager of the community or a communities manager.");
                 return Response.status(Status.FORBIDDEN).entity(
-                        "Community is locked and user is not a manager of the community or a communities manager.")
+                                "Community is locked and user is not a manager of the community or a communities manager.")
                         .build();
             }
             boolean nameChange = data.name != null && !data.name.trim().isEmpty()
@@ -753,7 +757,7 @@ public class Validations {
     }
 
     private static Response checkRequestRemoveCommunityValidation(Entity user, Entity community, Entity member,
-            Entity token, AuthToken authToken, RemoveCommunityRequest data) {
+                                                                  Entity token, AuthToken authToken, RemoveCommunityRequest data) {
         String operation = "Remove community request: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -783,7 +787,7 @@ public class Validations {
     }
 
     private static Response checkLockCommunityValidation(Entity user, Entity community, Entity member, Entity token,
-            AuthToken authToken, CommunityData data) {
+                                                         AuthToken authToken, CommunityData data) {
         String operation = "Lock community: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -811,7 +815,7 @@ public class Validations {
     }
 
     private static Response checkRemoveCommunityValidation(Entity user, Entity community, Entity token,
-            AuthToken authToken) {
+                                                           AuthToken authToken) {
         String operation = "Remove community: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -835,7 +839,7 @@ public class Validations {
     }
 
     private static Response checkLeaveCommunityValidation(Entity user, Entity community, Entity member,
-            Entity adminMember, Entity token, AuthToken authToken, CommunityData data) {
+                                                          Entity adminMember, Entity token, AuthToken authToken, CommunityData data) {
         String operation = "Leave community: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -922,7 +926,7 @@ public class Validations {
     }
 
     private static Response checkUpdateCommunityManagerValidation(Entity user, Entity community, Entity member,
-            Entity adminMember, Entity token, AuthToken authToken, boolean isManager) {
+                                                                  Entity adminMember, Entity token, AuthToken authToken, boolean isManager) {
         String operation = "Update manager status: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -951,7 +955,7 @@ public class Validations {
     }
 
     private static Response checkListCommunityMembersValidation(Entity user, Entity community, Entity member,
-            Entity token, AuthToken authToken) {
+                                                                Entity token, AuthToken authToken) {
         String operation = "List community members: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -975,7 +979,7 @@ public class Validations {
     }
 
     private static Response checkListCommunityPostsValidation(Entity user, Entity community, Entity member,
-            Entity token, AuthToken authToken) {
+                                                              Entity token, AuthToken authToken) {
         String operation = "List community posts: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -999,7 +1003,7 @@ public class Validations {
     }
 
     private static Response checkListCommunityThreadsValidation(Entity user, Entity community, Entity member,
-            Entity token, AuthToken authToken) {
+                                                                Entity token, AuthToken authToken) {
         String operation = "List community threads: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1022,25 +1026,92 @@ public class Validations {
         }
     }
 
+    /************************ Applications Validations ********************/
+
+    public static Response checkApplicationsValidations(int operation, Entity user, Entity token, AuthToken authToken, ApplicationData data) {
+        return checkApplicationsValidations(operation, user, null, token, authToken, data);
+    }
+
+    public static <T> Response checkApplicationsValidations(int operation, Entity user, Entity submitter, Entity token, AuthToken authToken, T data) {
+        switch (operation) {
+            case SUBMIT_APPLICATION:
+                return checkSubmitApplicationValidation(user, token, authToken, (ApplicationData) data);
+            case PROCESS_APPLICATION:
+                return checkProcessApplicationValidation(user, submitter, token, authToken, (boolean) data);
+            default:
+                return Response.status(Status.INTERNAL_SERVER_ERROR)
+                        .entity("Internal server error during applications validations.").build();
+        }
+    }
+
+    private static Response checkSubmitApplicationValidation(Entity user, Entity token, AuthToken authToken, ApplicationData data) {
+        String operation = "Submit application: ";
+        if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
+            return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
+        }
+        var tokenValidation = validateToken(operation, user, token, authToken);
+        if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
+            return tokenValidation;
+        } else {
+            var userRole = user.getString("role");
+            if (userRole.equals(ServerConstants.USER)) {
+                var code = data.isValid();
+                if (code < 1) {
+                    LOG.fine(operation + data.getInvalidReason(code) + "provided.");
+                    return Response.status(Status.BAD_REQUEST)
+                            .entity(operation + data.getInvalidReason(code) + "provided.").build();
+                }
+                return Response.ok().build();
+            } else {
+                return Response.status(Status.FORBIDDEN).entity("User is not allowed to submit application").build();
+            }
+        }
+    }
+
+    private static Response checkProcessApplicationValidation(Entity user, Entity submitter, Entity token, AuthToken authToken, boolean isAccepted) {
+        String operation = "Process application: ";
+        if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
+            return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
+        }
+        var tokenValidation = validateToken(operation, user, token, authToken);
+        if (tokenValidation.getStatus() != Status.OK.getStatusCode()) {
+            return tokenValidation;
+        } else {
+            var userRole = user.getString("role");
+            if (userRole.equals(ServerConstants.GA)) {
+                if (isAccepted) {
+                    if (submitter == null) {
+                        return Response.status(Status.NOT_FOUND).entity("Submitter no longer exists.").build();
+                    } else if (!submitter.getString("role").equals(ServerConstants.USER) || !submitter.getString("profile").equals(ServerConstants.ACTIVE)) {
+                        return Response.status(Status.CONFLICT).entity("User is no longer allowed to submit applications.").build();
+                    }
+                }
+                return Response.ok().build();
+            } else {
+                return Response.status(Status.FORBIDDEN).entity("User is not allowed to process application").build();
+            }
+        }
+    }
+
     /************************ Posts Validations ********************/
 
     public static Response checkPostsValidations(int operation, Entity user, Entity community, Entity member,
-            Entity token, AuthToken authToken, PostData data) {
+                                                 Entity token, AuthToken authToken, PostData data) {
         return checkPostsValidations(operation, user, community, null, member, token, authToken, data);
     }
 
     public static Response checkPostsValidations(int operation, Entity user, Entity community, Entity post,
-            Entity member, Entity token, AuthToken authToken) {
+                                                 Entity member, Entity token, AuthToken authToken) {
         return checkPostsValidations(operation, user, community, post, member, token, authToken, null);
     }
 
     public static Response checkPostsValidations(int operation, Entity user, Entity community, Entity post,
-            Entity member, Entity token, AuthToken authToken, PostData data) {
+                                                 Entity member, Entity token, AuthToken authToken, PostData data) {
         return checkPostsValidations(operation, user, community, post, member, null, token, authToken, data);
     }
 
     public static Response checkPostsValidations(int operation, Entity user, Entity community, Entity post,
-            Entity member, Entity relation, Entity token, AuthToken authToken, PostData data) {
+                                                 Entity member, Entity relation, Entity token, AuthToken authToken, PostData data) {
         switch (operation) {
             case ADD_POST:
                 return checkAddPostValidation(user, community, member, token, authToken, data);
@@ -1069,7 +1140,7 @@ public class Validations {
     }
 
     private static Response checkAddPostValidation(Entity user, Entity community, Entity member, Entity token,
-            AuthToken authToken, PostData data) {
+                                                   AuthToken authToken, PostData data) {
         String operation = "Add post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1113,7 +1184,7 @@ public class Validations {
     }
 
     private static Response checkGetPostValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity token, AuthToken authToken) {
+                                                   Entity token, AuthToken authToken) {
         String operation = "Get post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1141,7 +1212,7 @@ public class Validations {
     }
 
     private static Response checkEditPostValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity token, AuthToken authToken, PostData data) {
+                                                    Entity token, AuthToken authToken, PostData data) {
         String operation = "Edit post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1204,7 +1275,7 @@ public class Validations {
     }
 
     private static Response checkRemovePostValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity token, AuthToken authToken) {
+                                                      Entity token, AuthToken authToken) {
         String operation = "Remove post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1251,7 +1322,7 @@ public class Validations {
     }
 
     private static Response checkLockPostValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity token, AuthToken authToken, PostData data) {
+                                                    Entity token, AuthToken authToken, PostData data) {
         String operation = "Lock post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1298,7 +1369,7 @@ public class Validations {
     }
 
     private static Response checkPinPostValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity token, AuthToken authToken, PostData data) {
+                                                   Entity token, AuthToken authToken, PostData data) {
         String operation = "Pin post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1352,7 +1423,7 @@ public class Validations {
     }
 
     private static Response checkLikePostValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity likeRelation, Entity token, AuthToken authToken, PostData data) {
+                                                    Entity likeRelation, Entity token, AuthToken authToken, PostData data) {
         String operation = "Like post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1401,7 +1472,7 @@ public class Validations {
     }
 
     private static Response checkDislikePostValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity dislikeRelation, Entity token, AuthToken authToken, PostData data) {
+                                                       Entity dislikeRelation, Entity token, AuthToken authToken, PostData data) {
         String operation = "Dislike post: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1451,7 +1522,7 @@ public class Validations {
     }
 
     private static Response checkListCommentsValidation(Entity user, Entity community, Entity post, Entity member,
-            Entity token, AuthToken authToken) {
+                                                        Entity token, AuthToken authToken) {
         String operation = "List comments: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1481,14 +1552,14 @@ public class Validations {
     /************** Comments Validations *******************/
 
     public static Response checkCommentsValidations(int operation, Entity user, Entity community, Entity post,
-            Entity comment,
-            Entity member, Entity token, AuthToken authToken, CommentData data) {
+                                                    Entity comment,
+                                                    Entity member, Entity token, AuthToken authToken, CommentData data) {
         return checkCommentsValidations(operation, user, community, post, comment, member, null, token, authToken,
                 data);
     }
 
     public static Response checkCommentsValidations(int operation, Entity user, Entity community, Entity post,
-            Entity comment, Entity member, Entity relation, Entity token, AuthToken authToken, CommentData data) {
+                                                    Entity comment, Entity member, Entity relation, Entity token, AuthToken authToken, CommentData data) {
         switch (operation) {
             case ADD_COMMENT:
                 return checkAddCommentValidation(user, community, post, comment, member, token, authToken, data);
@@ -1511,7 +1582,7 @@ public class Validations {
     }
 
     private static Response checkAddCommentValidation(Entity user, Entity community, Entity post, Entity parentComment,
-            Entity member, Entity token, AuthToken authToken, CommentData data) {
+                                                      Entity member, Entity token, AuthToken authToken, CommentData data) {
         String operation = "Add comment: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1569,7 +1640,7 @@ public class Validations {
     }
 
     private static Response checkEditCommentValidation(Entity user, Entity community, Entity post, Entity comment,
-            Entity member, Entity token, AuthToken authToken, CommentData data) {
+                                                       Entity member, Entity token, AuthToken authToken, CommentData data) {
         String operation = "Edit comment: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1624,7 +1695,7 @@ public class Validations {
     }
 
     private static Response checkRemoveCommentValidation(Entity user, Entity community, Entity post, Entity comment,
-            Entity member, Entity token, AuthToken authToken, CommentData data) {
+                                                         Entity member, Entity token, AuthToken authToken, CommentData data) {
         String operation = "Remove comment: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1676,7 +1747,7 @@ public class Validations {
     }
 
     private static Response checkLikeCommentValidation(Entity user, Entity community, Entity post, Entity comment,
-            Entity member, Entity likeRelation, Entity token, AuthToken authToken, CommentData data) {
+                                                       Entity member, Entity likeRelation, Entity token, AuthToken authToken, CommentData data) {
         String operation = "Like comment: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1729,7 +1800,7 @@ public class Validations {
     }
 
     private static Response checkDislikeCommentValidation(Entity user, Entity community, Entity post, Entity comment,
-            Entity member, Entity dislikeRelation, Entity token, AuthToken authToken, CommentData data) {
+                                                          Entity member, Entity dislikeRelation, Entity token, AuthToken authToken, CommentData data) {
         String operation = "Dislike comment: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1782,7 +1853,7 @@ public class Validations {
     }
 
     private static Response checkPinCommentValidation(Entity user, Entity community, Entity post, Entity comment,
-            Entity member, Entity token, AuthToken authToken, CommentData data) {
+                                                      Entity member, Entity token, AuthToken authToken, CommentData data) {
         String operation = "Pin comment: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1848,33 +1919,33 @@ public class Validations {
     /************** Threads Validations *******************/
 
     public static Response checkThreadsValidations(int operation, Entity user, Entity community, Entity thread,
-            Entity member,
-            Entity token, AuthToken authToken) {
+                                                   Entity member,
+                                                   Entity token, AuthToken authToken) {
         return checkThreadsValidations(operation, user, community, thread, member, token, authToken, null);
     }
 
     public static Response checkThreadsValidations(int operation, Entity user, Entity community, Entity thread,
-            Entity reply, Entity member, Entity token, AuthToken authToken) {
+                                                   Entity reply, Entity member, Entity token, AuthToken authToken) {
         return checkThreadsValidations(operation, user, community, thread, reply, member, token, authToken, null);
     }
 
     public static <T> Response checkThreadsValidations(int operation, Entity user, Entity community, Entity member,
-            Entity token, AuthToken authToken, T data) {
+                                                       Entity token, AuthToken authToken, T data) {
         return checkThreadsValidations(operation, user, community, null, member, token, authToken, data);
     }
 
     public static <T> Response checkThreadsValidations(int operation, Entity user, Entity community, Entity thread,
-            Entity member, Entity token, AuthToken authToken, T data) {
+                                                       Entity member, Entity token, AuthToken authToken, T data) {
         return checkThreadsValidations(operation, user, community, thread, null, member, token, authToken, data);
     }
 
     public static <T> Response checkThreadsValidations(int operation, Entity user, Entity community, Entity thread,
-            Entity reply, Entity member, Entity token, AuthToken authToken, T data) {
+                                                       Entity reply, Entity member, Entity token, AuthToken authToken, T data) {
         return checkThreadsValidations(operation, user, community, thread, reply, null, member, token, authToken, data);
     }
 
     public static <T> Response checkThreadsValidations(int operation, Entity user, Entity community, Entity thread,
-            Entity reply, Entity threadmarkOrLikeRelation, Entity member, Entity token, AuthToken authToken, T data) {
+                                                       Entity reply, Entity threadmarkOrLikeRelation, Entity member, Entity token, AuthToken authToken, T data) {
         switch (operation) {
             case START_THREAD:
                 return checkStartThreadValidation(user, community, member, token, authToken, (ThreadData) data);
@@ -1913,7 +1984,7 @@ public class Validations {
     }
 
     private static Response checkStartThreadValidation(Entity user, Entity community, Entity member, Entity token,
-            AuthToken authToken, ThreadData data) {
+                                                       AuthToken authToken, ThreadData data) {
         String operation = "Start thread: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -1963,7 +2034,7 @@ public class Validations {
     }
 
     private static Response checkLockThreadValidation(Entity user, Entity community, Entity thread, Entity member,
-            Entity token, AuthToken authToken, boolean isLocked) {
+                                                      Entity token, AuthToken authToken, boolean isLocked) {
         String operation = "Lock thread: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -2020,7 +2091,7 @@ public class Validations {
     }
 
     private static Response checkPinThreadValidation(Entity user, Entity community, Entity thread, Entity member,
-            Entity token, AuthToken authToken, boolean isPinned) {
+                                                     Entity token, AuthToken authToken, boolean isPinned) {
         String operation = "Pin thread: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -2076,7 +2147,7 @@ public class Validations {
     }
 
     private static Response checkRemoveThreadValidation(Entity user, Entity community, Entity thread, Entity member,
-            Entity token, AuthToken authToken) {
+                                                        Entity token, AuthToken authToken) {
         String operation = "Remove thread: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -2129,7 +2200,7 @@ public class Validations {
     }
 
     private static Response checkAddThreadTagsValidation(Entity user, Entity community, Entity thread, Entity member,
-            Entity token, AuthToken authToken, ThreadData data) {
+                                                         Entity token, AuthToken authToken, ThreadData data) {
         String operation = "Tag thread: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -2186,7 +2257,7 @@ public class Validations {
     }
 
     private static Response checkReplyToThreadValidation(Entity user, Entity community, Entity thread, Entity member,
-            Entity token, AuthToken authToken, ReplyData data) {
+                                                         Entity token, AuthToken authToken, ReplyData data) {
         String operation = "Post reply: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -2239,7 +2310,7 @@ public class Validations {
     }
 
     private static Response checkEditReplyValidation(Entity user, Entity community, Entity thread, Entity reply,
-            Entity member, Entity token, AuthToken authToken, ReplyData data) {
+                                                     Entity member, Entity token, AuthToken authToken, ReplyData data) {
         String operation = "Edit reply: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -2296,7 +2367,7 @@ public class Validations {
     }
 
     private static Response checkThreadmarkReplyValidation(Entity user, Entity community, Entity thread, Entity reply,
-            Entity previousThreadmark, Entity member, Entity token, AuthToken authToken, ThreadmarkData data) {
+                                                           Entity previousThreadmark, Entity member, Entity token, AuthToken authToken, ThreadmarkData data) {
         String operation = "Add threadmark: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -2354,7 +2425,7 @@ public class Validations {
     }
 
     private static Response checkRemoveReplyValidation(Entity user, Entity community, Entity thread, Entity reply,
-            Entity member, Entity token, AuthToken authToken) {
+                                                       Entity member, Entity token, AuthToken authToken) {
         String operation = "Remove reply: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -2407,7 +2478,7 @@ public class Validations {
     }
 
     private static Response checkLikeReplyValidation(Entity user, Entity community, Entity thread, Entity reply,
-            Entity likeRelation, Entity member, Entity token, AuthToken authToken, boolean isLiked) {
+                                                     Entity likeRelation, Entity member, Entity token, AuthToken authToken, boolean isLiked) {
         String operation = "Like reply: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -2465,7 +2536,7 @@ public class Validations {
     }
 
     private static Response checkGetThreadValidation(Entity user, Entity community, Entity thread, Entity member,
-            Entity token, AuthToken authToken) {
+                                                     Entity token, AuthToken authToken) {
         String operation = "Get thread: ";
         if (validateUser(operation, user, authToken.username).getStatus() != Status.OK.getStatusCode()) {
             return Response.status(Status.NOT_FOUND).entity(authToken.username + " is not a registered user.").build();
@@ -2566,4 +2637,5 @@ public class Validations {
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 }
