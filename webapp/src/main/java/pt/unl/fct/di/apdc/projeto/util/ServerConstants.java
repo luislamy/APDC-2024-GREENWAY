@@ -14,7 +14,7 @@ public class ServerConstants {
 
     private final Datastore datastore;
 
-    private final KeyFactory userKeyFactory, communityKeyFactory;
+    private final KeyFactory userKeyFactory, communityKeyFactory, applicationKeyFactory;
 
     private static ServerConstants singleton = null;
 
@@ -24,6 +24,7 @@ public class ServerConstants {
         this.datastore = DatastoreOptions.getDefaultInstance().getService();
         this.userKeyFactory = datastore.newKeyFactory().setKind("User");
         this.communityKeyFactory = datastore.newKeyFactory().setKind("Community");
+        this.applicationKeyFactory = datastore.newKeyFactory().setKind("Application");
     }
 
     public static ServerConstants getServerConstants() {
@@ -88,6 +89,20 @@ public class ServerConstants {
     public Entity getCommunity(Transaction txn, String key) {
         return txn == null ? datastore.get(getCommunityKey(key)) : txn.get(getCommunityKey(key));
     }
+
+    //todo
+    public Entity getApplication(String key) {
+        return getApplication(null, key);
+    }
+
+    public Entity getApplication(Transaction txn, String key) {
+        return txn == null ? datastore.get(getApplicationKey(key)) : txn.get(getApplicationKey(key));
+    }
+
+    public Key getApplicationKey(String key) {
+        return applicationKeyFactory.newKey(key);
+    }
+    //todo
 
     public Key getPostKey(String communityID, String postID) {
         return datastore.newKeyFactory()
