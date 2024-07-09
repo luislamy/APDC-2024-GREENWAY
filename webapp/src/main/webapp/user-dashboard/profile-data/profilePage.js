@@ -34,11 +34,11 @@ function checkLoginStatus() {
 function getUserProfile() {
     var authToken = localStorage.getItem('authToken');
     fetch('https://greenway-be.nw.r.appspot.com/rest/user/profile', {
-        method: 'POST',
+        method: 'GET',
         headers: {
-            'Content-Type': 'application/json'
-        },
-        body: authToken
+            'Content-Type': 'application/json',
+            'authToken': localStorage.getItem('authToken')
+        }
     })
     .then(response => {
         if (!response.ok) {

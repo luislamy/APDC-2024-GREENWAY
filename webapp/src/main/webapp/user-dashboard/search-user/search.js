@@ -16,18 +16,18 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = '../../login/login.html';
             return;
         }
-        var token = JSON.parse(authToken);
-        jsonData['token'] = token;
-        searchUser(JSON.stringify(jsonData));
+        var username = document.getElementById('username').value;
+        searchUser(username);
     });
 
-    function searchUser(jsonData) {
+    function searchUser(username) {
         fetch('https://greenway-be.nw.r.appspot.com/rest/user/search', {
-            method: 'POST',
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/json'
-            },
-            body: jsonData
+                'Content-Type': 'application/json',
+                'authToken': localStorage.getItem("authToken"),
+                'username': username
+            }
         })
         .then(response => {
             if (!response.ok) {
